@@ -1,15 +1,15 @@
 script_key = "bTlRzNcavWwTVeZloINfTSCbaNWrRgbO"
 
 getgenv().Config = {
-    ["Time To Sell"] = 35, -- Seconds
+    ["Time To Sell"] = 200, -- Seconds
     ["Craft Event"] = 
     {
-        ["Crafters Seed Pack"] = true,
-        ["Anti Bee Egg"] = true
+        ["Crafters Seed Pack"] = false,
+        ["Anti Bee Egg"] = false
     },
-    ["Dont Spawn Bee Egg"] = true,
-    ["Dont Open Pack"] = false,
-    ["Dont Use Flower Seed Pack"] = true, -- If u Enable Crafters Seed Pack pls enable this
+    ["Dont Spawn Bee Egg"] = false,
+    ["Dont Open Pack"] = true,
+    ["Dont Use Flower Seed Pack"] = false, -- If u Enable Crafters Seed Pack pls enable this
     ["Seed"] = {
         ["Strawberry"] = 44,
         ["Corn"] = 44,
@@ -27,8 +27,7 @@ getgenv().Config = {
         ["Cactus"] = 44,
         ["Beanstalk"] = 44,
         ["Grape"] = 44,
-        ["Bamboo"] = 44,
-        ["Sugar Apple"] = 44
+        ["Bamboo"] = 44
     },
     ["FPS"] = 3,
     ["Buy Egg"] = true,
@@ -58,7 +57,7 @@ getgenv().Config = {
         ["Godly Sprinkler"] = true
     },
     ["Plant Candy"] = false,
-    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Butterfly", "Disco Bee"},
+    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Butterfly", "Disco Bee", "Queen Bee"},
     ["Destroy Mode"] = {
         ["Auto Destroy when have money"] = 1000000, -- its will destroy all trees select when money >= select
         ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
@@ -67,19 +66,24 @@ getgenv().Config = {
 
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
-    ["Note"] = "K7N",
+    ["Note"] = "Win",
     ["Pet Mode"] = {
         ["Sell Pet"] = true,
         ["Equip Pet"] = true,
         ["Name Pet Equip"] = {
             ["Night Owl"] = true,
-            ["Chicken"] = true
+            ["Chicken"] = true,
+            ["Raccoon"] = true,
+            ["Red Fox"] = true,
+            ["Echo Frog"] = true,
+            ["Red Giant Ant"] = true,
+            ["Praying Mantis"] = true
         },
         ["Rarity"] = { -- Rarity Sell Pet
             ["Common"] = true,
             ["Uncommon"] = true,
             ["Rare"] = true,
-            ["Legendary"] = true,
+            ["Legendary"] = false,
             ["Divine"] = false,
             ["Mythical"] = false
         },
@@ -109,7 +113,7 @@ getgenv().Config = {
         ["Shocked"] = false
     }
 }
-setfpscap(getgenv().Config["FPS"])
+setfpscap(getgenv().Config["FPS"] or 3)
 
 -- Auto-load loop
 repeat
