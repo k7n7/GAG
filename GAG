@@ -233,8 +233,8 @@ spawn(function()
                     local v106 = v_u_9:GetIndividualCraftingMachineData(p104, v_u_38(p104))
                     if v106.CraftingItems[1] then
 
-                        v106.CraftingItems[1].IsDone = true
-                        v106.CraftingItems[1].TimeRemaining = 0
+                        -- v106.CraftingItems[1].IsDone = true
+                        -- v106.CraftingItems[1].TimeRemaining = 0
                         local args = {"Claim",
                                       workspace:WaitForChild("Interaction"):WaitForChild("UpdateItems")
                             :WaitForChild("NewCrafting"):WaitForChild("SeedEventCraftingWorkBench"),
@@ -272,8 +272,8 @@ spawn(function()
                     local p105 = workspace.Interaction.UpdateItems.NewCrafting.EventCraftingWorkBench
                     local v107 = v_u_9:GetIndividualCraftingMachineData(p105, v_u_38(p105))
                     if v107.CraftingItems[1] then
-                        v107.CraftingItems[1].IsDone = true
-                        v107.CraftingItems[1].TimeRemaining = 0
+                        -- v107.CraftingItems[1].IsDone = true
+                        -- v107.CraftingItems[1].TimeRemaining = 0
                         local args = {"Claim",
                                       workspace:WaitForChild("Interaction"):WaitForChild("UpdateItems")
                             :WaitForChild("NewCrafting"):WaitForChild("EventCraftingWorkBench"), "GearEventWorkbench", 1}
