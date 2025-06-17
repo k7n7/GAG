@@ -1,7 +1,7 @@
 script_key = "bTlRzNcavWwTVeZloINfTSCbaNWrRgbO"
 
 getgenv().Config = {
-    ["Time To Sell"] = 35, -- Seconds
+    ["Time To Sell"] = 100, -- Seconds
     ["Craft Event"] = 
     {
         ["Crafters Seed Pack"] = true,
@@ -34,7 +34,7 @@ getgenv().Config = {
     ["Buy Egg"] = true,
     ["Egg"] = {
         ["Common Egg"] = false,
-        ["Uncommon Egg"] = true,
+        ["Uncommon Egg"] = false,
         ["Rare Egg"] = false,
         ["Mythical Egg"] = false,
         ["Legendary Egg"] = false,
