@@ -1,13 +1,13 @@
 script_key = "bTlRzNcavWwTVeZloINfTSCbaNWrRgbO"
 
 getgenv().Config = {
-    ["Time To Sell"] = 100, -- Seconds
+    ["Time To Sell"] = 35, -- Seconds
     ["Craft Event"] = 
     {
         ["Crafters Seed Pack"] = true,
         ["Anti Bee Egg"] = true
     },
-    ["Dont Spawn Bee Egg"] = true,
+    ["Dont Spawn Bee Egg"] = false,
     ["Dont Open Pack"] = false,
     ["Dont Use Flower Seed Pack"] = true, -- If u Enable Crafters Seed Pack pls enable this
     ["Seed"] = {
@@ -27,8 +27,7 @@ getgenv().Config = {
         ["Cactus"] = 44,
         ["Beanstalk"] = 44,
         ["Grape"] = 44,
-        ["Bamboo"] = 44,
-        ["Sugar Apple"] = 44
+        ["Bamboo"] = 44
     },
     ["FPS"] = 3,
     ["Buy Egg"] = true,
@@ -38,7 +37,7 @@ getgenv().Config = {
         ["Rare Egg"] = false,
         ["Mythical Egg"] = false,
         ["Legendary Egg"] = false,
-        ["Bug Egg"] = true
+        ["Bug Egg"] = true,
     },
     ["Honey Item"] = {
         ["Nectarine"] = false,
@@ -58,7 +57,7 @@ getgenv().Config = {
         ["Godly Sprinkler"] = true
     },
     ["Plant Candy"] = false,
-    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Butterfly", "Disco Bee", "Queen Bee"},
+    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Queen Bee", "Butterfly", "DiscoBee", "Red Fox"},
     ["Destroy Mode"] = {
         ["Auto Destroy when have money"] = 1000000, -- its will destroy all trees select when money >= select
         ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
@@ -67,7 +66,7 @@ getgenv().Config = {
 
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
-    ["Note"] = "NHIN CON CAC",
+    ["Note"] = "dew",
     ["Pet Mode"] = {
         ["Sell Pet"] = true,
         ["Equip Pet"] = true,
@@ -82,11 +81,11 @@ getgenv().Config = {
             ["Common"] = true,
             ["Uncommon"] = true,
             ["Rare"] = true,
-            ["Legendary"] = true,
+            ["Legendary"] = false,
             ["Divine"] = false,
             ["Mythical"] = false
         },
-        ["Pet Dont Delete"] = {"Queen Bee", "Butterfly", "Disco Bee", "Dragonfly"}
+        ["Pet Dont Delete"] = {"Queen Bee", "Disco Bee", "Dragonfly", "Red Fox"}
     },
     ["Webhook Mode"] = {
         ["Enable Send Pet Weight"] = false,
@@ -112,10 +111,9 @@ getgenv().Config = {
         ["Shocked"] = false
     }
 }
-setfpscap(getgenv().Config["FPS"])
+setfpscap(getgenv().Config["FPS"] or 3)
 
 -- Auto-load loop
-repeat
-    wait()
-    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/791a1cc069605b60b85413847f6e5d2f.lua"))()
-until getgenv().Loaded
+repeat wait() until game:IsLoaded()
+task.wait(10)
+loadstring(game:HttpGet("https://raw.githubusercontent.com/k7n7/GAG/refs/heads/main/LoukANCUT"))()
