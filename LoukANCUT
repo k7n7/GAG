@@ -115,5 +115,4 @@ setfpscap(getgenv().Config["FPS"] or 3)
 
 -- Auto-load loop
 repeat wait() until game:IsLoaded()
-task.wait(10)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/k7n7/GAG/refs/heads/main/LoukANCUT"))()
