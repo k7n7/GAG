@@ -67,7 +67,7 @@ getgenv().Config = {
 
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
-    ["Note"] = "123123",
+    ["Note"] = "NHIN CON CAC",
     ["Pet Mode"] = {
         ["Sell Pet"] = true,
         ["Equip Pet"] = true,
