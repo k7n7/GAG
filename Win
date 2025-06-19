@@ -7,7 +7,7 @@ getgenv().Config = {
         ["Crafters Seed Pack"] = true,
         ["Anti Bee Egg"] = true
     },
-    ["Dont Spawn Bee Egg"] = false,
+    ["Dont Spawn Bee Egg"] = true,
     ["Dont Open Pack"] = false,
     ["Dont Use Flower Seed Pack"] = true, -- If u Enable Crafters Seed Pack pls enable this
     ["Seed"] = {
