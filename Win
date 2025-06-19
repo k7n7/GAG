@@ -80,11 +80,11 @@ getgenv().Config = {
             ["Praying Mantis"] = true
         },
         ["Rarity"] = { -- Rarity Sell Pet
-            ["Common"] = true,
-            ["Uncommon"] = true,
-            ["Rare"] = true,
+            ["Common"] = false,
+            ["Uncommon"] = false,
+            ["Rare"] = false,
             ["Legendary"] = false,
-            ["Divine"] = false,
+            ["Divine"] = true,
             ["Mythical"] = false
         },
         ["Pet Dont Delete"] = {"Queen Bee", "Butterfly", "Disco Bee", "Dragonfly"}
