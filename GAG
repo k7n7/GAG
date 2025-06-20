@@ -1,7 +1,7 @@
 script_key = "bTlRzNcavWwTVeZloINfTSCbaNWrRgbO"
 
 getgenv().Config = {
-    ["Time To Sell"] = 60, -- Seconds
+    ["Time To Sell"] = 35, -- Seconds
     ["Craft Event"] = 
     {
         ["Crafters Seed Pack"] = true,
@@ -27,17 +27,18 @@ getgenv().Config = {
         ["Cactus"] = 44,
         ["Beanstalk"] = 44,
         ["Grape"] = 44,
-        ["Bamboo"] = 44
+        ["Bamboo"] = 44,
+        ["Sugar Apple"] = 44
     },
     ["FPS"] = 3,
     ["Buy Egg"] = true,
     ["Egg"] = {
         ["Common Egg"] = false,
-        ["Uncommon Egg"] = false,
+        ["Uncommon Egg"] = true,
         ["Rare Egg"] = false,
         ["Mythical Egg"] = false,
         ["Legendary Egg"] = false,
-        ["Bug Egg"] = true,
+        ["Bug Egg"] = true
     },
     ["Honey Item"] = {
         ["Nectarine"] = false,
@@ -57,7 +58,7 @@ getgenv().Config = {
         ["Godly Sprinkler"] = true
     },
     ["Plant Candy"] = false,
-    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Queen Bee", "Butterfly", "DiscoBee", "Red Fox"},
+    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Butterfly", "Disco Bee"},
     ["Destroy Mode"] = {
         ["Auto Destroy when have money"] = 1000000, -- its will destroy all trees select when money >= select
         ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
@@ -66,26 +67,23 @@ getgenv().Config = {
 
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
-    ["Note"] = "dew",
+    ["Note"] = "K7N",
     ["Pet Mode"] = {
         ["Sell Pet"] = true,
         ["Equip Pet"] = true,
         ["Name Pet Equip"] = {
             ["Night Owl"] = true,
-            ["Chicken"] = true,
-            ["Echo Frog"] = true,
-            ["Red Giant Ant"] = true,
-            ["Praying Mantis"] = true
+            ["Chicken"] = true
         },
         ["Rarity"] = { -- Rarity Sell Pet
             ["Common"] = true,
             ["Uncommon"] = true,
             ["Rare"] = true,
-            ["Legendary"] = false,
+            ["Legendary"] = true,
             ["Divine"] = false,
             ["Mythical"] = false
         },
-        ["Pet Dont Delete"] = {"Dragonfly", "Night Owl", "Raccoon", "Butterfly", "Disco Bee"}
+        ["Pet Dont Delete"] = {"Queen Bee", "Butterfly", "Disco Bee", "Dragonfly"}
     },
     ["Webhook Mode"] = {
         ["Enable Send Pet Weight"] = false,
@@ -111,7 +109,7 @@ getgenv().Config = {
         ["Shocked"] = false
     }
 }
-setfpscap(getgenv().Config["FPS"] or 3)
+setfpscap(getgenv().Config["FPS"])
 
 -- Auto-load loop
 repeat wait() until game:IsLoaded()
