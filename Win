@@ -1,7 +1,7 @@
-script_key = "bTlRzNcavWwTVeZloINfTSCbaNWrRgbO"
-
+repeat wait() until game:IsLoaded()
+wait(10)
 getgenv().Config = {
-    ["Time To Sell"] = 35, -- Seconds
+    ["Time To Sell"] = 200, -- Seconds
     ["Craft Event"] = 
     {
         ["Crafters Seed Pack"] = true,
@@ -27,7 +27,6 @@ getgenv().Config = {
         ["Cactus"] = 44,
         ["Beanstalk"] = 44,
         ["Grape"] = 44,
-        ["Sugar Apple"] = 44,
         ["Bamboo"] = 44
     },
     ["FPS"] = 3,
@@ -59,16 +58,16 @@ getgenv().Config = {
         ["Godly Sprinkler"] = true
     },
     ["Plant Candy"] = false,
-    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Queen Bee", "Butterfly", "DiscoBee", "Red Fox", "Mimic Octopus"},
+    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Queen Bee", "Butterfly", "DiscoBee", "Mimic Octopus"},
     ["Destroy Mode"] = {
         ["Auto Destroy when have money"] = 1000000, -- its will destroy all trees select when money >= select
         ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
     },
     ["Url"] = "https://discord.com/api/webhooks/1364129938831310858/IiqEgOAGT6C-j_es65KF_ifYmnfVOxT1W-TaUyf38VsCSgY7onVMM-4PW3R3qSBKohMO", -- Webhook 
 
-    ["Boost FPS"] = false,
-    ["Black Screen"] = false,
-    ["Note"] = "win",
+    ["Boost FPS"] = true,
+    ["Black Screen"] = true,
+    ["Note"] = "Win",
     ["Pet Mode"] = {
         ["Sell Pet"] = true,
         ["Equip Pet"] = true,
@@ -76,6 +75,7 @@ getgenv().Config = {
             ["Night Owl"] = true,
             ["Chicken"] = true,
             ["Echo Frog"] = true,
+            ["Red Fox"] = true,
             ["Red Giant Ant"] = true,
             ["Praying Mantis"] = true
         },
@@ -114,7 +114,10 @@ getgenv().Config = {
     }
 }
 setfpscap(getgenv().Config["FPS"] or 3)
+script_key="bTlRzNcavWwTVeZloINfTSCbaNWrRgbO";
 
--- Auto-load loop
-repeat wait() until game:IsLoaded()
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/791a1cc069605b60b85413847f6e5d2f.lua"))()
+repeat
+    wait()
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/392bd177458276c103d5ec042d7d4e38.lua"))()
+    task.wait(10)
+until getgenv().Loaded
