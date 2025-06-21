@@ -9,7 +9,7 @@ getgenv().Config = {
     },
     ["Dont Spawn Bee Egg"] = true,
     ["Dont Open Pack"] = false,
-    ["Dont Use Flower Seed Pack"] = true, -- If u Enable Crafters Seed Pack pls enable this
+    ["Dont Use Flower Seed Pack"] = false, -- If u Enable Crafters Seed Pack pls enable this
     ["Seed"] = {
         ["Strawberry"] = 44,
         ["Corn"] = 44,
@@ -37,7 +37,7 @@ getgenv().Config = {
         ["Rare Egg"] = false,
         ["Mythical Egg"] = false,
         ["Legendary Egg"] = false,
-        ["Bug Egg"] = true,
+        ["Bug Egg"] = false,
         ["Paradise Egg"] = true
     },
     ["Honey Item"] = {
@@ -67,7 +67,7 @@ getgenv().Config = {
 
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
-    ["Note"] = "Win",
+    ["Note"] = "stirboy",
     ["Pet Mode"] = {
         ["Sell Pet"] = true,
         ["Equip Pet"] = true,
