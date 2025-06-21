@@ -4,10 +4,10 @@ getgenv().Config = {
     ["Time To Sell"] = 200, -- Seconds
     ["Craft Event"] = 
     {
-        ["Crafters Seed Pack"] = true,
-        ["Anti Bee Egg"] = true
+        ["Crafters Seed Pack"] = false,
+        ["Anti Bee Egg"] = false
     },
-    ["Dont Spawn Bee Egg"] = true,
+    ["Dont Spawn Bee Egg"] = false,
     ["Dont Open Pack"] = false,
     ["Dont Use Flower Seed Pack"] = false, -- If u Enable Crafters Seed Pack pls enable this
     ["Seed"] = {
@@ -27,7 +27,8 @@ getgenv().Config = {
         ["Cactus"] = 44,
         ["Beanstalk"] = 44,
         ["Grape"] = 44,
-        ["Bamboo"] = 44
+        ["Bamboo"] = 44,
+        ["Sugar Apple"] = 44
     },
     ["FPS"] = 3,
     ["Buy Egg"] = true,
@@ -37,8 +38,8 @@ getgenv().Config = {
         ["Rare Egg"] = false,
         ["Mythical Egg"] = false,
         ["Legendary Egg"] = false,
-        ["Bug Egg"] = false,
-        ["Paradise Egg"] = true
+        ["Bug Egg"] = true,
+        ["Paradise Egg"] = false
     },
     ["Honey Item"] = {
         ["Nectarine"] = false,
