@@ -1,7 +1,7 @@
 script_key = "bTlRzNcavWwTVeZloINfTSCbaNWrRgbO"
 
 getgenv().Config = {
-    ["Time To Sell"] = 35, -- Seconds
+    ["Time To Sell"] = 200, -- Seconds
     ["Craft Event"] = 
     {
         ["Crafters Seed Pack"] = true,
@@ -38,7 +38,8 @@ getgenv().Config = {
         ["Rare Egg"] = false,
         ["Mythical Egg"] = false,
         ["Legendary Egg"] = false,
-        ["Bug Egg"] = true,
+        ["Bug Egg"] = false,
+        ["Paradise Egg"] = true
     },
     ["Honey Item"] = {
         ["Nectarine"] = false,
@@ -58,7 +59,7 @@ getgenv().Config = {
         ["Godly Sprinkler"] = true
     },
     ["Plant Candy"] = false,
-    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Queen Bee", "Butterfly", "DiscoBee", "Red Fox"},
+    ["PetNeedSend"] = {"Dragonfly", "Night Owl", "Raccoon", "Queen Bee", "Butterfly", "DiscoBee", "Red Fox", "Mimic Octopus"},
     ["Destroy Mode"] = {
         ["Auto Destroy when have money"] = 1000000, -- its will destroy all trees select when money >= select
         ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
@@ -67,7 +68,7 @@ getgenv().Config = {
 
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
-    ["Note"] = "dew",
+    ["Note"] = "win",
     ["Pet Mode"] = {
         ["Sell Pet"] = true,
         ["Equip Pet"] = true,
@@ -86,7 +87,7 @@ getgenv().Config = {
             ["Divine"] = false,
             ["Mythical"] = false
         },
-        ["Pet Dont Delete"] = {"Queen Bee", "Disco Bee", "Dragonfly", "Red Fox"}
+        ["Pet Dont Delete"] = {"Queen Bee", "Disco Bee", "Dragonfly", "Red Fox", "Mimic Octopus"}
     },
     ["Webhook Mode"] = {
         ["Enable Send Pet Weight"] = false,
