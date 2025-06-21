@@ -1,7 +1,7 @@
 script_key = "bTlRzNcavWwTVeZloINfTSCbaNWrRgbO"
 
 getgenv().Config = {
-    ["Time To Sell"] = 200, -- Seconds
+    ["Time To Sell"] = 35, -- Seconds
     ["Craft Event"] = 
     {
         ["Crafters Seed Pack"] = true,
