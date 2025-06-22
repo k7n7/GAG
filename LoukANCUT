@@ -91,18 +91,18 @@ getgenv().ConfigsKaitun = {
         "Disco Bee",
         "Butterfly",
         "Dragonfly",
+        "Mimic Octopus",
         "Raccoon",
         "Red Fox",
     },
     ["Lock Pets"] = {
         "Queen Bee",
         "Disco Bee",
+        "Butterfly",
         "Dragonfly",
         "Raccoon",
+        "Mimic Octopus",
         "Red Fox",
-        "Blood Owl",
-        "Blood Kiwi", 
-        "Butterfly", 
         ["Chiken"] = 5,
     }
 }
