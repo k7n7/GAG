@@ -54,7 +54,6 @@ getgenv().ConfigsKaitun = {
             "Bee Egg",
             "Night Egg",
             "Bug Egg",
-            "Mythical Egg",
         },
         ["Safe Eggs"] = { -- จะไม่วางหรือฟักไข่ให้
             "Bee Egg",
