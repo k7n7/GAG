@@ -1,5 +1,5 @@
 getgenv().Config = {
-    ["Time To Sell"] = 200, -- Seconds
+    ["Time To Sell"] = 60, -- Seconds
     ["Craft Event"] = {
         ["Crafters Seed Pack"] = true,
         ["Anti Bee Egg"] = true
