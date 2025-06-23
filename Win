@@ -68,8 +68,8 @@ getgenv().Config = {
         ["Name Pet Equip"] = {
             ["Night Owl"] = true,
             ["Chicken"] = true,
-        ["Honey Bee"] = true,
-        ["Tarantula Hawk"] = true
+            ["Honey Bee"] = true,
+            ["Tarantula Hawk"] = true
         },
         ["Rarity"] = { -- Rarity Sell Pet
             ["Common"] = true,
