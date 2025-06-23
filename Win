@@ -84,7 +84,7 @@ getgenv().Config = {
     ["Url"] = "https://discord.com/api/webhooks/1386314241803419678/wJHfSpn59FNjBjA9JqBOW1V4s36uq9RM6_TBt8OtQhcES9doG6ghKarbl99mwWEHozqT", -- Webhook 
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
-    ["Note"] = "win",
+    ["Note"] = "Cyndral Hub",
     ["Pet Mode"] = {
         ["Sell Pet"] = true,
         ["Equip Pet"] = true,
@@ -133,4 +133,8 @@ getgenv().Config = {
     }
 }
 setfpscap(getgenv().Config["FPS"] or 3)
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/791a1cc069605b60b85413847f6e5d2f.lua"))(
+
+-- Auto-load loop
+repeat
+    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/791a1cc069605b60b85413847f6e5d2f.lua"))()
+until getgenv().Loaded
