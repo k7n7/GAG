@@ -1,124 +1,127 @@
-repeat wait() until game:IsLoaded()
-wait(10)
-getgenv().Config = {
-    ["Time To Sell"] = 200, -- Seconds
-    ["Craft Event"] = 
-    {
-        ["Crafters Seed Pack"] = true,
-        ["Anti Bee Egg"] = true
-    },
-    ["Dont Spawn Bee Egg"] = true,
-    ["Dont Open Pack"] = false,
-    ["Dont Use Flower Seed Pack"] = true, -- If u Enable Crafters Seed Pack pls enable this
-    ["Seed"] = {
-        ["Strawberry"] = 44,
-        ["Corn"] = 44,
-        ["Coconut"] = 44,
-        ["Apple"] = 44,
-        ["Watermelon"] = 44,
-        ["Mushroom"] = 44,
-        ["Carrot"] = 44,
-        ["Pumpkin"] = 44,
-        ["Pepper"] = 44,
-        ["Cacao"] = 44,
-        ["Banana"] = 44,
-        ["Dragon Fruit"] = 44,
-        ["Mango"] = 44,
-        ["Cactus"] = 44,
-        ["Beanstalk"] = 44,
-        ["Grape"] = 44,
-        ["Bamboo"] = 44
-    },
-    ["FPS"] = 3,
-    ["Buy Egg"] = true,
-    ["Egg"] = {
-        ["Common Egg"] = false,
-        ["Uncommon Egg"] = false,
-        ["Rare Egg"] = false,
-        ["Mythical Egg"] = false,
-        ["Legendary Egg"] = false,
-        ["Bug Egg"] = false,
-        ["Paradise Egg"] = true
-    },
-    ["Honey Item"] = {
-        ["Nectarine"] = false,
-        ["Flower Seed Pack"] = true,
-        ["Honey Sprinkler"] = false,
-        ["Bee Egg"] = true,
-        ["Pollen Radar"] = false,
-        ["Nectar Staff"] = false,
-        ["Nectarshade"] = false,
-        ["Lavender"] = false,
-        ["Hive Fruit"] = false
-    },
-    ["Sprinkler"] = {
-        ["Basic Sprinkler"] = true,
-        ["Advanced Sprinkler"] = true,
-        ["Master Sprinkler"] = true,
-        ["Godly Sprinkler"] = true
-    },
-    ["Plant Candy"] = false,
-    ["PetNeedSend"] = {"Mimic Octopus", "Disco Bee", "Buterfly", "Dragonfly", "Queen Bee"},
-    ["Destroy Mode"] = {
-        ["Auto Destroy when have money"] = 1000000, -- its will destroy all trees select when money >= select
-        ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
-    },
-    ["Url"] = "https://discord.com/api/webhooks/1386314241803419678/wJHfSpn59FNjBjA9JqBOW1V4s36uq9RM6_TBt8OtQhcES9doG6ghKarbl99mwWEHozqT", -- Webhook 
+getgenv().ConfigsKaitun = {
+	["Stack Plant"] = true,
+	["Low Cpu"] = true,
+	
+	["Summer Harvest Event"] = true,
+	
+	["Limit Tree"] = { -- จำกัดจำนวนต้นไม้
+		["Limit"] = 400, -- ถ้าต้นไม่ถึงที่ตั้งไว้
+		["Sell Untill"] = 350 -- มันจะขายจนเหลือที่ตั้งตรงนี้
+	},
 
-    ["Boost FPS"] = true,
-    ["Black Screen"] = true,
-    ["Note"] = "Cyndral Hub",
-    ["Pet Mode"] = {
-        ["Sell Pet"] = true,
-        ["Equip Pet"] = true,
-        ["Name Pet Equip"] = {
-            ["Night Owl"] = true,
-            ["Chicken"] = true,
-            ["Raccoon"] = true,
-            ["Red Fox"] = true,
-            ["Echo Frog"] = true,
-            ["Red Giant Ant"] = true,
-            ["Praying Mantis"] = true
-        },
-        ["Rarity"] = { -- Rarity Sell Pet
-            ["Common"] = true,
-            ["Uncommon"] = true,
-            ["Rare"] = true,
-            ["Legendary"] = false,
-            ["Divine"] = false,
-            ["Mythical"] = false
-        },
-        ["Pet Dont Delete"] = {"Mimic Octopus", "Disco Bee", "Buterfly", "Dragonfly", "Queen Bee"}
-    },
-    ["Webhook Mode"] = {
-        ["Enable Send Pet Weight"] = false,
-        ["Weight"] = 10 -- if Weight >= 10 they will send wh
-    },
-    ["Rejoin After X Time"] = 60, -- Minutes
-    ["Mutation Skips"] = { -- Skip Havest
-        ["Pollinated"] = false,
-        ["Disco"] = false,
-        ["Twisted"] = false,
-        ["Wet"] = false,
-        ["Choc"] = false,
-        ["Bloodlit"] = false,
-        ["Celestial"] = false,
-        ["Moonlit"] = false,
-        ["Chilled"] = false,
-        ["Zombified"] = false,
-        ["Plasma"] = false,
-        ["Burnt"] = false,
-        ["Frozen"] = false,
-        ["Voidtouched"] = false,
-        ["HoneyGlazed"] = false,
-        ["Shocked"] = false
-    }
+	["Seed"] = {
+		["Mode"] = "Auto", -- Custom , Auto
+		["Custom"] = { -- ถ้าปรับเป็น custom มันจะซื้อเเค่ที่ใส่ในด้านล่าง
+			"Carrot",
+			"Bamboo",
+			"Pumpkin",
+			"Daffodil",
+			"Orange Tulip",
+			"Watermelon",
+			"Mushroom",
+			"Nightshade",
+			"Beanstalk",
+		}
+	},
+	
+	["Craft Event"] = {
+		"Crafters Seed Pack",
+		"Anti Bee Egg"
+	},
+	
+	["Event Shop"] =  { -- จะให้ซื้ออะไรบ้างจาก event shop อยากได้อันไหนเพิ่ม เอา -- ออก
+		"Flower Seed Pack",
+		--"Nectarine",
+		--"Hive Fruit",
+		--"Honey Sprinkler",
+		"Bee Egg",
+		--"Bee Crate",
+	},
+	
+	["Gear Shop"] = {
+		"Master Sprinkler",
+		"Godly Sprinkler",
+		"Advanced Sprinkler"
+	},
+	["Gear Lock"] = {
+		
+	},
+
+	["Eggs"] = {
+		["Hatch"] = { -- มันจะสุ่มไขซื้อไข่วางไข่ เรียงจากบนลงล่างก่อน
+			"Anti Bee Egg",
+			"Paradise Egg",
+		},
+		["Safe Eggs"] = { -- จะไม่วางหรือฟักไข่ให้
+			"Bee Egg",
+		}
+	},
+	
+	["Limit Upgrade Slot"] = 5, -- เป็นการปลด ค่าสูงสุดของการวางไข่เเละใช้สัตว์ (สูงสุด 5)
+	["Equip When Done"] = { -- จะให้มันใส่สัตว์อะไรหลังจากปลดอันบนเสร็จเเล้ว
+		"Chicken",
+		"Tarantula Hawk",
+		"Moth"
+	},
+
+	["Webhook"] = {-- webhook เเจ้งเตือน ถ้าได้สัตว์ใน Noti Pets หรือพวกที่มี Noti อื่นๆ
+		UrlPet = "https://discord.com/api/webhooks/1386314241803419678/wJHfSpn59FNjBjA9JqBOW1V4s36uq9RM6_TBt8OtQhcES9doG6ghKarbl99mwWEHozqT",
+		UrlSeed = "",
+		PcName = "dew"
+	},
+	["Noti Seeds"] = { -- ที่จะให้มันเเจ้งเตือนใน webhook
+		"Sunflower",
+		"Dragon Pepper",
+		"Elephant Ears",
+	},
+	["Lock Seeds"] = { -- มันจะไม่ใช้ seed ที่เลือก
+		"Sunflower",
+		"Dragon Pepper",
+		"Elephant Ears",
+		"Rosy Delight",
+		"Parasol Flower",
+		"Cocovine",
+		"Bendboo",
+		"Violet Corn",
+		"Succulent",
+		"Crocus",
+	},
+	["Noti Seed Packs"] = { -- ที่จะให้มันเเจ้งเตือนใน webhook
+		"Idk"
+	},
+	["Lock Seed Packs"] = { -- มันจะไม่เปิด Seed pack นั้นๆให้
+		"Flower Seed Pack",
+	},
+	["Noti Pets"] = { -- สัตว์ที่จะให้มันเเจ้งเตือนใน webhook
+		"Disco Bee",
+		"Butterfly",
+		"Mimic Octopus",
+		"Peacock",
+		"Scarlet Macaw",
+		"Moth",
+		"Brown Mouse",
+		"Queen Bee",
+		"Dragonfly",
+		"Raccoon",
+		"Red Fox",
+	},
+	["Lock Pets"] = { -- สัตว์ที่จะเก็บไว้ไม่ขายไม่เอาไปเเลก slot
+		"Disco Bee",
+		"Butterfly",
+		"Mimic Octopus",
+		"Peacock",
+		"Scarlet Macaw",
+		"Moth",
+		"Brown Mouse",
+		"Queen Bee",
+		"Dragonfly",
+		"Raccoon",
+		"Red Fox",
+		"Blood Owl",
+		"Blood Kiwi", -- ใส่เเบบนี้หมายความว่า เก็บหมดไม่มี limit
+		["Chicken"] = 5, -- ใส่เเบบนี้ได้หมายความว่า limit มีได้ 5 ตัว
+	}
 }
-setfpscap(getgenv().Config["FPS"])
-script_key="bTlRzNcavWwTVeZloINfTSCbaNWrRgbO";
-
-repeat
-    wait()
-    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/791a1cc069605b60b85413847f6e5d2f.lua"))()
-    task.wait(10)
-until getgenv().Loaded
+License = "5wxY3aTfQIjbPtwsHhwvg78klCY6Fivm"
+loadstring(game:HttpGet('https://raw.githubusercontent.com/Real-Aya/Loader/main/Init.lua'))()
+setfpscap(3)
