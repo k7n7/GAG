@@ -122,6 +122,7 @@ getgenv().ConfigsKaitun = {
         ["Chicken"] = 5, -- ใส่เเบบนี้ได้หมายความว่า limit มีได้ 5 ตัว
     }
 }
+task.wait(30)
 License = "5wxY3aTfQIjbPtwsHhwvg78klCY6Fivm"
 loadstring(game:HttpGet('https://raw.githubusercontent.com/Real-Aya/Loader/main/Init.lua'))()
 setfpscap(3)
