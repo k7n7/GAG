@@ -1,4 +1,3 @@
-setfpscap(3)
 getgenv().ConfigsKaitun = {
     ["Stack Plant"] = true,
     ["Low Cpu"] = true,
@@ -52,60 +51,76 @@ getgenv().ConfigsKaitun = {
         ["Hatch"] = { -- มันจะสุ่มไขซื้อไข่วางไข่ เรียงจากบนลงล่างก่อน
             "Anti Bee Egg",
             "Paradise Egg",
-            "Bee Egg",
-            "Night Egg",
-            "Bug Egg",
         },
         ["Safe Eggs"] = { -- จะไม่วางหรือฟักไข่ให้
             "Bee Egg",
         }
     },
     
-    ["Limit Upgrade Slot"] = 1, -- เป็นการปลด ค่าสูงสุดของการวางไข่เเละใช้สัตว์ (สูงสุด 5)
+    ["Limit Upgrade Slot"] = 5, -- เป็นการปลด ค่าสูงสุดของการวางไข่เเละใช้สัตว์ (สูงสุด 5)
     ["Equip When Done"] = { -- จะให้มันใส่สัตว์อะไรหลังจากปลดอันบนเสร็จเเล้ว
-        "Blood Kiwi",
-        "Chicken"
+        "Chicken",
+        "Tarantula Hawk",
+        "Moth"
     },
-    
-    ["Webhook"] = {
-        UrlPet = "https://discord.com/api/webhooks/1374073793101828237/ndSFicrSDtoiHWR1OgzLDxd-vKrhoUH0dLL71dNqwR_eXYG9_kIZjsSzPEmJIdmknDtj",
+
+    ["Webhook"] = {-- webhook เเจ้งเตือน ถ้าได้สัตว์ใน Noti Pets หรือพวกที่มี Noti อื่นๆ
+        UrlPet = "https://discord.com/api/webhooks/1386531414320746567/av_MvbFCs7q142GfQW9RGgrUkBMbLL4Wm9zLE-YKyyy5J0XOivhkWqb9-e31iNy1dTod",
         UrlSeed = "",
         PcName = "dew"
     },
-    ["Noti Seeds"] = {
+    ["Noti Seeds"] = { -- ที่จะให้มันเเจ้งเตือนใน webhook
         "Sunflower",
-        "Dragon Pepper"
+        "Dragon Pepper",
+        "Elephant Ears",
     },
-    ["Lock Seeds"] = {
+    ["Lock Seeds"] = { -- มันจะไม่ใช้ seed ที่เลือก
         "Sunflower",
-        "Dragon Pepper"
+        "Dragon Pepper",
+        "Elephant Ears",
+        "Rosy Delight",
+        "Parasol Flower",
+        "Cocovine",
+        "Bendboo",
+        "Violet Corn",
+        "Succulent",
+        "Crocus",
     },
-    ["Noti Seed Packs"] = {
-        "Flower Seed Pack"
+    ["Noti Seed Packs"] = { -- ที่จะให้มันเเจ้งเตือนใน webhook
+        "Idk"
     },
-    ["Lock Seed Packs"] = {
-        "Flower Seed Pack"
+    ["Lock Seed Packs"] = { -- มันจะไม่เปิด Seed pack นั้นๆให้
+        "Flower Seed Pack",
     },
-    ["Noti Pets"] = {
-        "Queen Bee",
+    ["Noti Pets"] = { -- สัตว์ที่จะให้มันเเจ้งเตือนใน webhook
         "Disco Bee",
         "Butterfly",
-        "Dragonfly",
         "Mimic Octopus",
+        "Peacock",
+        "Scarlet Macaw",
+        "Moth",
+        "Brown Mouse",
+        "Queen Bee",
+        "Dragonfly",
         "Raccoon",
         "Red Fox",
     },
-    ["Lock Pets"] = {
-        "Queen Bee",
+    ["Lock Pets"] = { -- สัตว์ที่จะเก็บไว้ไม่ขายไม่เอาไปเเลก slot
         "Disco Bee",
         "Butterfly",
+        "Mimic Octopus",
+        "Peacock",
+        "Scarlet Macaw",
+        "Moth",
+        "Brown Mouse",
+        "Queen Bee",
         "Dragonfly",
         "Raccoon",
-        "Mimic Octopus",
         "Red Fox",
-        ["Chiken"] = 5,
+        "Blood Owl",
+        "Blood Kiwi", -- ใส่เเบบนี้หมายความว่า เก็บหมดไม่มี limit
+        ["Chicken"] = 5, -- ใส่เเบบนี้ได้หมายความว่า limit มีได้ 5 ตัว
     }
 }
 License = "5wxY3aTfQIjbPtwsHhwvg78klCY6Fivm"
-repeat wait() until game:IsLoaded()
 loadstring(game:HttpGet('https://raw.githubusercontent.com/Real-Aya/Loader/main/Init.lua'))()
