@@ -63,7 +63,7 @@ getgenv().Config = {
         ["Auto Destroy when have money"] = 1000000, -- its will destroy all trees select when money >= select
         ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
     },
-    ["Url"] = "", -- Webhook 
+    ["Url"] = "https://discord.com/api/webhooks/1386314241803419678/wJHfSpn59FNjBjA9JqBOW1V4s36uq9RM6_TBt8OtQhcES9doG6ghKarbl99mwWEHozqT", -- Webhook 
 
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
