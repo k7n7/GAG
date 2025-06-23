@@ -1,7 +1,7 @@
 repeat wait() until game:IsLoaded()
 wait(10)
 getgenv().Config = {
-    ["Time To Sell"] = 35, -- Seconds
+    ["Time To Sell"] = 200, -- Seconds
     ["Craft Event"] = 
     {
         ["Crafters Seed Pack"] = true,
@@ -33,7 +33,7 @@ getgenv().Config = {
     ["Buy Egg"] = true,
     ["Egg"] = {
         ["Common Egg"] = false,
-        ["Uncommon Egg"] = true,
+        ["Uncommon Egg"] = false,
         ["Rare Egg"] = false,
         ["Mythical Egg"] = false,
         ["Legendary Egg"] = false,
@@ -58,7 +58,7 @@ getgenv().Config = {
         ["Godly Sprinkler"] = true
     },
     ["Plant Candy"] = false,
-    ["PetNeedSend"] = {"Mimic Octopus"},
+    ["PetNeedSend"] = {"Mimic Octopus", "Disco Bee", "Buterfly", "Dragonfly", "Queen Bee"},
     ["Destroy Mode"] = {
         ["Auto Destroy when have money"] = 1000000, -- its will destroy all trees select when money >= select
         ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
@@ -73,7 +73,12 @@ getgenv().Config = {
         ["Equip Pet"] = true,
         ["Name Pet Equip"] = {
             ["Night Owl"] = true,
-            ["Chicken"] = true
+            ["Chicken"] = true,
+            ["Raccoon"] = true,
+            ["Red Fox"] = true,
+            ["Echo Frog"] = true,
+            ["Red Giant Ant"] = true,
+            ["Praying Mantis"] = true
         },
         ["Rarity"] = { -- Rarity Sell Pet
             ["Common"] = true,
@@ -83,7 +88,7 @@ getgenv().Config = {
             ["Divine"] = false,
             ["Mythical"] = false
         },
-        ["Pet Dont Delete"] = {"Mimic Octopus"}
+        ["Pet Dont Delete"] = {"Mimic Octopus", "Disco Bee", "Buterfly", "Dragonfly", "Queen Bee"}
     },
     ["Webhook Mode"] = {
         ["Enable Send Pet Weight"] = false,
