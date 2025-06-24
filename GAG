@@ -51,6 +51,7 @@ getgenv().ConfigsKaitun = {
 		["Hatch"] = { -- มันจะสุ่มไขซื้อไข่วางไข่ เรียงจากบนลงล่างก่อน
 			"Anti Bee Egg",
 			"Paradise Egg",
+			"Night Egg",
 			"Bug Egg"
 		},
 		["Safe Eggs"] = { -- จะไม่วางหรือฟักไข่ให้
