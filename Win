@@ -1,11 +1,9 @@
-script_key = "bTlRzNcavWwTVeZloINfTSCbaNWrRgbO";
 getgenv().Config = {
     ["Time To Sell"] = 200, -- Seconds
     ["Craft Event"] = {
         ["Crafters Seed Pack"] = true,
         ["Anti Bee Egg"] = true
     },
-    ["Dont Spawn Bee Egg"] = true,
     ["Dont Open Pack"] = false,
     ["Dont Use Flower Seed Pack"] = true, -- If u Enable Crafters Seed Pack pls enable this
     ["Seed"] = {
@@ -14,6 +12,7 @@ getgenv().Config = {
         ["Tomato"] = 44,
         ["Loquat"] = 44,
         ["Pineapple"] = 44,
+        ["Carrot"] = 44,
         ["Bell Pepper"] = 44,
         ["Green Apple"] = 44,
         ["Feijoa"] = 44,
@@ -24,37 +23,47 @@ getgenv().Config = {
         ["Watermelon"] = 44,
         ["Kiwi"] = 44
     },
+
     ["FPS"] = 3,
     ["Egg"] = {
         ["Common Egg"] = {
             ["Buy"] = false,
-            ["Place"] = false
+            ["Place"] = false,
+            ["Priority"] = 8
         },
         ["Uncommon Egg"] = {
             ["Buy"] = false,
-            ["Place"] = false
+            ["Place"] = false,
+            ["Priority"] = 7
         },
         ["Rare Egg"] = {
             ["Buy"] = false,
-            ["Place"] = false
+            ["Place"] = false,
+            ["Priority"] = 6
         },
+
         ["Mythical Egg"] = {
             ["Buy"] = false,
-            ["Place"] = false
+            ["Place"] = false,
+            ["Priority"] = 5
         },
         ["Anti Bee Egg"] = {
-            ["Place"] = true
+            ["Place"] = true,
+            ["Priority"] = 1
         },
         ["Night Egg"] = {
-            ["Place"] = true
+            ["Place"] = true,
+            ["Priority"] = 4
         },
         ["Bug Egg"] = {
             ["Buy"] = true,
-            ["Place"] = true
+            ["Place"] = true,
+            ["Priority"] = 2
         },
         ["Paradise Egg"] = {
             ["Buy"] = true,
-            ["Place"] = true
+            ["Place"] = true,
+            ["Priority"] = 3
         }
     },
     ["Honey Item"] = {
@@ -83,6 +92,7 @@ getgenv().Config = {
         ["Trees"] = {"Strawberry", "Blueberry", "Corn", "Tomato", "Orange Tulip", "Carrot"}
     },
     ["Url"] = "https://discord.com/api/webhooks/1386314241803419678/wJHfSpn59FNjBjA9JqBOW1V4s36uq9RM6_TBt8OtQhcES9doG6ghKarbl99mwWEHozqT", -- Webhook 
+
     ["Boost FPS"] = true,
     ["Black Screen"] = true,
     ["Note"] = "Cyndral Hub",
@@ -105,7 +115,8 @@ getgenv().Config = {
         },
         ["Upgrade Slot Egg"] = {
             ["Enable"] = true,
-            ["Black List Pet For Upgrade Slots"] = {"Queen Bee", "Red Fox", "Dragonfly", "Raccoon", "Disco Bee", "Butterfly", "Mimic Octopus"}
+            ["Black List Pet For Upgrade Slots"] = {"Queen Bee", "Red Fox", "Dragonfly", "Raccoon", "Disco Bee",
+                                                    "Butterfly", "Mimic Octopus"}
         },
         ["Pet Dont Delete"] = {"Queen Bee", "Red Fox", "Dragonfly", "Raccoon", "Disco Bee", "Butterfly", "Mimic Octopus"}
     },
@@ -113,7 +124,12 @@ getgenv().Config = {
         ["Enable Send Pet Weight"] = false,
         ["Weight"] = 10 -- if Weight >= 10 they will send wh
     },
-    ["Rejoin After X Time"] = 999999, -- Minutes
+    ["Rejoin Mode"] = {
+        ["Auto rejoin on script update"] = false,
+        ["Enable Rejoin After X Time"] = false,
+        ["Rejoin After X Time"] = 60 -- Minutes
+    },
+
     ["Mutation Skips"] = { -- Skip Havest
         ["Pollinated"] = false,
         ["Disco"] = false,
@@ -134,8 +150,4 @@ getgenv().Config = {
     }
 }
 setfpscap(getgenv().Config["FPS"])
-
--- Auto-load loop
-repeat
-    loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/791a1cc069605b60b85413847f6e5d2f.lua"))()
-until getgenv().Loaded
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/4bbb062dd01f4eb1fa71fca9e6ccbb7b.lua"))()
