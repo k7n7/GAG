@@ -93,7 +93,7 @@ getgenv().ConfigsKaitun = {
 		"Idk"
 	},
 	["Lock Seed Packs"] = { -- มันจะไม่เปิด Seed pack นั้นๆให้
-		"Flower Seed Pack",
+		"Summer Seed Pack"
 	},
 	["Noti Pets"] = { -- สัตว์ที่จะให้มันเเจ้งเตือนใน webhook
 		"Disco Bee",
