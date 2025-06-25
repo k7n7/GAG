@@ -63,6 +63,9 @@ getgenv().ConfigsKaitun = {
 	["Equip When Done"] = { -- จะให้มันใส่สัตว์อะไรหลังจากปลดอันบนเสร็จเเล้ว
 		"Chicken",
 		"Tarantula Hawk",
+		"Scarlet Macaw",
+		"Ostrich",
+		"Peacock",
 		"Moth"
 	},
 
