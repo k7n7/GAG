@@ -31,6 +31,7 @@ getgenv().ConfigsKaitun = {
 	
 	["Event Shop"] =  { -- จะให้ซื้ออะไรบ้างจาก event shop อยากได้อันไหนเพิ่ม เอา -- ออก
 		"Bee Egg",
+		--"Bee Crate",
 	},
 	
 	["Gear Shop"] = {
