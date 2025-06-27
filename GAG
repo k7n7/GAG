@@ -2,7 +2,7 @@ getgenv().ConfigsKaitun = {
 	["Stack Plant"] = true,
 	["Low Cpu"] = true,
 	
-	["Summer Harvest Event"] = true,
+	["Summer Harvest Event"] = false,
 	
 	["Limit Tree"] = { -- จำกัดจำนวนต้นไม้
 		["Limit"] = 400, -- ถ้าต้นไม่ถึงที่ตั้งไว้
