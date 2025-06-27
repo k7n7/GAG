@@ -111,7 +111,6 @@ getgenv().ConfigsKaitun = {
 		"Dragonfly",
 		"Raccoon",
 		"Red Fox",
-		"Blood Owl",
 		"Blood Kiwi", -- ใส่เเบบนี้หมายความว่า เก็บหมดไม่มี limit
 		["Chicken"] = 5, -- ใส่เเบบนี้ได้หมายความว่า limit มีได้ 5 ตัว
 	}
