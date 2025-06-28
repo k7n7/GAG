@@ -65,7 +65,7 @@ getgenv().ConfigsKaitun = {
 	["Limit Upgrade Slot"] = 5, -- เป็นการปลด ค่าสูงสุดของการวางไข่เเละใช้สัตว์ (สูงสุด 5)
 	["Equip When Done"] = { -- จะให้มันใส่สัตว์อะไรหลังจากปลดอันบนเสร็จเเล้ว
 		"Chicken",
-		"Tarantula Hawk",
+		"Hamster",
 		"Scarlet Macaw",
 		"Peacock",
 		"Moth"
