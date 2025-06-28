@@ -32,6 +32,12 @@ getgenv().ConfigsKaitun = {
 	["Event Shop"] =  { -- จะให้ซื้ออะไรบ้างจาก event shop อยากได้อันไหนเพิ่ม เอา -- ออก
 		"Bee Egg",
 		--"Bee Crate",
+		--"Traveler's Fruit",
+		"Summer Seed Pack",
+		"Hamster",
+		"Oasis Egg",
+		--"Delphinium",
+		"Lily of the Valley",
 	},
 	
 	["Gear Shop"] = {
@@ -48,6 +54,7 @@ getgenv().ConfigsKaitun = {
 			"Anti Bee Egg",
 			"Paradise Egg",
 			"Night Egg",
+		        "Oasis Egg",
 			"Bug Egg"
 		},
 		["Safe Eggs"] = { -- จะไม่วางหรือฟักไข่ให้
