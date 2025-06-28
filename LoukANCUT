@@ -32,6 +32,12 @@ getgenv().ConfigsKaitun = {
 	["Event Shop"] =  { -- จะให้ซื้ออะไรบ้างจาก event shop อยากได้อันไหนเพิ่ม เอา -- ออก
 		"Bee Egg",
 		--"Bee Crate",
+		--"Traveler's Fruit",
+		"Summer Seed Pack",
+		"Hamster",
+		"Oasis Egg",
+		--"Delphinium",
+		"Lily of the Valley",
 	},
 	
 	["Gear Shop"] = {
@@ -48,6 +54,7 @@ getgenv().ConfigsKaitun = {
 			"Anti Bee Egg",
 			"Paradise Egg",
 			"Night Egg",
+		        "Oasis Egg",
 			"Bug Egg"
 		},
 		["Safe Eggs"] = { -- จะไม่วางหรือฟักไข่ให้
@@ -59,6 +66,8 @@ getgenv().ConfigsKaitun = {
 	["Equip When Done"] = { -- จะให้มันใส่สัตว์อะไรหลังจากปลดอันบนเสร็จเเล้ว
 		"Chicken",
 		"Tarantula Hawk",
+		"Scarlet Macaw",
+		"Peacock",
 		"Moth"
 	},
 
@@ -73,8 +82,6 @@ getgenv().ConfigsKaitun = {
 		"Elephant Ears",
 	},
 	["Lock Seeds"] = { -- มันจะไม่ใช้ seed ที่เลือก
-		"Sunflower",
-		"Dragon Pepper",
 		"Elephant Ears",
 		"Rosy Delight",
 		"Parasol Flower",
@@ -88,7 +95,7 @@ getgenv().ConfigsKaitun = {
 		"Idk"
 	},
 	["Lock Seed Packs"] = { -- มันจะไม่เปิด Seed pack นั้นๆให้
-		"Flower Seed Pack",
+		"Summer Seed Pack"
 	},
 	["Noti Pets"] = { -- สัตว์ที่จะให้มันเเจ้งเตือนใน webhook
 		"Disco Bee",
@@ -111,7 +118,6 @@ getgenv().ConfigsKaitun = {
 		"Dragonfly",
 		"Raccoon",
 		"Red Fox",
-		"Blood Owl",
 		"Blood Kiwi", -- ใส่เเบบนี้หมายความว่า เก็บหมดไม่มี limit
 		["Chicken"] = 5, -- ใส่เเบบนี้ได้หมายความว่า limit มีได้ 5 ตัว
 	}
