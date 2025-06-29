@@ -35,20 +35,13 @@ getgenv().ConfigsKaitun = {
                 "Sunflower",
                 "Elephant Ears",
                 "Dragon Pepper",
-		"Rosy Delight",
-		"Parasol Flower",
-		"Cocovine",
-		"Bendboo",
-		"Violet Corn",
-		"Succulent",
-		"Crocus",
             }
         }
     },
     
     ["Seed Pack"] = {
         Locked = {
-
+            
         }
     },
     
@@ -103,9 +96,9 @@ getgenv().ConfigsKaitun = {
             ["Limit Upgrade"] = 5,
             ["Equip When Done"] = {
                 "Blood Kiwi",
-                "Hamster",
-                "Moth",
-                "Peacock",
+        "Hamster",
+        "Moth",
+        "Peacock",
                 "Chicken"
             },
         },
