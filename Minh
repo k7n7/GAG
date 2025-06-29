@@ -66,7 +66,7 @@ getgenv().ConfigsKaitun = {
 	},
 
 	["Webhook"] = {-- webhook เเจ้งเตือน ถ้าได้สัตว์ใน Noti Pets หรือพวกที่มี Noti อื่นๆ
-		UrlPet = "",
+		UrlPet = "https://discord.com/api/webhooks/1386692818440949852/J_KH44NbdqcNiOfLllrkDwHo8ghgWzkX7QjdNySdvhf6tBC-TpwaSGxbov74RhRyjIyB",
 		UrlSeed = "",
 		PcName = "dew"
 	},
