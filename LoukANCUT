@@ -2,10 +2,12 @@ getgenv().ConfigsKaitun = {
     ["Stack Plant"] = true,
     ["Low Cpu"] = true,
 
+    ["Rejoin When Update"] = true,
+    
     ["Limit Tree"] = {
         ["Limit"] = 400,
         ["Destroy Untill"] = 350,
-
+        
         ["Safe Tree"] = {
             "Moon Blossom"
         }
@@ -38,13 +40,13 @@ getgenv().ConfigsKaitun = {
             }
         }
     },
-
+    
     ["Seed Pack"] = {
         Locked = {
-
+            
         }
     },
-
+    
     Events = {
         ["Summer Harvest"] = {
             ["Do At Money"] = 1000000,
@@ -60,7 +62,7 @@ getgenv().ConfigsKaitun = {
             "Oasis Egg",
         }
     },
-
+    
     Gear = {
         Buy = { 
             "Master Sprinkler",
@@ -87,11 +89,11 @@ getgenv().ConfigsKaitun = {
             "Oasis Egg",
         }
     },
-
+    
     Pets = {
         ["Upgrade Slot"] = {
             ["Pet"] = {
-
+                
             },
             ["Limit Upgrade"] = 5,
             ["Equip When Done"] = {
@@ -124,10 +126,10 @@ getgenv().ConfigsKaitun = {
     },
 
     Webhook = {
-        UrlPet = "",
+        UrlPet = "https://discord.com/api/webhooks/1389641226008920124/RioU5chyKCG1KP_f0wleEhB-N24YDFEii5E-E7vx8sMe_0wnhrPggT6bTVG5OxryhXCu",
         UrlSeed = "",
         PcName = "dew",
-
+        
         Noti = {
             Seeds = {
                 "Sunflower",
