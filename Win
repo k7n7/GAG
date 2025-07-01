@@ -1,6 +1,8 @@
 getgenv().ConfigsKaitun = {
     ["Stack Plant"] = true,
     ["Low Cpu"] = true,
+
+    ["Rejoin When Update"] = true,
     
     ["Limit Tree"] = {
         ["Limit"] = 400,
@@ -124,7 +126,7 @@ getgenv().ConfigsKaitun = {
     },
 
     Webhook = {
-        UrlPet = "https://discord.com/api/webhooks/1386314241803419678/wJHfSpn59FNjBjA9JqBOW1V4s36uq9RM6_TBt8OtQhcES9doG6ghKarbl99mwWEHozqT",
+        UrlPet = "https://discord.com/api/webhooks/1386314245016129658/nT5CEyORMoiJi1I7AViU0WIFnbqqDCXGCHcLoijcHibiAz5_fvb97DlQ0Sqwj2Aypz35",
         UrlSeed = "",
         PcName = "dew",
         
