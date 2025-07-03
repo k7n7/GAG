@@ -98,9 +98,9 @@ getgenv().ConfigsKaitun = {
             ["Limit Upgrade"] = 5,
             ["Equip When Done"] = {
                 "Blood Kiwi",
-        "Hamster",
-        "Moth",
-        "Peacock",
+                "Hamster",
+                "Moth",
+                "Peacock",
                 "Chicken"
             },
         },
@@ -108,25 +108,20 @@ getgenv().ConfigsKaitun = {
             "Disco Bee",
             "Butterfly",
             "Mimic Octopus",
-            "Hyacinth Macaw",
-            "Axolotl",
             "Moth",
             "Hamster",
             "Queen Bee",
             "Dragonfly",
             "Raccoon",
             "Red Fox",
-            "Blood Owl",
-            "Scarlet Macaw",
+            "Peacock",
             "Blood Kiwi",
-        "Sand Snake",
-        "Meerkat",
             ["Chicken"] = 5,
         }
     },
 
     Webhook = {
-        UrlPet = "https://discord.com/api/webhooks/1389641226008920124/RioU5chyKCG1KP_f0wleEhB-N24YDFEii5E-E7vx8sMe_0wnhrPggT6bTVG5OxryhXCu",
+        UrlPet = "",
         UrlSeed = "",
         PcName = "dew",
         
@@ -143,7 +138,6 @@ getgenv().ConfigsKaitun = {
                 "Disco Bee",
                 "Butterfly",
                 "Mimic Octopus",
-                "Hyacinth Macaw",
                 "Queen Bee",
                 "Dragonfly",
                 "Raccoon",
