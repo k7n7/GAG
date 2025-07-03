@@ -99,40 +99,31 @@ getgenv().ConfigsKaitun = {
             ["Equip When Done"] = {
                 "Blood Kiwi",
                 "Hamster",
-                "Kiwi",
-                "Rooster",
-            "Seal",
-            "Starfish",
-                "Chicken",
+                "Moth",
+                "Peacock",
+                "Chicken"
             },
         },
         Locked = {
             "Disco Bee",
-        "Fennec Fox",
+            "Fennec Fox",
             "Butterfly",
             "Mimic Octopus",
-            "Hyacinth Macaw",
-            "Axolotl",
             "Moth",
             "Hamster",
             "Queen Bee",
             "Dragonfly",
             "Raccoon",
             "Red Fox",
-            "Blood Owl",
-            "Scarlet Macaw",
+            "Peacock",
             "Blood Kiwi",
-         "Kiwi",
-            "Rooster",
-        "Seal",
-        "Starfish",
-            "Chicken",
+            ["Chicken"] = 5,
         }
     },
 
     Webhook = {
-        UrlPet = "https://discord.com/api/webhooks/1246353354930651207/OIsCx9I2sXKRokSTvcAWbM121LUdAH13mOE8J5Erh8q-RQUzECGSS2Oixoi8x7Egl8Ky",
-        UrlSeed = "https://discord.com/api/webhooks/1246353354930651207/OIsCx9I2sXKRokSTvcAWbM121LUdAH13mOE8J5Erh8q-RQUzECGSS2Oixoi8x7Egl8Ky",
+        UrlPet = "",
+        UrlSeed = "",
         PcName = "dew",
         
         Noti = {
@@ -146,7 +137,6 @@ getgenv().ConfigsKaitun = {
             },
             Pets = {
                 "Disco Bee",
-        "Fennec Fox",
                 "Butterfly",
                 "Mimic Octopus",
                 "Queen Bee",
