@@ -108,7 +108,6 @@ getgenv().ConfigsKaitun = {
                 "Rooster",
                 "Starfish",
                 "Seal",
-                "Peacock",
                 "Hamster"
             },
         },
