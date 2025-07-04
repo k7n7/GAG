@@ -107,7 +107,6 @@ getgenv().ConfigsKaitun = {
                 "Blood Kiwi",
                 "Rooster",
                 "Starfish",
-                "Seal",
                 "Peacock",
                 "Hamster"
             },
@@ -115,7 +114,6 @@ getgenv().ConfigsKaitun = {
         Locked = {
             "Disco Bee",
             "Hyacinth Macaw",
-            "Seal",
             "Fennec Fox",
             "Rooster",
             "Starfish",
