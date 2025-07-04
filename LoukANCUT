@@ -92,8 +92,8 @@ getgenv().ConfigsKaitun = {
             "Bee Egg",
             "Oasis Egg",
             "Rare Egg",
-	    "Common Summer Egg",
 	    "Rare Summer Egg",
+	    "Common Summer Egg",
         }
     },
     
@@ -108,18 +108,18 @@ getgenv().ConfigsKaitun = {
                 "Rooster",
                 "Starfish",
                 "Seal",
+                "Peacock",
                 "Hamster"
             },
         },
         Locked = {
             "Disco Bee",
             "Hyacinth Macaw",
-            "Scarlet Macaw",
+            "Seal",
             "Fennec Fox",
             "Rooster",
             "Starfish",
             "Butterfly",
-            "Seal",
             "Mimic Octopus",
             "Hamster",
             "Queen Bee",
