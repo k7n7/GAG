@@ -83,14 +83,16 @@ getgenv().ConfigsKaitun = {
             "Night Egg",
             "Rare Egg",
 	    "Common Summer Egg",
+	    "Rare Summer Egg",
         },
         Buy = {
             "Paradise Egg",
-            "Bee Egg",
             "Night Egg",
             "Bug Egg",
+            "Bee Egg",
             "Oasis Egg",
             "Rare Egg",
+	    "Rare Summer Egg",
 	    "Common Summer Egg",
         }
     },
@@ -105,6 +107,7 @@ getgenv().ConfigsKaitun = {
                 "Blood Kiwi",
                 "Rooster",
                 "Starfish",
+                "Seal",
                 "Peacock",
                 "Hamster"
             },
@@ -112,7 +115,7 @@ getgenv().ConfigsKaitun = {
         Locked = {
             "Disco Bee",
             "Hyacinth Macaw",
-            "Scarlet Macaw",
+            "Seal",
             "Fennec Fox",
             "Rooster",
             "Starfish",
