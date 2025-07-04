@@ -83,6 +83,7 @@ getgenv().ConfigsKaitun = {
             "Night Egg",
             "Rare Egg",
 	    "Common Summer Egg",
+	    "Rare Summer Egg",
         },
         Buy = {
             "Paradise Egg",
@@ -91,6 +92,7 @@ getgenv().ConfigsKaitun = {
             "Bee Egg",
             "Oasis Egg",
             "Rare Egg",
+	    "Rare Summer Egg",
 	    "Common Summer Egg",
         }
     },
@@ -105,6 +107,7 @@ getgenv().ConfigsKaitun = {
                 "Blood Kiwi",
                 "Rooster",
                 "Starfish",
+                "Seal",
                 "Peacock",
                 "Hamster"
             },
@@ -112,7 +115,7 @@ getgenv().ConfigsKaitun = {
         Locked = {
             "Disco Bee",
             "Hyacinth Macaw",
-            "Scarlet Macaw",
+            "Seal",
             "Fennec Fox",
             "Rooster",
             "Starfish",
@@ -130,7 +133,7 @@ getgenv().ConfigsKaitun = {
     },
 
     Webhook = {
-        UrlPet = "",
+        UrlPet = "https://discord.com/api/webhooks/1390055075623206974/PtCph6lr4Cg1tMyvzHmdSyf7rPIDLzPMzen3VII8z_sE_kW_pWTKEUdOCKOYNkGvOPMN",
         UrlSeed = "",
         PcName = "dew",
         
