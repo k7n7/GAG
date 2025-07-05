@@ -48,6 +48,7 @@ getgenv().ConfigsKaitun = {
 	},
 
 	Events = {
+                Dino = true,
 		["Traveling Shop"] = {
 			"Liberty Lily",
 			"Firework Flower",
@@ -94,6 +95,7 @@ getgenv().ConfigsKaitun = {
 			"Paradise Egg",
 			"Night Egg",
 			"Bug Egg",
+			"Dinosaur Egg",
 			"Rare Summer Egg",
 		},
 		Buy = {
@@ -127,6 +129,7 @@ getgenv().ConfigsKaitun = {
 			},
 		},
 		Locked = {
+			"T-Rex",
 			"Disco Bee",
 			"Seal",
 			"Hyacinth Macaw",
@@ -164,6 +167,7 @@ getgenv().ConfigsKaitun = {
 				"Idk",
 			},
 			Pets = {
+			        "T-Rex",
 				"Dragonfly",
 				"Queen Bee",
 				"Raccoon",
