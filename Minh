@@ -81,7 +81,6 @@ getgenv().ConfigsKaitun = {
             "Paradise Egg",
             "Bug Egg",
             "Night Egg",
-	    "Rare Summer Egg",
         },
         Buy = {
             "Paradise Egg",
@@ -89,21 +88,23 @@ getgenv().ConfigsKaitun = {
             "Bug Egg",
             "Bee Egg",
             "Oasis Egg",
-	    "Rare Summer Egg",
         }
     },
     
     Pets = {
         ["Upgrade Slot"] = {
             ["Pet"] = {
-                
+                "Blood Kiwi",
+                "Rooster",
+                "Starfish",
+                "Peacock",
+                "Hamster"
             },
             ["Limit Upgrade"] = 5,
             ["Equip When Done"] = {
                 "Blood Kiwi",
                 "Rooster",
                 "Starfish",
-                "Seal",
                 "Peacock",
                 "Hamster"
             },
@@ -111,7 +112,6 @@ getgenv().ConfigsKaitun = {
         Locked = {
             "Disco Bee",
             "Hyacinth Macaw",
-            "Seal",
             "Fennec Fox",
             "Rooster",
             "Starfish",
@@ -150,7 +150,7 @@ getgenv().ConfigsKaitun = {
                 "Dragonfly",
                 "Raccoon",
                 "Red Fox",
-	        "Fennec Fox",
+            "Fennec Fox",
             },
         }
     },
