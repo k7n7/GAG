@@ -94,7 +94,11 @@ getgenv().ConfigsKaitun = {
     Pets = {
         ["Upgrade Slot"] = {
             ["Pet"] = {
-                
+                "Blood Kiwi",
+                "Rooster",
+                "Starfish",
+                "Peacock",
+                "Hamster"
             },
             ["Limit Upgrade"] = 5,
             ["Equip When Done"] = {
@@ -146,7 +150,7 @@ getgenv().ConfigsKaitun = {
                 "Dragonfly",
                 "Raccoon",
                 "Red Fox",
-	        "Fennec Fox",
+            "Fennec Fox",
             },
         }
     },
