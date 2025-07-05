@@ -79,6 +79,7 @@ getgenv().ConfigsKaitun = {
             "Anti Bee Egg",
             "Oasis Egg",
             "Paradise Egg",
+            "Rare Summer Egg",
             "Bug Egg",
             "Night Egg",
         },
@@ -86,6 +87,7 @@ getgenv().ConfigsKaitun = {
             "Paradise Egg",
             "Night Egg",
             "Bug Egg",
+            "Rare Summer Egg",
             "Bee Egg",
             "Oasis Egg",
         }
@@ -118,6 +120,7 @@ getgenv().ConfigsKaitun = {
             "Butterfly",
             "Mimic Octopus",
             "Hamster",
+            "Seal",
             "Queen Bee",
             "Dragonfly",
             "Raccoon",
@@ -129,7 +132,7 @@ getgenv().ConfigsKaitun = {
     },
 
     Webhook = {
-        UrlPet = "https://discord.com/api/webhooks/1390055075623206974/PtCph6lr4Cg1tMyvzHmdSyf7rPIDLzPMzen3VII8z_sE_kW_pWTKEUdOCKOYNkGvOPMN",
+        UrlPet = "",
         UrlSeed = "",
         PcName = "dew",
         
