@@ -62,6 +62,7 @@ getgenv().ConfigsKaitun = {
 		},
 		Craft = {
 			"Crafters Seed Pack",
+			"Ancient Seed Pack",
 			"Lightning Rod",
 			"Anti Bee Egg",
 		},
