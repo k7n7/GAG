@@ -62,7 +62,6 @@ getgenv().ConfigsKaitun = {
 		Craft = {
 			"Lightning Rod",
 			"Anti Bee Egg",
-			"Ancient Seed Pack",
 		},
 		Shop = {
 			--"Traveler's Fruit",
