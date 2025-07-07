@@ -37,6 +37,7 @@ getgenv().ConfigsKaitun = {
 				"Sunflower",
 				"Elephant Ears",
 				"Dragon Pepper",
+				"Bone Blossom"
 			}
 		}
 	},
@@ -48,20 +49,12 @@ getgenv().ConfigsKaitun = {
 	},
 
 	Events = {
-                Dino = true,
-		["Traveling Shop"] = {
-			"Liberty Lily",
-			"Firework Flower",
-			--"Firework",
-			"Bald Eagle",
-			--"July 4th Crate",
-		},
+		Dino = true,
 		["Summer Harvest"] = {
 			["Do At Money"] = 1000000,
 			["Point Limit"] = 15000,
 		},
 		Craft = {
-			"Crafters Seed Pack",
 			"Ancient Seed Pack",
 			"Lightning Rod",
 			"Anti Bee Egg",
@@ -91,12 +84,12 @@ getgenv().ConfigsKaitun = {
 
 	Eggs = {
 		Place = {
+			"Dinosaur Egg",
 			"Oasis Egg",
 			"Anti Bee Egg",
 			"Paradise Egg",
 			"Night Egg",
 			"Bug Egg",
-			"Dinosaur Egg",
 		},
 		Buy = {
 			"Anti Bee Egg",
@@ -148,12 +141,12 @@ getgenv().ConfigsKaitun = {
 		LockPet_Weight = 10, -- if Weight >= 10 they will locked,
 		Instant_Sell = {
 			"Dog",
-                        "Raptor",
-                        "Meerkat",
-                        "Wasp",
-                        "Ostrich",
-                        "Hedgehog",
-                        "Caterpillar",
+			"Raptor",
+			"Meerkat",
+			"Wasp",
+			"Ostrich",
+			"Hedgehog",
+			"Caterpillar",
 		}
 	},
 
@@ -172,7 +165,6 @@ getgenv().ConfigsKaitun = {
 				"Idk",
 			},
 			Pets = {
-			        "T-Rex",
 				"Dragonfly",
 				"Queen Bee",
 				"Raccoon",
