@@ -2,7 +2,7 @@ getgenv().ConfigsKaitun = {
 	["Stack Plant"] = true,
 	["Low Cpu"] = true,
 	
-	["Rejoin When Update"] = false,
+	["Rejoin When Update"] = true,
 
 	["Limit Tree"] = {
 		["Limit"] = 250,
@@ -37,6 +37,7 @@ getgenv().ConfigsKaitun = {
 				"Sunflower",
 				"Elephant Ears",
 				"Dragon Pepper",
+				"Bone Blossom"
 			}
 		}
 	},
@@ -49,12 +50,6 @@ getgenv().ConfigsKaitun = {
 
 	Events = {
 		Dino = true,
-		["Traveling Shop"] = {
-			"Liberty Lily",
-			"Firework Flower",
-			--"Firework",
-			"Bald Eagle",
-		},
 		["Summer Harvest"] = {
 			["Do At Money"] = 1000000,
 			["Point Limit"] = 15000,
@@ -66,6 +61,7 @@ getgenv().ConfigsKaitun = {
 		},
 		Shop = {
 			--"Traveler's Fruit",
+			"Summer Seed Pack",
 			"Hamster",
 			"Oasis Egg",
 			--"Delphinium",
@@ -96,8 +92,8 @@ getgenv().ConfigsKaitun = {
 			"Bug Egg",
 		},
 		Buy = {
-			"Dinosaur Egg",
 			"Anti Bee Egg",
+			"Oasis Egg",
 			"Paradise Egg",
 			"Bee Egg",
 			"Night Egg",
@@ -112,7 +108,7 @@ getgenv().ConfigsKaitun = {
 				"Rooster",
 				"Starfish",
 				"Peacock",
-				"Seal",
+				"Hamster",
 			},
 			["Limit Upgrade"] = 5,
 			["Equip When Done"] = {
@@ -120,51 +116,44 @@ getgenv().ConfigsKaitun = {
 				"Rooster",
 				"Starfish",
 				"Peacock",
+				"Hamster",
 				"Seal",
 			},
 		},
 		Locked = {
-			"Seal",
-			"Starfish",
-			"Hamster",
-			"Peacock",
 			"T-Rex",
-			"Pterodactyl",
-			"Stegosaurus",
-			"Triceratops",
-			"Raptor",
-			"Night Owl",
-			"Queen Bee",
 			"Disco Bee",
+			"Seal",
+			"Hyacinth Macaw",
 			"Fennec Fox",
-			"Disco Bee",
-			"Butterfly",
-			"Mimic Octopus",
-			"Queen Bee",
-			"Fennec Fox",
-			"Dragonfly",
-			"Raccoon",
-			"Red Fox",
-			"Blood Owl",
-			"Blood Kiwi",
+                        "Starfish",
+                        "Butterfly",
+                        "Mimic Octopus",
+                        "Hamster",
+                        "Queen Bee",
+                        "Dragonfly",
+                        "Raccoon",
+                        "Red Fox",
+                        "Peacock",
+                        "Blood Kiwi",
 			["Rooster"] = 5,
 		},
 		LockPet_Weight = 10, -- if Weight >= 10 they will locked,
 		Instant_Sell = {
 			"Dog",
-                        "Raptor",
-                        "Meerkat",
-                        "Wasp",
-                        "Ostrich",
-                        "Hedgehog",
-                        "Caterpillar",
+			"Raptor",
+			"Meerkat",
+			"Wasp",
+			"Ostrich",
+			"Hedgehog",
+			"Caterpillar",
 		}
 	},
 
 	Webhook = {
 		UrlPet = "",
 		UrlSeed = "",
-		PcName = "dew",
+		PcName = "PC",
 
 		Noti = {
 			Seeds = {
@@ -176,7 +165,6 @@ getgenv().ConfigsKaitun = {
 				"Idk",
 			},
 			Pets = {
-				"T-Rex",
 				"Dragonfly",
 				"Queen Bee",
 				"Raccoon",
@@ -185,7 +173,6 @@ getgenv().ConfigsKaitun = {
 				"Disco Bee",
 				"Butterfly",
 				"Mimic Octopus",
-				"Red Fox",
 			},
 			Pet_Weight_Noti = true,
 		}
