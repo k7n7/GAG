@@ -50,6 +50,11 @@ getgenv().ConfigsKaitun = {
 
 	Events = {
 		Dino = true,
+		["Traveling Shop"] = {
+            		"Bald Eagle",
+            		"Night Staff",
+            		"Star Caller"
+        	},
 		["Summer Harvest"] = {
 			["Do At Money"] = 1000000,
 			["Point Limit"] = 15000,
