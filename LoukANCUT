@@ -183,6 +183,7 @@ getgenv().ConfigsKaitun = {
 			},
 			Pets = {
 				"Dragonfly",
+				"T-Rex",
 				"Queen Bee",
 				"Raccoon",
 				"Disco Bee",
