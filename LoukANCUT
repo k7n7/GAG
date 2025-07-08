@@ -55,7 +55,6 @@ getgenv().ConfigsKaitun = {
 			["Point Limit"] = 15000,
 		},
 		Craft = {
-			"Ancient Seed Pack",
 			"Lightning Rod",
 			"Anti Bee Egg",
 		},
@@ -90,6 +89,8 @@ getgenv().ConfigsKaitun = {
 			"Paradise Egg",
 			"Night Egg",
 			"Bug Egg",
+			"Rare Summer Egg",
+			"Mythical Egg",
 		},
 		Buy = {
 			"Anti Bee Egg",
@@ -98,6 +99,8 @@ getgenv().ConfigsKaitun = {
 			"Bee Egg",
 			"Night Egg",
 			"Bug Egg",
+			"Rare Summer Egg",
+			"Mythical Egg",
 		}
 	},
 
@@ -105,7 +108,7 @@ getgenv().ConfigsKaitun = {
 		["Upgrade Slot"] = {
 			["Pet"] = {
 				"Blood Kiwi",
-				"Rooster",
+				"Seal",
 				"Starfish",
 				"Peacock",
 				"Hamster",
@@ -113,11 +116,10 @@ getgenv().ConfigsKaitun = {
 			["Limit Upgrade"] = 5,
 			["Equip When Done"] = {
 				"Blood Kiwi",
-				"Rooster",
+				"Seal",
 				"Starfish",
 				"Peacock",
 				"Hamster",
-				"Seal",
 			},
 		},
 		Locked = {
@@ -135,8 +137,7 @@ getgenv().ConfigsKaitun = {
                         "Raccoon",
                         "Red Fox",
                         "Peacock",
-                        "Blood Kiwi",
-			["Rooster"] = 5,
+			["Blood Kiwi"] = 5,
 		},
 		LockPet_Weight = 10, -- if Weight >= 10 they will locked,
 		Instant_Sell = {
@@ -151,7 +152,7 @@ getgenv().ConfigsKaitun = {
 	},
 
 	Webhook = {
-		UrlPet = "",
+		UrlPet = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
 		UrlSeed = "",
 		PcName = "PC",
 
@@ -173,6 +174,7 @@ getgenv().ConfigsKaitun = {
 				"Disco Bee",
 				"Butterfly",
 				"Mimic Octopus",
+				"T-Rex",
 			},
 			Pet_Weight_Noti = true,
 		}
