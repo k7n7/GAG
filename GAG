@@ -168,9 +168,9 @@ getgenv().ConfigsKaitun = {
 	},
 
 	Webhook = {
-		UrlPet = "",
+		UrlPet = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
 		UrlSeed = "",
-		PcName = "PC",
+		PcName = "Stock",
 
 		Noti = {
 			Seeds = {
@@ -183,6 +183,7 @@ getgenv().ConfigsKaitun = {
 			},
 			Pets = {
 				"Dragonfly",
+				"T-Rex",
 				"Queen Bee",
 				"Raccoon",
 				"Disco Bee",
