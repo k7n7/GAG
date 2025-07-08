@@ -50,11 +50,17 @@ getgenv().ConfigsKaitun = {
 
 	Events = {
 		Dino = true,
+		["Traveling Shop"] = {
+            		"Bald Eagle",
+            		"Night Staff",
+            		"Star Caller"
+        	},
 		["Summer Harvest"] = {
 			["Do At Money"] = 1000000,
 			["Point Limit"] = 15000,
 		},
 		Craft = {
+			"Ancient Seed Pack",
 			"Lightning Rod",
 			"Anti Bee Egg",
 		},
@@ -89,8 +95,8 @@ getgenv().ConfigsKaitun = {
 			"Paradise Egg",
 			"Night Egg",
 			"Bug Egg",
-			"Rare Summer Egg",
 			"Mythical Egg",
+			"Rare Summer Egg",
 		},
 		Buy = {
 			"Anti Bee Egg",
@@ -99,8 +105,8 @@ getgenv().ConfigsKaitun = {
 			"Bee Egg",
 			"Night Egg",
 			"Bug Egg",
-			"Rare Summer Egg",
 			"Mythical Egg",
+			"Rare Summer Egg",
 		}
 	},
 
@@ -108,21 +114,24 @@ getgenv().ConfigsKaitun = {
 		["Upgrade Slot"] = {
 			["Pet"] = {
 				"Blood Kiwi",
-				"Seal",
+				"Bald Eagle",
 				"Starfish",
 				"Peacock",
 				"Hamster",
+				"Seal",
 			},
 			["Limit Upgrade"] = 5,
 			["Equip When Done"] = {
 				"Blood Kiwi",
-				"Seal",
+				"Bald Eagle",
 				"Starfish",
 				"Peacock",
 				"Hamster",
+				"Seal",
 			},
 		},
 		Locked = {
+			"Bald Eagle",
 			"T-Rex",
 			"Disco Bee",
 			"Seal",
@@ -137,22 +146,29 @@ getgenv().ConfigsKaitun = {
                         "Raccoon",
                         "Red Fox",
                         "Peacock",
-			["Blood Kiwi"] = 5,
+                        "Blood Kiwi",
+			["Rooster"] = 5,
 		},
 		LockPet_Weight = 10, -- if Weight >= 10 they will locked,
 		Instant_Sell = {
 			"Dog",
-			"Raptor",
 			"Meerkat",
 			"Wasp",
 			"Ostrich",
 			"Hedgehog",
 			"Caterpillar",
+			"Flamingo",
+			"Toucan",
+			"Sea Turtle",
+			"Grey Mouse",
+			"Brown Mouse",
+			"Squirrel",
+			"Orangutan",
 		}
 	},
 
 	Webhook = {
-		UrlPet = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
+		UrlPet = "",
 		UrlSeed = "",
 		PcName = "PC",
 
@@ -174,7 +190,6 @@ getgenv().ConfigsKaitun = {
 				"Disco Bee",
 				"Butterfly",
 				"Mimic Octopus",
-				"T-Rex",
 			},
 			Pet_Weight_Noti = true,
 		}
