@@ -95,6 +95,8 @@ getgenv().ConfigsKaitun = {
 			"Paradise Egg",
 			"Night Egg",
 			"Bug Egg",
+			"Mythical Egg",
+			"Rare Summer Egg",
 		},
 		Buy = {
 			"Anti Bee Egg",
@@ -103,6 +105,8 @@ getgenv().ConfigsKaitun = {
 			"Bee Egg",
 			"Night Egg",
 			"Bug Egg",
+			"Mythical Egg",
+			"Rare Summer Egg",
 		}
 	},
 
@@ -110,15 +114,16 @@ getgenv().ConfigsKaitun = {
 		["Upgrade Slot"] = {
 			["Pet"] = {
 				"Blood Kiwi",
-				"Rooster",
+				"Bald Eagle",
 				"Starfish",
 				"Peacock",
 				"Hamster",
+				"Seal",
 			},
 			["Limit Upgrade"] = 5,
 			["Equip When Done"] = {
 				"Blood Kiwi",
-				"Rooster",
+				"Bald Eagle",
 				"Starfish",
 				"Peacock",
 				"Hamster",
@@ -126,6 +131,7 @@ getgenv().ConfigsKaitun = {
 			},
 		},
 		Locked = {
+			"Bald Eagle",
 			"T-Rex",
 			"Disco Bee",
 			"Seal",
@@ -146,12 +152,18 @@ getgenv().ConfigsKaitun = {
 		LockPet_Weight = 10, -- if Weight >= 10 they will locked,
 		Instant_Sell = {
 			"Dog",
-			"Raptor",
 			"Meerkat",
 			"Wasp",
 			"Ostrich",
 			"Hedgehog",
 			"Caterpillar",
+			"Flamingo",
+			"Toucan",
+			"Sea Turtle",
+			"Grey Mouse",
+			"Brown Mouse",
+			"Squirrel",
+			"Orangutan",
 		}
 	},
 
