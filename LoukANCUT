@@ -1,9 +1,10 @@
+
 script_key="LUWSAenulBZHxiysCBtjdgKvuzedZXFF";
 setfpscap(3)
 
 getgenv().gagConfig = {
     CRAFT_EVENT = { "Anti Bee Egg" },
-    KEEP_PETS_TRADE_DINO = { "Dog", "Golden Lab", "Bunny" },
+    KEEP_PETS_TRADE_DINO = { "Dog" },
 
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
