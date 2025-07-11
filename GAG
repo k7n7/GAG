@@ -2,8 +2,9 @@ script_key="LUWSAenulBZHxiysCBtjdgKvuzedZXFF";
 setfpscap(3)
 
 getgenv().gagConfig = {
-    CRAFT_EVENT = { "Anti Bee Egg"},
-    KEEP_PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan", "Red Giant Ant", "Squirrel" },
+    -- Event:
+    CRAFT_EVENT = { "Anti Bee Egg" },
+    PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan", "Red Giant Ant", "Squirrel" },
 
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
@@ -16,7 +17,7 @@ getgenv().gagConfig = {
     DESTROY_UNTIL_MIN_PLANTS = 230,
     DELETE_PLANTS_AFTER_MAX = { "Carrot", "Strawberry", "Blueberry", "Tomato", "Cauliflower" },
     
-    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Common Summer Egg", "Rare Summer Egg", "Mythical Egg"  },
+    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Common Summer Egg", "Rare Summer Egg" },
     PLANT_EGGS = { "Dinosaur Egg", "Anti Bee Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Common Summer Egg", "Rare Summer Egg", "Oasis Egg" },
     
     -- BUY_SEED_SHOP Priority (Left -> Right)
@@ -31,7 +32,7 @@ getgenv().gagConfig = {
     KEEP_PETS_WEIGHT = 10,
 
     -- EQUIP_PETS Priority (Left -> Right)
-    EQUIP_PETS = { "Seal", "Bald Eagle", "Blood Kiwi", "Starfish", "Rooster", "Peacock"  },
+    EQUIP_PETS = { "Bald Eagle", ["Seal"] = 2, ["Blood Kiwi"] = 2, ["Peacock"] = 1, ["Starfish"] = 1 },
 
     BUY_GEAR_SHOP = { "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler" },
     USE_SPRINKLER = { "Basic Sprinkler", "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler" },
