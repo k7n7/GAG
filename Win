@@ -2,8 +2,9 @@ script_key="LUWSAenulBZHxiysCBtjdgKvuzedZXFF";
 setfpscap(3)
 
 getgenv().gagConfig = {
-    CRAFT_EVENT = { "Anti Bee Egg",  "Ancient Seed Pack" },
-    KEEP_PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan" },
+    -- Event:
+    CRAFT_EVENT = { "Anti Bee Egg" },
+    PETS_TRADE_DINO = { "Toucan", "Caterpillar", "Seagull", "Crab", "Bee", "Honey Bee", "Flamingo", "Dog", "Bunny", "Golden Lab" },
 
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
@@ -20,9 +21,9 @@ getgenv().gagConfig = {
     PLANT_EGGS = { "Dinosaur Egg", "Anti Bee Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Common Summer Egg", "Rare Summer Egg", "Oasis Egg" },
     
     -- BUY_SEED_SHOP Priority (Left -> Right)
-    BUY_SEED_SHOP = { "Carrot", "Bamboo", "Pumpkin", "Daffodil", "Orange Tulip", "Watermelon", "Mushroom", "Nightshade", "Beanstalk" },
+    BUY_SEED_SHOP = { "Nightshade", "Daffodil", "Beanstalk", "Mushroom", "Bamboo", "Pumpkin", "Watermelon", ["Orange Tulip"] = 50, ["Carrot"] = 50 },
     KEEP_SEEDS = {},
-    KEEP_SEEDS_AFTER_MAX_PLANTS = { "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato" },
+    KEEP_SEEDS_AFTER_MAX_PLANTS = { "Carrot", "Strawberry", "Blueberry", "Orange Tulip", "Tomato", "Daffodil" },
     
     FAVOURITE_FRUIT_MUTATIONS = {},  -- Stop Autosell
     SKIP_HARVEST_MUTATIONS = {},  -- Stop Harvest
@@ -31,7 +32,7 @@ getgenv().gagConfig = {
     KEEP_PETS_WEIGHT = 10,
 
     -- EQUIP_PETS Priority (Left -> Right)
-    EQUIP_PETS = { "Seal", "Bald Eagle", "Blood Kiwi", "Starfish", "Peacock"  },
+    EQUIP_PETS = { "Bald Eagle", ["Seal"] = 2, ["Blood Kiwi"] = 2, ["Peacock"] = 1, ["Starfish"] = 1 },
 
     BUY_GEAR_SHOP = { "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler" },
     USE_SPRINKLER = { "Basic Sprinkler", "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler" },
