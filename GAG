@@ -3,7 +3,7 @@ setfpscap(3)
 
 getgenv().gagConfig = {
     CRAFT_EVENT = { "Anti Bee Egg"},
-    KEEP_PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan", "Red Fox", "Red Giant Ant", "Squirrel" },
+    KEEP_PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan", "Red Giant Ant", "Squirrel" },
 
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
