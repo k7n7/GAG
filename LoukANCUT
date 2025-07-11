@@ -3,7 +3,7 @@ setfpscap(3)
 
 getgenv().gagConfig = {
     CRAFT_EVENT = { "Anti Bee Egg"},
-    KEEP_PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan" },
+    KEEP_PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan", "Red Giant Ant", "Squirrel" },
 
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
@@ -16,7 +16,7 @@ getgenv().gagConfig = {
     DESTROY_UNTIL_MIN_PLANTS = 230,
     DELETE_PLANTS_AFTER_MAX = { "Carrot", "Strawberry", "Blueberry", "Tomato", "Cauliflower" },
     
-    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Common Summer Egg", "Rare Summer Egg" },
+    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Common Summer Egg", "Rare Summer Egg", "Mythical Egg"  },
     PLANT_EGGS = { "Dinosaur Egg", "Anti Bee Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Common Summer Egg", "Rare Summer Egg", "Oasis Egg" },
     
     -- BUY_SEED_SHOP Priority (Left -> Right)
@@ -27,7 +27,7 @@ getgenv().gagConfig = {
     FAVOURITE_FRUIT_MUTATIONS = {},  -- Stop Autosell
     SKIP_HARVEST_MUTATIONS = {},  -- Stop Harvest
 
-    KEEP_PETS = { "Bald Eagle", "Brontosaurus", "T-Rex", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Hyacinth Macaw", "Seal", "Hamster", "Peacock", "Blood Kiwi" },
+    KEEP_PETS = { "Bald Eagle", "Brontosaurus", "T-Rex", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Seal" },
     KEEP_PETS_WEIGHT = 10,
 
     -- EQUIP_PETS Priority (Left -> Right)
