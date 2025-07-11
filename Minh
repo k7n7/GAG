@@ -2,8 +2,8 @@ script_key="LUWSAenulBZHxiysCBtjdgKvuzedZXFF";
 setfpscap(3)
 
 getgenv().gagConfig = {
-    CRAFT_EVENT = { "Anti Bee Egg" },
-    KEEP_PETS_TRADE_DINO = { "Dog" },
+    CRAFT_EVENT = { "Anti Bee Egg"},
+    KEEP_PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan" },
 
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
@@ -16,8 +16,8 @@ getgenv().gagConfig = {
     DESTROY_UNTIL_MIN_PLANTS = 230,
     DELETE_PLANTS_AFTER_MAX = { "Carrot", "Strawberry", "Blueberry", "Tomato", "Cauliflower" },
     
-    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Common Egg" },
-    PLANT_EGGS = { "Dinosaur Egg", "Anti Bee Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Common Egg", "Oasis Egg" },
+    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Common Summer Egg", "Rare Summer Egg" },
+    PLANT_EGGS = { "Dinosaur Egg", "Anti Bee Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Common Summer Egg", "Rare Summer Egg", "Oasis Egg" },
     
     -- BUY_SEED_SHOP Priority (Left -> Right)
     BUY_SEED_SHOP = { "Carrot", "Bamboo", "Pumpkin", "Daffodil", "Orange Tulip", "Watermelon", "Mushroom", "Nightshade", "Beanstalk" },
