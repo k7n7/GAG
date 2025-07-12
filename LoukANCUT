@@ -2,9 +2,8 @@ script_key="LUWSAenulBZHxiysCBtjdgKvuzedZXFF";
 setfpscap(3)
 
 getgenv().gagConfig = {
-    -- Event:
     CRAFT_EVENT = { "Anti Bee Egg" },
-    PETS_TRADE_DINO = { "Seagull", "Crab", "Flamingo", "Toucan", "Red Giant Ant", "Squirrel" },
+    PETS_TRADE_DINO = { "Toucan", "Caterpillar", "Seagull", "Crab", "Bee", "Honey Bee", "Flamingo", "Dog", "Bunny", "Golden Lab" },
 
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
@@ -17,8 +16,8 @@ getgenv().gagConfig = {
     DESTROY_UNTIL_MIN_PLANTS = 230,
     DELETE_PLANTS_AFTER_MAX = { "Carrot", "Strawberry", "Blueberry", "Tomato", "Cauliflower" },
     
-    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Common Summer Egg", "Rare Summer Egg" },
-    PLANT_EGGS = { "Dinosaur Egg", "Anti Bee Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Common Summer Egg", "Rare Summer Egg", "Oasis Egg" },
+    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Common Egg", "Rare Egg" },
+    PLANT_EGGS = { "Dinosaur Egg", "Anti Bee Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Common Egg", "Oasis Egg", },
     
     -- BUY_SEED_SHOP Priority (Left -> Right)
     BUY_SEED_SHOP = { "Carrot", "Bamboo", "Pumpkin", "Daffodil", "Orange Tulip", "Watermelon", "Mushroom", "Nightshade", "Beanstalk" },
@@ -28,23 +27,22 @@ getgenv().gagConfig = {
     FAVOURITE_FRUIT_MUTATIONS = {},  -- Stop Autosell
     SKIP_HARVEST_MUTATIONS = {},  -- Stop Harvest
 
-    KEEP_PETS = { "Bald Eagle", "Brontosaurus", "T-Rex", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Seal" },
+    KEEP_PETS = { "Bald Eagle", "Brontosaurus", "T-Rex", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Night Owl", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Hyacinth Macaw", "Pack Bee", "Seal", "Hamster", "Peacock", "Blood Kiwi", "Rooster" },
     KEEP_PETS_WEIGHT = 10,
 
     -- EQUIP_PETS Priority (Left -> Right)
-    EQUIP_PETS = { "Bald Eagle", ["Seal"] = 2, ["Blood Kiwi"] = 2, ["Peacock"] = 1, ["Starfish"] = 1 },
+    EQUIP_PETS = { "Seal", "Bald Eagle", "Blood Kiwi", "Starfish", "Rooster", "Peacock" },
 
     BUY_GEAR_SHOP = { "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler" },
     USE_SPRINKLER = { "Basic Sprinkler", "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler" },
 
-    PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
+    PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1246353354930651207/OIsCx9I2sXKRokSTvcAWbM121LUdAH13mOE8J5Erh8q-RQUzECGSS2Oixoi8x7Egl8Ky",
     SEED_WEBHOOK_URL = "", 
-    NOTIFY_PETS = { "Bald Eagle", "Fennec Fox", "Disco Bee", "Raccoon", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex" },
+    NOTIFY_PETS = { "Fennec Fox", "Disco Bee", "Raccoon", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex" },
     NOTIFY_PETS_WEIGHT = 10,
-    DISCORD_ID = "",
-    WEBHOOK_NOTE = "",
-    SHOW_WEBHOOK_JOBID = false,
-    SHOW_WEBHOOK_USERNAME = false,
+    DISCORD_ID = "473755357274046464",
+    WEBHOOK_NOTE = "dew",
+    SHOW_WEBHOOK_USERNAME = true,
 }
 
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6b71bc8fa2ff932327c20f197e426686.lua"))()
