@@ -13,8 +13,8 @@ getgenv().gagConfig = {
     OPEN_ALL_SEED_PACK = true,
     ADD_FRIEND = true,
 
-    MAX_PLANTS = 250,
-    DESTROY_UNTIL_MIN_PLANTS = 230,
+    MAX_PLANTS = 400,
+    DESTROY_UNTIL_MIN_PLANTS = 350,
     DELETE_PLANTS_AFTER_MAX = { "Carrot", "Strawberry", "Blueberry", "Tomato", "Cauliflower" },
     
     BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Mythical Egg", "Rare Summer Egg", "Common Summer Egg", ["Common Egg"] = 1, "Rare Egg", "Uncommon Egg" },
