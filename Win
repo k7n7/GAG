@@ -5,6 +5,7 @@ getgenv().gagConfig = {
     -- Event:
     CRAFT_EVENT = { "Anti Bee Egg", "Primal Egg" },
     PETS_TRADE_DINO = { "Caterpillar", "Seagull", "Crab", "Dog", "Flamingo", "Bunny", "Golden Lab" },
+    BUY_TRAVELING_MERCHANT = { "Bee Egg", "Loquat", "Feijoa", "Pitcher Plant" },
     -- General:
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
@@ -12,6 +13,7 @@ getgenv().gagConfig = {
     EXTRA_EGG_SLOTS = 5,
     OPEN_ALL_SEED_PACK = true,
     ADD_FRIEND = true,
+    FAST_LEVEL_PET = true,
 
     MAX_PLANTS = 400,
     DESTROY_UNTIL_MIN_PLANTS = 350,
