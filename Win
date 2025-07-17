@@ -11,7 +11,7 @@ getgenv().gagConfig = {
     REDEEM_CODES = {},
     EXTRA_PET_SLOTS = 5,
     EXTRA_EGG_SLOTS = 5,
-    MUTATE_PET = { "Spinosaurus", "T-Rex", "Fennec Fox", "Butterfly", "Disco Bee", "Raccoon", "Dragonfly", "Mimic Octopus" },  -- Pet Names
+    MUTATE_PET = { "Spinosaurus", "T-Rex", "Fennec Fox", "Butterfly", "Disco Bee", "Raccoon", "Dragonfly", "Mimic Octopus", "Dilophosaurus", "Seal", "Blood Kiwi", "Rooster" },  -- Pet Names
     OPEN_ALL_SEED_PACK = true,
     ADD_FRIEND = true,
     FAST_LEVEL_PET = true,
@@ -20,8 +20,8 @@ getgenv().gagConfig = {
     DESTROY_UNTIL_MIN_PLANTS = 350,
     DELETE_PLANTS_AFTER_MAX = { "Carrot", "Strawberry", "Blueberry", "Tomato", "Cauliflower" },
     
-    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Rare Summer Egg", "Common Summer Egg", ["Common Egg"] = 1, "Rare Egg", "Uncommon Egg" },
-    PLANT_EGGS = { "Anti Bee Egg", "Primal Egg", "Dinosaur Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Rare Summer Egg", "Common Summer Egg", "Common Egg", "Rare Egg", "Uncommon Egg" },
+    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Oasis Egg", "Mythical Egg", "Rare Summer Egg", "Common Summer Egg", ["Common Egg"] = 1, "Rare Egg", "Uncommon Egg" },
+    PLANT_EGGS = { "Anti Bee Egg", "Primal Egg", "Dinosaur Egg", "Mythical Egg", "Bug Egg", "Paradise Egg", "Rare Summer Egg", "Common Summer Egg", "Common Egg", "Rare Egg", "Uncommon Egg" },
     
     -- BUY_SEED_SHOP Priority (Left -> Right)
     BUY_SEED_SHOP = { "Sugar Apple", "Beanstalk", "Mushroom", "Bamboo", "Pumpkin", "Watermelon", ["Daffodil"] = 50, ["Orange Tulip"] = 50, ["Carrot"] = 50 },
@@ -31,22 +31,22 @@ getgenv().gagConfig = {
     FAVOURITE_FRUIT_MUTATIONS = {},  -- Stop Autosell
     SKIP_HARVEST_MUTATIONS = {},  -- Stop Harvest
 
-    KEEP_PETS = { "Bald Eagle", "Ankylosaurus", "Spinosaurus", "Pterodactyl", "Brontosaurus", "T-Rex", "Fennec Fox", "Blood Kiwi", "Peacock", "Starfish", "Rooster", "Hamster", "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Chicken Zombie", ["Dog"] = 1, ["Bunny"] = 1, ["Golden Lab"] = 1 },
+    KEEP_PETS = { "Dilophosaurus", ["Iguanodon"] =2 , "Bald Eagle", "Ankylosaurus", "Spinosaurus", "Pterodactyl", "Brontosaurus", "T-Rex", "Fennec Fox", "Blood Kiwi", "Peacock", "Starfish", "Rooster", ["Hamster"] = 2, "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Chicken Zombie", ["Dog"] = 1, ["Bunny"] = 1, ["Golden Lab"] = 1 },
     KEEP_PETS_WEIGHT = 10,
 
-    -- EQUIP_PETS Priority (Left -> Right)
-    EQUIP_PETS = { "Bald Eagle", ["Seal"] = 2, ["Blood Kiwi"] = 2, ["Peacock"] = 1, ["Starfish"] = 1, ["Rooster"] = 1 },
+     -- EQUIP_PETS Priority (Left -> Right)
+    EQUIP_PETS = { ["Dilophosaurus"] = 2, ["Seal"] = 2, ["Blood Kiwi"] = 2, ["Rooster"] = 2 },
 
-    BUY_GEAR_SHOP = { "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler" },
+    BUY_GEAR_SHOP = { "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler", "Starfish" },
     USE_SPRINKLER = {},
 
     PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
     SEED_WEBHOOK_URL = "", 
-    NOTIFY_PETS = { "Bald Eagle", "Fennec Fox", "Disco Bee", "Raccoon", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex", "Ankylosaurus", "Pterodactyl" },
+    NOTIFY_PETS = { "Fennec Fox", "Disco Bee", "Raccoon", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex", "Spinosaurus", "Red Fox" },
     NOTIFY_PETS_WEIGHT = 10,
     DISCORD_ID = "",
-    WEBHOOK_NOTE = "",
-    SHOW_WEBHOOK_USERNAME = false,
+    WEBHOOK_NOTE = "dew",
+    SHOW_WEBHOOK_USERNAME = true,
 }
 
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6b71bc8fa2ff932327c20f197e426686.lua"))()
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6b71bc8fa2ff932327c20f197e426686.lua"))() 
