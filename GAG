@@ -11,7 +11,7 @@ getgenv().gagConfig = {
     -- General:
     AUTO_UPDATE_RESTART = true,
     REDEEM_CODES = {},
-    EXTRA_PET_SLOTS = 5,
+    EXTRA_PET_SLOTS = 0,
     EXTRA_EGG_SLOTS = 5,
     MUTATE_PET = { "Spinosaurus", "T-Rex", "Fennec Fox", "Butterfly", "Disco Bee", "Raccoon", "Dragonfly", "Mimic Octopus", "Dilophosaurus", "Seal", "Blood Kiwi", "Rooster" },  -- Pet Names
     OPEN_ALL_SEED_PACK = true,
@@ -19,7 +19,7 @@ getgenv().gagConfig = {
     FAST_LEVEL_PET = true,
 
     MAX_PLANTS = 300,
-    DESTROY_UNTIL_MIN_PLANTS = 280,
+    DESTROY_UNTIL_MIN_PLANTS = 250,
     DELETE_PLANTS_AFTER_MAX = { "Carrot", "Strawberry", "Blueberry", "Tomato", "Cauliflower" },
 
     BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Mythical Egg", "Rare Summer Egg", "Common Summer Egg", "Rare Egg", "Uncommon Egg" },
@@ -41,13 +41,13 @@ getgenv().gagConfig = {
     BUY_GEAR_SHOP = { "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler" },
     USE_SPRINKLER = { "Basic Sprinkler", "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler" },
 
-    PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAGy",
+    PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
     SEED_WEBHOOK_URL = "", 
-    NOTIFY_PETS = { "Kitsune", "Fennec Fox", "Disco Bee", "Raccoon", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex", "Spinosaurus"},
+    NOTIFY_PETS = { "Kitsune", "Fennec Fox", "Disco Bee", "Raccoon", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex", "Spinosaurus", "Red Fox" , "Queen Bee"},
     NOTIFY_PETS_WEIGHT = 10,
-    DISCORD_ID = "",
-    WEBHOOK_NOTE = "k7n",
-    SHOW_WEBHOOK_USERNAME = false,
+    DISCORD_ID = "473755357274046464",
+    WEBHOOK_NOTE = "Dew",
+    SHOW_WEBHOOK_USERNAME = true,
 }
 
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6b71bc8fa2ff932327c20f197e426686.lua"))()
