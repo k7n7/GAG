@@ -83,7 +83,7 @@ getgenv().ConfigsKaitun = { -- thx config cradit to npk02
 			"Zen Egg",
 			"Koi",
 		},
-		Restocks_limit = 50000000,
+		Restocks_limit = 200000000,
 		MinimumChi = 10
 	},
 
