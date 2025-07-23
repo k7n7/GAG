@@ -118,10 +118,6 @@ getgenv().ConfigsKaitun = { -- thx config cradit to npk02
 			"Bug Egg",
 			"Paradise Egg",
 			"Mythical Egg",
-			"Rare Summer Egg",
-			"Common Summer Egg",
-			"Uncommon Egg",
-			"Common Egg",
 		},
 		Buy = {
 			"Mythical Egg",
