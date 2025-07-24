@@ -83,7 +83,7 @@ getgenv().ConfigsKaitun = {
 			"Zen Egg",
 			"Koi",
 		},
-		Restocks_limit = 500000000,
+		Restocks_limit = 1000000000,
 		MinMoney_To_Restocks = 10000000,
 		MinMoney_To_PlayEvent = 30000000,
 		MinimumChi = 20
