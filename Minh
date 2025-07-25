@@ -83,10 +83,18 @@ getgenv().ConfigsKaitun = {
 			"Zen Egg",
 			"Koi",
 		},
-		Restocks_limit = 3000000000,
-		MinMoney_To_Restocks = 10000000,
-		MinMoney_To_PlayEvent = 30000000,
-		MinimumChi = 20
+		["Zen Event"] = {
+			["Restocking"] = { -- Minimumthing to restock
+				Max_Restocks_Price = 2_000_000_000,
+				Minimum_Money = 10_000_000,
+				Minimum_Chi = 200
+			},
+			["Doing"] = {
+				Minimum_Money = 10_000_000, -- minimum money to start play this event
+				First_Upgrade_Tree = 2,
+				Maximum_Chi = 250,
+			}
+		},
 	},
 
 	Gear = {
@@ -152,6 +160,7 @@ getgenv().ConfigsKaitun = {
 			"Kitsune",
 			"Dilophosaurus",
 			"Moon Cat",
+			"Seal",
 			"Capybara",
 			"Spinosaurus",
 			"T-Rex",
