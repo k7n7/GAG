@@ -81,6 +81,7 @@ getgenv().ConfigsKaitun = {
 		},
 		Shop = {
 			"Zen Egg",
+			"Raiju",
 			"Koi",
 		},
 		["Zen Event"] = {
@@ -166,6 +167,7 @@ getgenv().ConfigsKaitun = {
 			"T-Rex",
 			"Corrupted Kitsune",
 			"Brontosaurus",
+			"Raiju",
 			"Disco Bee",
 			"Butterfly",
 			"Queen Bee",
