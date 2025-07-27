@@ -82,6 +82,7 @@ getgenv().ConfigsKaitun = {
 		Shop = {
 			"Zen Egg",
 			"Koi",
+			"Raiju",
 		},
 		["Zen Event"] = {
 			["Restocking"] = { -- Minimumthing to restock
@@ -162,6 +163,7 @@ getgenv().ConfigsKaitun = {
 			"Moon Cat",
 			"Seal",
 			"Capybara",
+			"Raiju",
 			"Corrupted Kitsune",
 			"Spinosaurus",
 			"T-Rex",
