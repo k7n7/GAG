@@ -1,4 +1,4 @@
-script_key="GMyqZfwglsTgGOMQwEcdfTFNjOvRZhQc";
+ script_key="GMyqZfwglsTgGOMQwEcdfTFNjOvRZhQc";
 setfpscap(3)
 
 getgenv().gagConfig = {
@@ -43,7 +43,7 @@ getgenv().gagConfig = {
 
     PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
     SEED_WEBHOOK_URL = "", 
-    NOTIFY_PETS = { "Mochi Mouse" , "Spaghetti Sloth", "French Fry Ferret", "Corrupted Kitsune", "Kitsune", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex", "Red Fox", "Spinosaurus"},
+    NOTIFY_PETS = { "French Fry Ferret", "Corrupted Kitsune", "Kitsune", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex", "Red Fox", "Spinosaurus"},
     NOTIFY_PETS_WEIGHT = 5,
     DISCORD_ID = "473755357274046464",
     WEBHOOK_NOTE = "minh",
