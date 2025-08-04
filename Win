@@ -5,6 +5,7 @@ getgenv().gagConfig = {
     -- Event:
     CRAFT_EVENT = { "Anti Bee Egg" },
     BUY_TRAVELING_MERCHANT = { "Bee Egg", "Loquat", "Feijoa", "Pitcher Plant" },
+    BUY_EVENT_SHOP = { "Zen Egg"},
     
     -- General:
     AUTO_UPDATE_RESTART = true,
@@ -33,7 +34,7 @@ getgenv().gagConfig = {
     KEEP_PETS_WEIGHT = { ["Red Giant Ant"] = 5 },
     KEEP_PETS_AGE = { ["Starfish"] = 75 },
 
-    EQUIP_PETS = { ["Kodama"] = 4, ["Tanchozuru"] = 4,},
+    EQUIP_PETS = { ["Koi"] = 2, ["Seal"] = 2, "Blood Kiwi", "Rooster", ["Starfish"] =2 },
     USE_PETS_FOR_UPGRADE_SLOT = { "Starfish" },
     REMOVE_PET_MAX_UPGRADE = { "Capybara", "Starfish" },  -- Unequip from garden
 
