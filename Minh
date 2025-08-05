@@ -18,8 +18,8 @@ getgenv().gagConfig = {
 
     MAX_PLANTS = 500,
     DESTROY_UNTIL_MIN_PLANTS = 250,
-    DELETE_PLANTS_AFTER_MAX = { "Strawberry", "Blueberry", "Corn", "Tomato", "Daffodil", "Apple", "Coconut", "Pumpkin", "Cacao", "Pepper", "Beanstalk" },
-    LIMIT_PLANT_SEED = { ["Strawberry"] = 5, ["Blueberry"] = 5, ["Apple"] = 5, ["Tomato"] = 5, ["Corn"] = 5, ["Bamboo"] = 5, ["Coconut"] = 5, ["Pumpkin"] = 5, ["Watermelon"] = 5, ["Pepper"] = 5, ["Pumpkin"] = 5, ["Cacao"] = 5, ["Beanstalk"] = 5 },
+    DELETE_PLANTS_AFTER_MAX = { "Strawberry", "Blueberry", "Corn", "Tomato", "Daffodil", "Apple", "Coconut", "Pumpkin", "Cacao", "Pepper", "Beanstalk", "Sugar Apple", "Mushroom" },
+    LIMIT_PLANT_SEED = { ["Strawberry"] = 5, ["Blueberry"] = 5, ["Apple"] = 5, ["Tomato"] = 5, ["Corn"] = 5, ["Bamboo"] = 5, ["Coconut"] = 5, ["Pumpkin"] = 5, ["Watermelon"] = 5, ["Pepper"] = 5, ["Pumpkin"] = 5, ["Cacao"] = 5, ["Beanstalk"] = 5, ["Sugar Apple"] = 3, ["Mushroom"] = 3 },
     KEEP_SEEDS_AFTER_MAX_PLANTS = { "Carrot", "Orange Tulip" },
     
     BUY_EGGS = {"Mythical Egg", "Bug Egg", "Bee Egg", "Paradise Egg", "Uncommon Egg", ["Common Summer Egg"] = 20, ["Rare Summer Egg"] = 20},
