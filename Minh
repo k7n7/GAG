@@ -38,7 +38,7 @@ getgenv().gagConfig = {
     KEEP_PETS_WEIGHT = 5,
 
     -- EQUIP_PETS Priority (Left -> Right)
-    EQUIP_PETS = { ["Kodama"] = 4, ["Tanchozuru"] = 4, ["Blood Kiwi"] = 2 , ["Rooster"] = 2, ["Starfish"] = 2 },
+    EQUIP_PETS = { "Kodama", "Tanchozuru", "Corrupted Kodama", "Blood Kiwi", "Rooster", ["Seal"] = 2, ["Starfish"] = 2, "Mochi Mouse", "Koi" },
     USE_PETS_FOR_UPGRADE_SLOT = { "Starfish" },
 
     BUY_GEAR_SHOP = { "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler" },
