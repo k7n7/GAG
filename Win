@@ -32,7 +32,7 @@ getgenv().gagConfig = {
     FAVOURITE_FRUIT_MUTATIONS = {},  -- Stop Autosell
     SKIP_HARVEST_MUTATIONS = {},  -- Stop Harvest
 
-    KEEP_PETS = { ["Spriggan"] = 5, ["Golem"] = 5, "Golden Goose", ["Gorilla Chef"] = 5, "Junkbot", "Hotdog Daschund" , "Sunny-Side Chicken", "Lobster Thermidor", ["Mochi Mouse"] = 2 , "Spaghetti Sloth", "French Fry Ferret", "Spaghetti Sloth", ["Starfish"] = 3, "Raiju", "Corrupted Kodama", "Kodama", "Rooster", "Capybara", ["Koi"] = 2, "Tanchozuru", "Seal", "Kitsune", "Corrupted Kitsune", "Kappa", "Dilophosaurus", "Spinosaurus", "Brontosaurus", "T-Rex", "Fennec Fox", "Blood Kiwi", ["Peacock"] = 2, ["Hamster"] = 2, "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Chicken Zombie" },
+    KEEP_PETS = { ["Spriggan"] = 5, ["Golem"] = 5, "Golden Goose", ["Gorilla Chef"] = 5, "Junkbot", "Hotdog Daschund" , "Sunny-Side Chicken", "Lobster Thermidor", ["Mochi Mouse"] = 2 , ["Spaghetti Sloth"] = 3, "French Fry Ferret", ["Starfish"] = 3, "Raiju", "Corrupted Kodama", "Kodama", "Rooster", ["Capybara"] = 3, ["Koi"] = 2, ["Tanchozuru"] = 3, ["Seal"] = 3 , "Kitsune", "Corrupted Kitsune", ["Kappa"] = 2, "Dilophosaurus", "Spinosaurus", "Brontosaurus", "T-Rex", "Fennec Fox", "Blood Kiwi", ["Peacock"] = 2, ["Hamster"] = 2, "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Chicken Zombie" },
     KEEP_PETS_WEIGHT = 5,
 
     -- EQUIP_PETS Priority (Left -> Right)
