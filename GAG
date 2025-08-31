@@ -5,7 +5,7 @@ getgenv().gagConfig = {
     -- Event:
     CRAFT_EVENT = { "Anti Bee Egg", "Skyroot Chest" , "Sprout Egg" },
     BUY_TRAVELING_MERCHANT = { "Bee Egg", "Primal Egg", "Paradise Egg", "Loquat", "Feijoa", "Pitcher Plant" },
-    CLAIM_FAIRY_REWARD = { "Enchanted Egg", "FairyPoints", "Pet Shard Glimmering" },
+    CLAIM_FAIRY_REWARD = { "Enchanted Egg", "FairyPoints", "Pet Shard Glimmering" , "Fairy Targeter", "Enchanted Crate" },
     PLANT_EVENT_TREES = true,
     PLACE_COSMETIC = { "Cooking Kit" },    
 
@@ -33,7 +33,7 @@ getgenv().gagConfig = {
     FAVOURITE_FRUIT_MUTATIONS = {},  -- Stop Autosell
     SKIP_HARVEST_MUTATIONS = {},  -- Stop Harvest
 
-    KEEP_PETS = { "Glimmering Sprite", "Cockatrice", "Gnome", "Green Bean", "Apple Gazelle", "Lemon Lion", "Peach Wasp", "Griffin", ["Spriggan"] = 5, ["Golem"] = 3, "Golden Goose", ["Gorilla Chef"] = 5, "Junkbot", "Hotdog Daschund" , "Sunny-Side Chicken", "Lobster Thermidor", ["Mochi Mouse"] = 2 , ["Spaghetti Sloth"] = 3 , "French Fry Ferret", "Spaghetti Sloth", ["Starfish"] = 3, "Raiju", "Corrupted Kodama", "Kodama", "Rooster", "Capybara", ["Koi"] = 2, ["Tanchozuru"] = 3, "Seal", "Kitsune", "Corrupted Kitsune", "Kappa", "Dilophosaurus", "Spinosaurus", "Brontosaurus", "T-Rex", "Fennec Fox", "Blood Kiwi", ["Peacock"] = 2, ["Hamster"] = 2, "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Chicken Zombie" },
+    KEEP_PETS = { "Glimmering Sprite", "Cockatrice", "Gnome", "Green Bean", "Apple Gazelle", "Lemon Lion", "Peach Wasp", "Griffin", ["Spriggan"] = 5, "Golden Goose", ["Gorilla Chef"] = 5, "Junkbot", "Hotdog Daschund" , "Sunny-Side Chicken", "Lobster Thermidor",  "French Fry Ferret", ["Starfish"] = 3, "Raiju", "Corrupted Kodama", "Rooster", "Capybara", ["Koi"] = 2, ["Tanchozuru"] = 3, "Kitsune", "Corrupted Kitsune", "Kappa", "Dilophosaurus", "Spinosaurus", "Brontosaurus", "T-Rex", "Fennec Fox", "Blood Kiwi", ["Peacock"] = 2, ["Hamster"] = 2, "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Chicken Zombie" },
     KEEP_PETS_WEIGHT = 5,
 
     -- EQUIP_PETS Priority (Left -> Right)
@@ -48,7 +48,8 @@ getgenv().gagConfig = {
     NOTIFY_PETS = { "Cockatrice", "Griffin", "Golden Goose", "Lobster Thermidor", "French Fry Ferret", "Corrupted Kitsune", "Kitsune", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "T-Rex", "Red Fox", "Spinosaurus"},
     NOTIFY_PETS_WEIGHT = 5,
     DISCORD_ID = "473755357274046464",
-    WEBHOOK_NOTE = "k7n",
-    SHOW_WEBHOOK_USERNAME = false,
+    WEBHOOK_NOTE = "K7n",
+    SHOW_WEBHOOK_USERNAME = true,
 }
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/18f68a241a8acc1191c28d9a76d67fe3.lua"))()
+
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6cb882027ef5de19462b160764dcfb53.lua"))()
