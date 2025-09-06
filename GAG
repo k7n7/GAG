@@ -106,6 +106,7 @@ getgenv().ConfigsKaitun = {
 			Minimum_Money = 10_000_000, -- minimum money to start play this event
 			Rewards_Item = {
 				"Enchanted Egg",
+				"Pet Shard Glimmering",
 				"Fairy Targeter",
 				"FairyPoints",
 				"Enchanted Seed Pack",
@@ -181,7 +182,6 @@ getgenv().ConfigsKaitun = {
 	Eggs = {
 		Place = {
 			"Gourmet Egg",
-			"Enchanted Egg",
 			"Sprout Egg",
 			"Zen Egg",
 			"Primal Egg",
@@ -193,6 +193,7 @@ getgenv().ConfigsKaitun = {
 			"Paradise Egg",
 			"Bee Egg",
 			"Mythical Egg",
+			"Rare Egg",
 		},
 		Buy = {
 			"Bee Egg",
