@@ -234,8 +234,10 @@ getgenv().ConfigsKaitun = {
 		Favorite_LockedPet = false,
 		Locked_Pet_Age = 60, -- pet that age > 60 will lock
 		Locked = {
-			["Pixie"] = 2,
-			["Imp"] = 2,
+			"Phoenix",
+			["Shroomie"] = 2,
+			["Drake"] = 2,
+			["Luminous Sprite"] = 2,
 			"Griffin",
 			"Glimmering Sprite",
 			"Cockatrice",
@@ -286,7 +288,7 @@ getgenv().ConfigsKaitun = {
 	Webhook = {
 		UrlPet = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
 		UrlSeed = "xxx",
-		PcName = "Louk",
+		PcName = "K7n",
 
 		Mention = "473755357274046464", -- discord id
 
@@ -300,6 +302,7 @@ getgenv().ConfigsKaitun = {
 				"Idk"
 			},
 			Pets = {
+				"Phoenix",
 				"Golden Goose",
 				"French Fry Ferret",
 				"Cockatrice",
