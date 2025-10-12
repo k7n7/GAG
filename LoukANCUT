@@ -4,10 +4,10 @@ setfpscap(3)
 getgenv().gagConfig = {
     -- Event:
     BUY_TRAVELING_MERCHANT = { "Bee Egg", "Paradise Egg", "Fall Egg", "Loquat", "Feijoa", "Pitcher Plant" },
-    BUY_EVENT_SHOP = { "Spooky Egg", "Reaper" },
+    BUY_EVENT_SHOP = { "Spooky Egg", ["Ghost Bear"] = 4, "Reaper" },
     
-    MAX_PLANTS = 100,
-    DESTROY_UNTIL_MIN_PLANTS = 80,
+    MAX_PLANTS = 250,
+    DESTROY_UNTIL_MIN_PLANTS = 200,
     KEEP_SEEDS = { "Bone Blossom" },
     KEEP_SEEDS_AFTER_MAX_PLANTS = {},
 
@@ -21,6 +21,7 @@ getgenv().gagConfig = {
     MAX_REBIRTH_SHECKLES = 0,
     ADD_FRIEND = true,
     OPEN_ALL_SEED_PACK = true,
+    COLLECT_FRUIT_PER_SECOND = 3,
 
     BUY_COSMETIC_SHOP = { ["Cooking Kit"] = 3 },
     
