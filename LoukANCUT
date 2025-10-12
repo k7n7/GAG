@@ -42,7 +42,7 @@ getgenv().gagConfig = {
     BUY_GEAR_SHOP = { "Grandmaster Sprinkler", "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler", "Trading Ticket", "Watering Can", "Levelup Lollipop" },
     USE_SPRINKLER = { "Basic Sprinkler", "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Grandmaster Sprinkler" },
 
-    PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1246353354930651207/OIsCx9I2sXKRokSTvcAWbM121LUdAH13mOE8J5Erh8q-RQUzECGSS2Oixoi8x7Egl8Ky",
+    PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
     SHOW_PUBLIC_DISCORD_ID = true,
     NOTIFY_PETS = { "Headless Horseman", "Reaper", "Fortune Squirrel", "Chinchilla", "Tiger", "Barn Owl", "Swan", "Marmot", "Space Squirrel", "Sugar Glider", "Phoenix", "Cockatrice", "Gnome", "Griffin", "Golden Goose", "Corrupted Kitsune", "Raiju", "Mizuchi", "Kitsune", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Night Owl", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox" },
     NOTIFY_PETS_WEIGHT = 7,
