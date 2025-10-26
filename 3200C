@@ -1,1 +1,33 @@
+setfpscap(10)
+script_key = "gBgCmAPZTSmdqGHMSmmUdgFuEcELDZWK";
+task.wait(30) -- DO NOT remove this wait, it's against double counts.
+-- INSERT YOUR CONFIG HERE --
+getgenv().GGFX_MODE = 2 -- or put 1 later = REMOVE_TEXTURES : might be more stable, but no visuals
+getgenv().GDO_HALLOWEEN_WORLD = true
+--read the buyer-announcements to understand these:
+--getgenv().GHALLOWEEN_WORLD_BUY_FROM_SPECIFIC_HOUSE = { 1, 2, 3, 5 } -- to buy from multiple houses at same time
+getgenv().GHALLOWEEN_WORLD_HATCH_SPOTS = 1
+getgenv().GHALLOWEEN_WORLD_ALLOW_WORSE_EGG_PLACEMENT = false
+getgenv().GHALLOWEEN_WORLD_USE_BOOSTS = true
+getgenv().GRANK_FIRST = true --if you use this you have to specify values for GREBIRTH_TO and GRANK_TO
+getgenv().GRANK_TO = 8
+getgenv().GZONE_TO = 101 -- to enter event from W1 put 1, from W2 put 100, from W3 200, from W4 240
+getgenv().GEVENT_UPGRADES = {
+  "HalloweenCandyMultiplier",
+  "HalloweenEggLuck",
+  "HalloweenTrickOrTreatLuck",
+  "HalloweenMoreDiamonds",
+  "HalloweenMoreWitchHats",
+  "HalloweenHugeLuck",
+  "HalloweenTitanicLuck"
+} --you can put the comment symbols (these 2 dashes): -- in front of the ones you don't want to upgrade
+getgenv().GWEBHOOK_USERID = ""
+getgenv().GWEBHOOK_LINK = "https://discord.com/api/webhooks/1304843909297602700/q36k-rICz9u3MZqp8MT5fSQ65sOsn01bs2m482jqF5T-KDcjBMAsOQxBcISU4JsNvoMN"
+getgenv().GHUGE_COUNT = 0 -- amount of huges to keep/not mail
+getgenv().GMAIL_RECEIVERS = {"your-receiver-mule"} -- for Huges and mailrules.
+getgenv().GMAIL_ITEMS = {
+["Send Diamonds"] = {Class = "Currency", Id = "Diamonds", KeepAmount = "2m", MinAmount = "50m"}, -- mail diamonds, to enable lower MinAmount..
 
+}
+getgenv().GMAX_MAIL_COST = "2m" -- this can limit how many mails sent/day
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6e75890d2e36b4613270666c4f5ccab3.lua"))()
