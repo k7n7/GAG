@@ -31,7 +31,7 @@ getgenv().GWEBHOOK_USERID = ""
 getgenv().GWEBHOOK_LINK = "https://discord.com/api/webhooks/1304843909297602700/q36k-rICz9u3MZqp8MT5fSQ65sOsn01bs2m482jqF5T-KDcjBMAsOQxBcISU4JsNvoMN"
 getgenv().GMAIL_RECEIVERS = {"Fd2YgZrJ74"} -- for Huges and mailrules.
 getgenv().GMAIL_ITEMS = {
-["Send Diamonds"] = {Class = "Currency", Id = "Diamonds", KeepAmount = "2m", MinAmount = "50m"}, -- mail diamonds, to enable lower MinAmount..
+["Send Diamonds"] = {Class = "Currency", Id = "Diamonds", KeepAmount = "2m", MinAmount = "100m"}, -- mail diamonds, to enable lower MinAmount..
 }
 getgenv().GMAX_MAIL_COST = "2m" -- this can limit how many mails sent/day
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6e75890d2e36b4613270666c4f5ccab3.lua"))()
