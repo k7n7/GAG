@@ -1,18 +1,39 @@
-script_key="yYq2vL2NaNwetImS6ckVBC1F5";
-getgenv().Config = {
-    ["PetAMountToBuy"] = "0", -- can be 999
-    ["PetRemoteToBuy"] = "moon_2025_egg",
+setfpscap(5)
+script_key = "ztMvmvBRojVRaBhAHDtmYBWxgLZXDYfv";
+task.wait(10) -- DO NOT remove this wait, it's against double counts.
+-- INSERT YOUR CONFIG HERE --
+getgenv().GGFX_MODE = 2 --1 = REMOVE_TEXTURES : more stable! but no visuals
+getgenv().GRANK_FIRST = true
+getgenv().GRANK_TO = 5
+getgenv().GREBIRTH_TO = 4
+getgenv().GZONE_TO = 99 -- to enter event from W1 put 1, from W2 put 100, from W3 200, from W4 240
+getgenv().GDO_HALLOWEEN_WORLD = true
+getgenv().GHALLOWEEN_WORLD_BUY_FROM_SPECIFIC_HOUSE = {1,2,3,4}
+getgenv().GHALLOWEEN_WORLD_RECIPES_TO_DO = {2,3}
+getgenv().GHALLOWEEN_JOIN_LOCAL = true
+--getgenv().GKEEP_CURRENCY_FOR_CRAFTS = "20m"
+getgenv().GALLOW_HOPPING = true
+getgenv().GHOP_ON_STAFF = true
+getgenv().GHALLOWEEN_WORLD_BUY_FROM_HOUSES_BELOW = false
+getgenv().GHALLOWEEN_WORLD_HATCH_SPOTS = 0
+getgenv().GHALLOWEEN_WORLD_ALLOW_WORSE_EGG_PLACEMENT = true
+getgenv().GHALLOWEEN_WORLD_USE_BOOSTS = true
+getgenv().GEVENT_UPGRADES = {
+    'HalloweenCandyMultiplier',
+    'HalloweenEggLuck',
+    'HalloweenTrickOrTreatLuck',
+    'HalloweenMoreDiamonds',
+    'HalloweenMoreWitchHats',
+    'HalloweenHugeLuck',
+    'HalloweenTitanicLuck',
+} --you can put the comment symbols (these 2 dashes): -- in front of the ones you don't want to upgrade
+getgenv().GWEBHOOK_USERID = ""
+getgenv().GWEBHOOK_LINK = "https://discord.com/api/webhooks/1304843909297602700/q36k-rICz9u3MZqp8MT5fSQ65sOsn01bs2m482jqF5T-KDcjBMAsOQxBcISU4JsNvoMN"
+getgenv().GHUGE_COUNT = 0 -- amount of huges to keep/not mail
+getgenv().GMAIL_RECEIVERS = {"your-receiver-mule"} -- for Huges and mailrules.
+getgenv().GMAIL_ITEMS = {
+["Send Diamonds"] = {Class = "Currency", Id = "Diamonds", KeepAmount = "2m", MinAmount = "50m"}, -- mail diamonds, to enable lower MinAmount..
 
-    ["PetFarmAutoSwitchFullGrown"] = false,
-    ["PetFarmActive"] = false,
-    ["LitePetFarmActive"] = false,
-    ["EggFarmActive"] = false,
-    ["BetaDualEggFarm"] = true,
-    
-    ["HideUselessGui"] = true,
-    ["Blur_username"] = true,
-    ["Blazing_Lion_Log"] = false,
-    ["DiscordId"] = "123456",
-    ["Webhook"] = "https://discord.com/api/webhooks/1422654114839396402/LxRpVKu51PxgYDUsfaiEp_NTDu_yruphcXsrOpiGe9WNi0K8DnMl330WJ0w2KrdL_JLk",
 }
-loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/66567bfd337b57eb059b58dbe1badb89.lua"))()
+getgenv().GMAX_MAIL_COST = "2m" -- this can limit how many mails sent/day
+loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6e75890d2e36b4613270666c4f5ccab3.lua"))()
