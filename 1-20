@@ -1,4 +1,4 @@
-setfpscap(5)
+setfpscap(10)
 script_key = "ztMvmvBRojVRaBhAHDtmYBWxgLZXDYfv";
 task.wait(10) -- DO NOT remove this wait, it's against double counts.
 -- INSERT YOUR CONFIG HERE --
