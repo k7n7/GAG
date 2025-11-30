@@ -38,7 +38,7 @@ getgenv().GMAIL_RECEIVERS = {"qEYPQaAf610","Fd2YgZrJ74"} -- for Huges and mailru
 getgenv().GMAIL_ITEMS = {
 ["Brainrot egg"] = {Class = "Egg", Id = "Exclusive Egg 56", MinAmount = 1},
 ["Harvest egg"] = {Class = "Egg", Id = "Exclusive Egg 57", MinAmount = 1},
-["Send Diamonds"] = {Class = "Currency", Id = "Diamonds", KeepAmount = "2m", MinAmount = "40m"}, -- mail diamonds, to enable lower MinAmount..
+["Send Diamonds"] = {Class = "Currency", Id = "Diamonds", KeepAmount = "2m", MinAmount = "90m"}, -- mail diamonds, to enable lower MinAmount..
 }
 getgenv().GMAX_MAIL_COST = "2m" -- this can limit how many mails sent/day
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6e75890d2e36b4613270666c4f5ccab3.lua"))()
