@@ -17,7 +17,7 @@ _G.FishItConfig = _G.FishItConfig or {
     },
     ["Selling"] = {
         ["Auto Sell"] = true,
-        ["Auto Sell Threshold"] = "Mythic",
+        ["Auto Sell Threshold"] = "Legendary",
         ["Auto Sell Every"] = 100,
     },
     ["Doing Quest"] = {
@@ -34,11 +34,11 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Minimum Rod"] = "Astral Rod",
     },
     ["WebHook"] = {
-        ["Link Webhook"] = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
+        ["Link Webhook"] = "https://discord.com/api/webhooks/1424350856060600365/c0V3CGaSQL6YiIZE2NtB4RHY91Vo0EmZ30dTaW0cwExgwdyntbsFbhxu4yitj4EazS05",
         ["Auto Sending"] = true,
         ["Category"] = {"Secret"},
 
-        ["Link Webhook Quest Complete"] = "https://discord.com/api/webhooks/1424350856060600365/c0V3CGaSQL6YiIZE2NtB4RHY91Vo0EmZ30dTaW0cwExgwdyntbsFbhxu4yitj4EazS05",
+        ["Link Webhook Quest Complete"] = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
     },
     ["Weather"] = {
         ["Auto Buying"] = true,
@@ -59,10 +59,8 @@ _G.FishItConfig = _G.FishItConfig or {
     ["Enchant"] = {
         ["Auto Enchant"] = true,
         ["Roll Enchant"] = false, -- Roll enchant until get Leprechaun II
-        ["Minimum Rod"] = "Astral Rod",
+        ["Minimum Rod"] = "Ghostfinn Rod",
         ["Enchant List"] = {
-            "Leprechaun II",
-            "Mutation Hunter II",
             "Prismatic I",
         },
     },
@@ -97,7 +95,7 @@ _G.FishItConfig = _G.FishItConfig or {
     ["UltimatePerformance"] = true,
     ["Disable3DRender"] = true,
     ["AutoRemovePlayer"] = true,
-    ["AutoReconnect"] = true,
+    ["AutoReconnect"] = false,
     ["Debug"] = true,
 }
 script_key="CDD0AEE7DAD2093FD6A6917901B02022";
