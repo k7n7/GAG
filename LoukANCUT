@@ -1,4 +1,4 @@
-script_key = "CbTDoNWvavqvxghxjmppFNnTArHwmkUt"
+script_key = "grcuwwtNJCRxSZlUDriDcFFVvFtQGxPT"
 getgenv().Config = {
     FARM_MODE = "Crate", -- BattlePass / Crate
     AUTO_RESTART_WHEN_UPDATE = true,
@@ -7,7 +7,7 @@ getgenv().Config = {
     REJOIN_WHEN_STUCK_LOADING_AFTER = 300, -- Customize if u find it too fast, depending on your network
     STOP_AUTO_BUY_FINAL_REWARD = false, -- Stop auto buy Raygun in FARM_MODE = "BattlePass"
     WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
-    WEBHOOK_NOTE = "CAC"
+    WEBHOOK_NOTE = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG"
 }
 
 -- No edits
