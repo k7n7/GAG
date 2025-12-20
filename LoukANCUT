@@ -42,8 +42,8 @@ getgenv().GMAIL_ITEMS = {
 ["Daycare egg 5"] = {Class = "Egg", Id = "Huge Machine Egg 5", MinAmount = 1},
 ["Brainrot egg"] = {Class = "Egg", Id = "Exclusive Egg 56", MinAmount = 1},
 ["Harvest egg"] = {Class = "Egg", Id = "Exclusive Egg 57", MinAmount = 1},
-["CandyCane Gift"] = {Class = "Lootbox", Id = "CandyCane Gift", Amount = 1},
-["Santa Gift"] = {Class = "Lootbox", Id = "Santa Gift", Amount = 1},
+["CandyCane Gift"] = {Class = "Lootbox", Id = "CandyCane Gift", MinAmount = 1},
+["Santa Gift"] = {Class = "Lootbox", Id = "Santa Gift", MinAmount = 1},
 }
 getgenv().GMAX_MAIL_COST = "2m" -- this can limit how many mails sent/day
 loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6e75890d2e36b4613270666c4f5ccab3.lua"))()
