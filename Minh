@@ -9,7 +9,7 @@ spawn(function()
         Note = "Pc", } 
    loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/yummytrack/main/tracker"))()
 end)
-getgenv().Key = "c830e3f49235dcdf"
+getgenv().Key = "k3e49340c71a135f033b14a2"
 getgenv().Config = {
     ["Gameplay"] = {
         -- Private Server config
