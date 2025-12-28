@@ -83,7 +83,7 @@ getgenv().Config = {
 
     ["Webhook"] = {
         ["Enable"] = true,
-        ["Url"] = "",
+        ["Url"] = "https://discord.com/api/webhooks/1454694325480067278/h-kSsEeKiqvCFyka7UlpsKjGy3US89RjQD-FBafdYkvzq3VXveeGbaRqGahIIJiC1bkf",
         ["Ignore Notify"] = {
         ["Chicleteira Bicicleteira"] = { "All" },
         ["La Grande Combinasion"] = { "All" },
