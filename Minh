@@ -1,3 +1,9 @@
+spawn(function()
+    _G.Config = { UserID = "1906033b-76b6-4227-bb52-1da777e8d57c", 
+        discord_id = "462235685097701381" , 
+        Note = "Pc", } 
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/skadidau/yummytrack/main/tracker"))()
+end)
 task.wait(15)
 getgenv().Key = "k60088776a0053e7f2f6dc8f"
 getgenv().Config = {
