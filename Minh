@@ -4,7 +4,7 @@ spawn(function()
         Note = "Pc", } 
    loadstring(game:HttpGet("https://cdn.yummydata.click/scripts/sab"))()
 end)
-task.wait(30)
+task.wait(20)
 getgenv().Key = "k60088776a0053e7f2f6dc8f"
 getgenv().Config = {
     ["Gameplay"] = {
