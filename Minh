@@ -1,5 +1,5 @@
-
-spawn(function(20)
+task.wait(20)
+spawn(function()
     _G.Config = { UserID = "1906033b-76b6-4227-bb52-1da777e8d57c", 
         discord_id = "462235685097701381" , 
         Note = "Pc", } 
