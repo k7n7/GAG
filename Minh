@@ -1,14 +1,24 @@
 _G.FishItConfig = _G.FishItConfig or {
     ["Fishing"] = {
         ["Auto Perfect"] = true,
+        ["Auto Favorite"] = true,
+        ["Fish Name"] = {
+            "Sacred Guardian Squid",
+            {Name = "Ruby", Variant = "Gemstone"},
+            {Name = "Blob Fish", Variant = "Gemstone"},
+        },
+        ["Auto Accept Trade"] = true,
     },
     ["Auto Trade"] = {
         ["Enabled"] = false,
         ["Whitelist Username"] = {""},
-        ["Category Fish"] = { -- Only Select one, fill in the fish category or fish name
+        ["Category Fish"] = {
             "Secret",
         },
         ["Fish Name"] = {
+        },
+        ["Item Name"] = {
+            "Evolved Enchant Stone",
         },
     },
     ["Farm Coin Only"] = {
@@ -22,23 +32,22 @@ _G.FishItConfig = _G.FishItConfig or {
     },
     ["Doing Quest"] = {
         ["Auto Ghostfinn Rod"] = true,
-        ["Auto Element Rod"] = false,
+        ["Auto Element Rod"] = true,
+        ["Unlock Ancient Ruin"] = true,
         ["Allowed Sacrifice"] = {
             "Blob Shark",
-            "Thin Armor Shark",
             "Ghost Shark",
-            "Cryoshade Glider",
         },
         ["FARM_LOC_SECRET_SACRIFICE"] = "Ocean",
 
         ["Minimum Rod"] = "Astral Rod",
     },
     ["WebHook"] = {
-        ["Link Webhook"] = "https://discord.com/api/webhooks/1456911663864217622/x9yVntAbLK-l0AFjYhHRIdoLf_5nKLm8gP6s5hk-2jhjMPnuLbKoByT43M6VCZY_Ln8N",
+        ["Link Webhook"] = "https://discord.com/api/webhooks/1442875419232829581/IazsXM69XXthYBWJqVksKjz1YgnCZoTRCTGFEuUVttRrzF4UxNMkIWKARSLNtAxPZ2D3",
         ["Auto Sending"] = true,
         ["Category"] = {"Secret"},
 
-        ["Link Webhook Quest Complete"] = "https://discord.com/api/webhooks/1456911663864217622/x9yVntAbLK-l0AFjYhHRIdoLf_5nKLm8gP6s5hk-2jhjMPnuLbKoByT43M6VCZY_Ln8N",
+        ["Link Webhook Quest Complete"] = "https://discord.com/api/webhooks/1442875419232829581/IazsXM69XXthYBWJqVksKjz1YgnCZoTRCTGFEuUVttRrzF4UxNMkIWKARSLNtAxPZ2D3",
     },
     ["Weather"] = {
         ["Auto Buying"] = true,
@@ -71,7 +80,7 @@ _G.FishItConfig = _G.FishItConfig or {
             "Chroma Bait",
             "Corrupt Bait",
             "Aether Bait",
-        "Singularity Bait",
+            "Singularity Bait",
         },
     },
     ["Rod List"] = {
@@ -87,16 +96,16 @@ _G.FishItConfig = _G.FishItConfig or {
             ["Fisherman Island"] = {"Starter Rod"}, -- Do not change
             ["Kohana Volcano"] = {"Grass Rod", "Midnight Rod"},
             ["Tropical Grove"] = {"Astral Rod"},
-        ["Ocean"] = {"Element Rod", "Ghostfinn Rod", "Angler Rod", "Ares Rod"},
+            ["Ocean"] = {"Element Rod", "Ghostfinn Rod", "Angler Rod", "Ares Rod"},
         },
     },
 
-    ["ExtremeFpsBoost"] = true,
-    ["UltimatePerformance"] = true,
-    ["Disable3DRender"] = true,
+    ["ExtremeFpsBoost"] = false,
+    ["UltimatePerformance"] = false,
+    ["Disable3DRender"] = false,
     ["AutoRemovePlayer"] = false,
     ["AutoReconnect"] = false,
-    ["Debug"] = true,
+    ["Debug"] = false,
 }
 script_key="CDD0AEE7DAD2093FD6A6917901B02022";
 local s,r repeat s,r=pcall(function()return game:HttpGet("https://raw.githubusercontent.com/FnDXueyi/roblog/refs/heads/main/fishit-78c86024ea87c8eca577549807421962.lua")end)wait(1)until s;loadstring(r)()
