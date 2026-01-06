@@ -1,6 +1,6 @@
 _G.FishItConfig = _G.FishItConfig or {
     ["Fishing"] = {
-        ["Auto Perfect"] = true,
+        ["Auto Perfect"] = false,
         ["Auto Favorite"] = true,
         ["Fish Name"] = {
             "Sacred Guardian Squid",
@@ -80,7 +80,7 @@ _G.FishItConfig = _G.FishItConfig or {
             "Chroma Bait",
             "Corrupt Bait",
             "Aether Bait",
-            "Singularity Bait",
+        "Singularity Bait",
         },
     },
     ["Rod List"] = {
@@ -96,16 +96,16 @@ _G.FishItConfig = _G.FishItConfig or {
             ["Fisherman Island"] = {"Starter Rod"}, -- Do not change
             ["Kohana Volcano"] = {"Grass Rod", "Midnight Rod"},
             ["Tropical Grove"] = {"Astral Rod"},
-            ["Ocean"] = {"Element Rod", "Ghostfinn Rod", "Angler Rod", "Ares Rod"},
+        ["Ocean"] = {"Element Rod", "Ghostfinn Rod", "Angler Rod", "Ares Rod"},
         },
     },
 
-    ["ExtremeFpsBoost"] = false,
-    ["UltimatePerformance"] = false,
-    ["Disable3DRender"] = false,
+    ["ExtremeFpsBoost"] = true,
+    ["UltimatePerformance"] = true,
+    ["Disable3DRender"] = true,
     ["AutoRemovePlayer"] = false,
     ["AutoReconnect"] = false,
-    ["Debug"] = false,
+    ["Debug"] = true,
 }
 script_key="CDD0AEE7DAD2093FD6A6917901B02022";
 local s,r repeat s,r=pcall(function()return game:HttpGet("https://raw.githubusercontent.com/FnDXueyi/roblog/refs/heads/main/fishit-78c86024ea87c8eca577549807421962.lua")end)wait(1)until s;loadstring(r)()
