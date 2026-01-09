@@ -31,8 +31,8 @@ _G.FishItConfig = _G.FishItConfig or {
     },
     ["Doing Quest"] = {
         ["Auto Ghostfinn Rod"] = true,
-        ["Auto Element Rod"] = true,
-        ["Unlock Ancient Ruin"] = true,
+        ["Auto Element Rod"] = false,
+        ["Unlock Ancient Ruin"] = false,
         ["Allowed Sacrifice"] = {
             "Blob Shark",
             "Ghost Shark",
@@ -48,24 +48,11 @@ _G.FishItConfig = _G.FishItConfig or {
 
         ["Link Webhook Quest Complete"] = "https://discord.com/api/webhooks/1456911465817833555/AMFn1v61J8-lMok4WrMHzLRCrUEoKMQH_B9LWVMy2QaZVbr6Trhl8v3ATRS_SmBNzyA5",
     },
-   ["Weather"] = {
-        ["Auto Buying"] = false,
-        ["Minimum Rod"] = "Astral Rod",
+    ["Weather"] = {
+        ["Auto Buying"] = true,
+        ["Minimum Rod"] = "Ghostfinn Rod",
         ["Weather List"] = {
             "Wind",
-        },
-    },
-    ["Potions"] = {
-        ["Auto Use"] = true,
-        ["Minimum Rod"] = "Astral Rod",
-    },
-    ["Totems"] = {
-        ["Auto Use"] = true,
-        ["Minimum Rod"] = "Ghostfinn Rod",
-        ["Buy List"] = {
-            "Luck Totem",
-            "Mutation Totem",
-            "Shiny Totem",
         },
     },
     ["Event"] = {
@@ -108,11 +95,11 @@ _G.FishItConfig = _G.FishItConfig or {
             ["Fisherman Island"] = {"Starter Rod"}, -- Do not change
             ["Kohana Volcano"] = {"Grass Rod", "Midnight Rod"},
             ["Tropical Grove"] = {"Astral Rod"},
-        ["Ocean"] = {"Element Rod", "Ghostfinn Rod", "Angler Rod", "Ares Rod"},
+            ["Kohana"] = {"Element Rod", "Ghostfinn Rod", "Angler Rod", "Ares Rod"},
         },
     },
 
-    ["ExtremeFpsBoost"] = true,
+    ["ExtremeFpsBoost"] = false,
     ["UltimatePerformance"] = true,
     ["Disable3DRender"] = true,
     ["AutoRemovePlayer"] = false,
