@@ -1,29 +1,1691 @@
-script_key = "CbTDoNWvavqvxghxjmppFNnTArHwmkUt"
-getgenv().Config = {
-    FARM_MODE = "Crate", -- BattlePass / Crate
-    AUTO_RESTART_WHEN_UPDATE = true,
-    AUTO_SHUTDOWN_WHEN_HOP_ERROR = false, -- If error please use, please use and check before going offline
-    DISPLAY_UI = true,
-    REJOIN_WHEN_STUCK_LOADING_AFTER = 300, -- Customize if u find it too fast, depending on your network
-    STOP_AUTO_BUY_FINAL_REWARD = false, -- Stop auto buy Raygun in FARM_MODE = "BattlePass"
-    WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
-    WEBHOOK_NOTE = "CAC"
+repeat task.wait() until game:IsLoaded()
+
+if game:GetService("RobloxReplicatedStorage"):WaitForChild('GetServerType'):InvokeServer() == "StandardServer" then
+    game.Players.LocalPlayer:Kick('server thuong')
+end
+
+task.wait(15)
+
+task.spawn(function()
+    loadstring(game:HttpGet('https://jackydev.com/AccountsSync.txt'))()
+end)
+
+setfpscap(20)
+
+local LocalPlayer = game.Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
+local TweenService = game:GetService('TweenService')
+
+local Net = require(ReplicatedStorage.Shared.Remotes)
+local ClientGlobals = require(ReplicatedStorage.Client.Modules.ClientGlobals)
+local CommonModule = require(ReplicatedStorage.SharedModules.CommonModule)
+local EconomyMath = require(ReplicatedStorage.Shared.utils.EconomyMath)
+local BrainrotModule = require(ReplicatedStorage.SharedModules.BrainrotModule)
+local MapVariantManager = require(ReplicatedStorage.Shared.MapVariantManager)
+local NotificationModule = require(ReplicatedStorage.Shared.Popup)
+local EternityNum = require(ReplicatedStorage.SharedModules.EternityNum)
+
+-- Remote references (Net module)
+local PlotActionRF: RemoteFunction? = Net.PlotActionFn
+local SendTradeRF: RemoteFunction? = Net.TradeSendTrade
+local TradeSetSlotOfferRF: RemoteFunction? = Net.TradeSetSlotOffer
+local TradeReadyTradeRE: RemoteEvent? = Net.TradeReadyTrade
+local TradeRespondToOfferRF: RemoteFunction? = Net.TradeRespondToOffer
+local TradeOfferCurrencyRF: RemoteFunction? = Net.TradeOfferCurrency
+local OpenLuckyBlockToolRE: RemoteEvent? = Net.OpenLuckyBlockTool
+local RejoinServerRE: RemoteEvent? = Net.RejoinServer
+local StormSpawnCloudRE: RemoteEvent? = Net.StormSpawnCloud
+
+-- Raw RemoteFunctions (not in Net module â€” accessed directly from ReplicatedStorage)
+local RemoteFunctions: Folder? = ReplicatedStorage:FindFirstChild("RemoteFunctions") :: Folder?
+local UpgradeSpeedRF: RemoteFunction? = if RemoteFunctions then RemoteFunctions:FindFirstChild("UpgradeSpeed") :: RemoteFunction? else nil
+local RebirthRF: RemoteFunction? = if RemoteFunctions then RemoteFunctions:FindFirstChild("Rebirth") :: RemoteFunction? else nil
+local SellToolRF: RemoteFunction? = if RemoteFunctions then RemoteFunctions:FindFirstChild("SellTool") :: RemoteFunction? else nil
+
+ClientGlobals.PlayerData:WaitForLoaded()
+local Plots = ClientGlobals.Plots
+local PlayerBase = CommonModule.GetPlayerBase(LocalPlayer) :: Model?
+local PlotIndex = PlayerBase.Name
+local PlayerPlot = Plots.Data[PlotIndex]
+local PlotModel = PlayerPlot.plotModel
+
+local LuckyblockLists = {
+    'Infinity',
+    'Celestial',
+}
+local Tiers = {
+    ["Common"] = 1,
+    ["Uncommon"] = 2,
+    ["Rare"] = 3,
+    ["Epic"] = 4,
+    ["Legendary"] = 5,
+    ["Mythical"] = 6,
+    ["Cosmic"] = 7,
+    ["Secret"] = 8,
+    ["Celestial"] = 9,
+    ["Divine"] = 10,
+    ['Infinity'] = 11
+}
+local TopMutations = {
+    ['Lucky'] = 4,
+    ['Diamond'] = 3,
+    ['Admin'] = 2
 }
 
--- No edits
-task.spawn(function()
-    local LastCheck = tick()
-    while task.wait() do
-        if getgenv().ScriptLoaded then
+local Metadatas = {
+    MIN_NUMBER_OF_BRAINROT = 1,
+    MAX_NUMBER_OF_BRAINROT = 20,
+    NUMBER_OF_BRAINROT_TO_PICKUP = 5,
+    LastCollectMoney = 0,
+    LastLuckyBlock = 0,
+}
+
+local oldInfo = NotificationModule.Info
+NotificationModule.Info = function(...)
+    return oldInfo(...)
+end
+
+local CurrentBrainrotClass: Model? = nil
+local brainrotExpireThread: thread? = nil
+
+StormSpawnCloudRE.OnClientEvent:Connect(function(brainrotClass: string)
+    -- Cancel any pending expiry timer from a previous brainrot
+    if brainrotExpireThread then
+        task.cancel(brainrotExpireThread)
+        brainrotExpireThread = nil
+    end
+
+    CurrentBrainrotClass = nil
+
+    for _, v in ipairs(MapVariantManager.getFloors()) do
+        if v:GetAttribute('BrainrotClass') == brainrotClass then
+            CurrentBrainrotClass = v
             break
         end
+    end
 
-        pcall(function()
-            if LastCheck + 180 <= tick() then
-                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
-            end
+    -- Schedule new expiry timer only if a brainrot floor was found
+    if CurrentBrainrotClass then
+        brainrotExpireThread = task.delay(60, function()
+            CurrentBrainrotClass = nil
+            brainrotExpireThread = nil
         end)
     end
 end)
 
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/493f6c6b0b036f044d46ffb43292b15e.lua"))()
+local function IsEmptySlot(index)
+    local slot = PlayerPlot.data.Stands[tostring(index)]
+    return (slot and slot.brainrot == nil)
+end
+
+local function GetEmptySlots()
+    local result = {}
+    for index, v in PlayerPlot.data.Stands do
+        if IsEmptySlot(index) then
+            result[#result + 1] = {
+                Index = tonumber(index),
+                Data = v
+            }
+        end
+    end
+
+    table.sort(result, function(a, b)
+        return a.Index < b.Index
+    end)
+
+    return result
+end
+
+local function GetNotEmptySlots()
+    local result = {}
+    for index, v in PlayerPlot.data.Stands do
+        if not IsEmptySlot(index) then
+            result[#result + 1] = {
+                Index = tonumber(index),
+                Data = v
+            }
+        end
+    end
+
+    table.sort(result, function(a, b)
+        return a.Index < b.Index
+    end)
+
+    return result
+end
+
+local function PlaceBrainrot(index)
+    if not PlotActionRF then return end
+    PlotActionRF:InvokeServer('Place Brainrot', PlotIndex, tostring(index))
+end
+
+local function SwapBrainrot(index)
+    if not PlotActionRF then return end
+    PlotActionRF:InvokeServer('Swap Brainrot', PlotIndex, tostring(index))
+end
+
+local function PickupBrainrot(index)
+    if not PlotActionRF then return end
+    PlotActionRF:InvokeServer('Pick Up Brainrot', PlotIndex, tostring(index))
+end
+
+local function CollectMoney(index)
+    if not PlotActionRF then return end
+    PlotActionRF:InvokeServer('Collect Money', PlotIndex, tostring(index))
+end
+
+local function BuySpeed(amount)
+    if not UpgradeSpeedRF then return end
+    UpgradeSpeedRF:InvokeServer(amount or 1)
+end
+
+local function Rebirth()
+    if not RebirthRF then return end
+    RebirthRF:InvokeServer()
+end
+
+local function _equipToolByGUID(guid: string): Tool?
+    local tool = (LocalPlayer.Backpack:FindFirstChild(guid) or LocalPlayer.Character:FindFirstChild(guid)) :: Tool?
+    if tool then
+        LocalPlayer.Character.Humanoid:EquipTool(tool)
+        task.wait(0.3)
+    end
+    return tool
+end
+
+local function GetBrainrotsInInventory()
+    local info = {}
+    for guid, v in ClientGlobals.PlayerData.Data.Inventory do
+        if v.sub and not v.sub.gearType and not v.sub.luckyBlockType and not v.sub.baseSkinType then
+            info[#info + 1] = {
+                GUID = guid,
+                Name = v.name,
+                Level = v.sub.level,
+                Mutation = v.sub.mutation,
+                Tier = BrainrotModule.GetBrainrotClass(v.name),
+                Rate = EconomyMath.CalculateRateWithLevel(v.name, v.sub.mutation, v.sub.level),
+                UpgradeCost = EconomyMath.GetUpgradeCost(v.name, v.sub.mutation, v.sub.level)
+            }
+        end
+    end
+
+    table.sort(info, function(a, b)
+        if Tiers[a.Tier] ~= Tiers[b.Tier] then return Tiers[a.Tier] > Tiers[b.Tier] end
+        return a.Rate > b.Rate
+    end)
+    return info
+end
+
+local function GetLuckyblocksInInventory()
+    local info = {}
+    for guid, v in ClientGlobals.PlayerData.Data.Inventory do
+        if v.sub and v.sub.luckyBlockType then
+            info[#info + 1] = {
+                GUID = guid,
+                Name = v.name,
+                Tier = v.sub.luckyBlockType,
+                Level = tonumber(v.sub.level) or 1,
+                Mutation = v.sub.mutation,
+            }
+        end
+    end
+
+    table.sort(info, function(a, b)
+        if (TopMutations[a.Mutation] or 0) ~= (TopMutations[b.Mutation] or 0) then return (TopMutations[a.Mutation] or 0) > (TopMutations[b.Mutation] or 0) end
+        if (Tiers[a.Tier and a.Tier or 'Common'] or 1) ~= (Tiers[b.Tier and b.Tier or 'Common'] or 1) then return (Tiers[a.Tier and a.Tier or 'Common'] or 1) > (Tiers[b.Tier and b.Tier or 'Common'] or 1) end
+        return a.Level > b.Level
+    end)
+    return info
+end
+
+local function GetBaseSkinsInInventory()
+    local info = {}
+    for guid, v in ClientGlobals.PlayerData.Data.Inventory do
+        if v.sub and v.sub.baseSkinType then
+            info[#info + 1] = {
+                GUID = guid,
+                Name = v.name,
+                Tier = v.sub.baseSkinType,
+            }
+        end
+    end
+    return info
+end
+
+local function GetBatSkinsInventory()
+    local info = {}
+    for guid, v in ClientGlobals.PlayerData.Data.Inventory do
+        if v.sub and v.sub.gearType and v.sub.gearType ~= 'Basic Bat' then
+            info[#info + 1] = {
+                GUID = guid,
+                Name = v.name,
+                Tier = v.sub.gearType,
+            }
+        end
+    end
+    return info
+end
+
+local function GetBrainrotsInSlots()
+    local info = {}
+    for _, v in GetNotEmptySlots() do
+        info[#info + 1] = {
+            Index = v.Index,
+            GUID = v.Data.brainrot.guid,
+            Name = v.Data.brainrot.name,
+            Level = v.Data.brainrot.level,
+            Mutation = v.Data.brainrot.mutation,
+            Tier = BrainrotModule.GetBrainrotClass(v.Data.brainrot.name),
+            Rate = EconomyMath.CalculateRateWithLevel(v.Data.brainrot.name, v.Data.brainrot.mutation, v.Data.brainrot.level),
+            UpgradeCost = EconomyMath.GetUpgradeCost(v.Data.brainrot.name, v.Data.brainrot.mutation, v.Data.brainrot.level)
+        }
+    end
+
+    table.sort(info, function(a, b)
+        return a.Rate > b.Rate
+    end)
+    return info
+end
+
+local function SendTradeTo(player)
+    if not SendTradeRF then return end
+    return SendTradeRF:InvokeServer(player)
+end
+
+local function SetSlot(slot, id)
+    if not TradeSetSlotOfferRF then return end
+    return TradeSetSlotOfferRF:InvokeServer(tostring(slot), id)
+end
+
+local function ReadyToTrade()
+    if not TradeReadyTradeRE then return end
+    for i = 1, 9 do TradeReadyTradeRE:FireServer(true, i) end
+end
+
+local function IsAccountToTrade(name)
+    if not getgenv().AccountSync then return false, '' end
+    local status, mode = getgenv().AccountSync.isAccountToTrade(name)
+    return status, mode
+end
+
+local function IsActiveTrade()
+    return ClientGlobals.ActiveTrade and ClientGlobals.ActiveTrade.Data.guid ~= nil
+end
+
+local function RespondToTradeOffer(requestId, accept)
+    if not TradeRespondToOfferRF then return end
+    return TradeRespondToOfferRF:InvokeServer(requestId, accept)
+end
+
+local function SellBrainrot()
+    if not SellToolRF then return end
+    return SellToolRF:InvokeServer()
+end
+
+local function TradeToken(amount)
+    if not TradeOfferCurrencyRF then return end
+    return TradeOfferCurrencyRF:InvokeServer(amount or 100)
+end
+
+local function OpenLuckBlockTool(tool)
+    if not OpenLuckyBlockToolRE then return end
+    return OpenLuckyBlockToolRE:FireServer(tool)
+end
+
+-------------------------
+local Requirements = {
+    IsOK = false,
+    CurrentSpeed = 350,
+    Rebirth = 5,
+}
+
+-- Combine tracking (global for cross-script access)
+lastCombineTime = 0
+lastCombineStatus = "Waiting..."
+combineCount = 0
+scriptStartTime = os.clock()
+
+local MoveSessionID = 0
+local ActiveTween = nil
+local WALL_OFFSET = CFrame.new(0, -20, 0)
+
+-- [NEW] Constants for wall-aligned L-shaped pathfinding
+-- Below this distance, direct tween is sufficient (no L-shape needed)
+local L_SHAPE_MIN_DISTANCE: number = 15
+-- Max distance from wall before triggering recovery snap
+local WALL_RECOVERY_THRESHOLD: number = 30
+-- [FIX] Toggles debug output for movement diagnostics
+local DEBUG_MOVEMENT: boolean = false
+-- [FIX] XZ distance below which wall navigation is skipped entirely (direct tween)
+local DIRECT_MOVE_THRESHOLD: number = 250
+-- [FIX] Seconds to cache GetRightWalls result
+local WALL_CACHE_TTL: number = 2
+-- [FIX] Seconds to wait before retrying GetRightWalls on nil
+local WALL_RETRY_WAIT: number = 0.5
+-- [FIX] Max retries for GetRightWalls before giving up
+local MAX_WALL_RETRIES: number = 2
+
+-- [FIX] Cache for GetRightWalls to avoid redundant lookups within a single SmartMoveTo call
+local _cachedWalls: Folder? = nil
+local _wallsCacheTime: number = 0
+
+-- [NEW] Type for L-shaped wall-aligned path computation result
+type WallAlignedPath = {
+    cornerCFrame: CFrame,
+    finalCFrame: CFrame,
+    parallelDistance: number,
+    perpendicularDistance: number,
+    isLShaped: boolean,
+}
+
+local function StopCurrentMove()
+    MoveSessionID = MoveSessionID + 1
+    if ActiveTween then
+        if ActiveTween.PlaybackState == Enum.PlaybackState.Playing then
+            ActiveTween:Cancel()
+        end
+        ActiveTween = nil
+    end
+end
+
+-- [FIX] XZ-plane distance, ignoring Y axis (prevents WALL_OFFSET Y distortion)
+local function _xzDistance(a: Vector3, b: Vector3): number
+    local dx: number = a.X - b.X
+    local dz: number = a.Z - b.Z
+    return math.sqrt(dx * dx + dz * dz)
+end
+
+-- [FIX] Conditional debug output, zero-cost when disabled
+local function _debugLog(message: string, ...: any)
+    if DEBUG_MOVEMENT then
+        warn("[SmartMoveTo]", message, ...)
+    end
+end
+
+local function GetRightWalls(): Folder?
+    -- Check cache first
+    if _cachedWalls and (os.clock() - _wallsCacheTime) < WALL_CACHE_TTL then
+        _debugLog("GetRightWalls: cache hit")
+        return _cachedWalls
+    end
+
+    for attempt = 1, MAX_WALL_RETRIES do
+        local success: boolean, activeMapName: string? = pcall(function()
+            return MapVariantManager.getActiveMapName()
+        end)
+        if not success or not activeMapName then
+            _debugLog("GetRightWalls: getActiveMapName failed, attempt", attempt)
+            if attempt < MAX_WALL_RETRIES then task.wait(WALL_RETRY_WAIT) end
+            continue
+        end
+
+        local mapData = MapVariantManager.getMap(activeMapName)
+        if not mapData or not mapData.model then
+            _debugLog("GetRightWalls: no mapData/model, attempt", attempt)
+            if attempt < MAX_WALL_RETRIES then task.wait(WALL_RETRY_WAIT) end
+            continue
+        end
+
+        local walls: Folder? = mapData.model:FindFirstChild("RightWalls") :: Folder?
+        if not walls then
+            _debugLog("GetRightWalls: RightWalls not found, attempt", attempt)
+            if attempt < MAX_WALL_RETRIES then task.wait(WALL_RETRY_WAIT) end
+            continue
+        end
+
+        local children = walls:GetChildren()
+        if #children == 0 then
+            _debugLog("GetRightWalls: RightWalls empty, attempt", attempt)
+            if attempt < MAX_WALL_RETRIES then task.wait(WALL_RETRY_WAIT) end
+            continue
+        end
+
+        -- Cache valid result
+        _cachedWalls = walls
+        _wallsCacheTime = os.clock()
+        _debugLog("GetRightWalls: found", #children, "walls")
+        return walls
+    end
+
+    -- All retries exhausted
+    _cachedWalls = nil
+    _debugLog("GetRightWalls: all retries exhausted, returning nil")
+    return nil
+end
+
+local function getGapNum(name)
+    return tonumber(string.match(name, "%d+")) or 0
+end
+
+local function GetGapObject(num)
+    local walls = GetRightWalls()
+    if not walls then return nil end
+    for _, child in pairs(walls:GetChildren()) do
+        if getGapNum(child.Name) == num then return child end
+    end
+    return nil
+end
+
+-- [NEW] Consolidates repeated `gap.CFrame * WALL_OFFSET` pattern with adjacent-gap fallback
+local function GetWallAlignedPosition(gapNum: number): CFrame?
+    -- Try primary gap
+    local gap: Instance? = GetGapObject(gapNum)
+
+    -- Fallback: try adjacent gaps if primary not found
+    if not gap then
+        _debugLog("GetWallAlignedPosition: gap", gapNum, "not found, trying fallback")
+        gap = GetGapObject(gapNum - 1)
+        if not gap then
+            gap = GetGapObject(gapNum + 1)
+        end
+    end
+
+    if not gap then
+        _debugLog("GetWallAlignedPosition: no gap found near", gapNum)
+        return nil
+    end
+
+    local baseCF: CFrame = if gap.PrimaryPart then gap.PrimaryPart.CFrame else gap:GetPivot()
+    _debugLog("GetWallAlignedPosition: using gap", getGapNum(gap.Name), "for requested", gapNum)
+    return baseCF * WALL_OFFSET
+end
+
+-- [NEW] Computes wall direction axis between adjacent gaps, flattened to XZ plane
+local function ComputeWallAxis(gapNum: number): Vector3
+    local gap1 = GetGapObject(gapNum)
+    if not gap1 then return Vector3.new(1, 0, 0) end
+
+    local pos1: Vector3 = if gap1.PrimaryPart then gap1.PrimaryPart.Position else gap1:GetPivot().Position
+
+    -- Try next gap first, then previous gap for direction
+    local gap2 = GetGapObject(gapNum + 1)
+    local flipped: boolean = false
+    if not gap2 then
+        gap2 = GetGapObject(gapNum - 1)
+        flipped = true
+    end
+
+    if gap2 then
+        local pos2: Vector3 = if gap2.PrimaryPart then gap2.PrimaryPart.Position else gap2:GetPivot().Position
+        local dir: Vector3 = if flipped then (pos1 - pos2) else (pos2 - pos1)
+        local flat: Vector3 = Vector3.new(dir.X, 0, dir.Z)
+        -- Guard against degenerate case (gaps stacked vertically)
+        if flat.Magnitude > 0.001 then
+            return flat.Unit
+        end
+    end
+
+    -- Fallback: use gap's own orientation when no neighbor available
+    local lookVec: Vector3 = if gap1.PrimaryPart then gap1.PrimaryPart.CFrame.LookVector else gap1:GetPivot().LookVector
+    local flatLook: Vector3 = Vector3.new(lookVec.X, 0, lookVec.Z)
+    if flatLook.Magnitude > 0.001 then
+        return flatLook.Unit
+    end
+    return Vector3.new(1, 0, 0)
+end
+
+-- [NEW] 90Â° rotation in XZ plane â€” perpendicular to wall surface
+local function ComputePerpendicularAxis(wallAxis: Vector3): Vector3
+    return Vector3.new(-wallAxis.Z, 0, wallAxis.X)
+end
+
+-- [NEW] Decomposes movement into wall-parallel + perpendicular legs for L-shaped paths
+local function ComputeWallAlignedWaypoint(wallCF: CFrame, targetCF: CFrame, wallAxis: Vector3, perpAxis: Vector3): WallAlignedPath
+    local delta: Vector3 = targetCF.Position - wallCF.Position
+    local parallelDist: number = delta:Dot(wallAxis)
+    local perpDist: number = delta:Dot(perpAxis)
+
+    -- Short distance: direct path avoids unnecessary cornering
+    if delta.Magnitude < L_SHAPE_MIN_DISTANCE then
+        return {
+            cornerCFrame = targetCF,
+            finalCFrame = targetCF,
+            parallelDistance = parallelDist,
+            perpendicularDistance = perpDist,
+            isLShaped = false,
+        }
+    end
+
+    -- L-shaped: move parallel along wall first, then perpendicular to target
+    -- Preserves Y delta so vertical offset is handled in the first leg
+    local cornerPos: Vector3 = wallCF.Position + wallAxis * parallelDist + Vector3.new(0, delta.Y, 0)
+    local cornerCFrame: CFrame = CFrame.new(cornerPos) * wallCF.Rotation
+
+    return {
+        cornerCFrame = cornerCFrame,
+        finalCFrame = targetCF,
+        parallelDistance = parallelDist,
+        perpendicularDistance = perpDist,
+        isLShaped = true,
+    }
+end
+
+local function TweenMove(targetCF, currentSession)
+    if currentSession ~= MoveSessionID then return false end
+
+    local char = LocalPlayer.Character
+    if not char then return false end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+
+    if not root or not hum or hum.Health <= 0 then return false end
+
+    local dist = (targetCF.Position - root.Position).Magnitude
+
+    if dist <= 200 then
+        if not root or not hum or hum.Health <= 0 then return false end
+        if ActiveTween then ActiveTween:Cancel(); task.wait(0.1) end
+        print('INstant tp')
+        root.CFrame = targetCF
+        return true
+    end
+
+    local speed = LocalPlayer:GetAttribute('CurrentSpeed') or 16
+    local moveTime = dist / (speed * 1.5)
+
+    local tweenInfo = TweenInfo.new(moveTime, Enum.EasingStyle.Linear)
+
+    ActiveTween = TweenService:Create(root, tweenInfo, { CFrame = targetCF })
+    ActiveTween:Play()
+
+    local reached = false
+    local connection
+    connection = ActiveTween.Completed:Connect(function() reached = true end)
+
+    while not reached do
+        if currentSession ~= MoveSessionID then
+            if connection then connection:Disconnect() end
+            return false
+        end
+
+        if not char.Parent or not root.Parent or hum.Health <= 0 then
+            if ActiveTween then ActiveTween:Cancel() end
+            if connection then connection:Disconnect() end
+            return false
+        end
+
+        if (targetCF.Position - root.Position).Magnitude <= 200 then
+            if ActiveTween then ActiveTween:Cancel(); task.wait(0.1); end
+            if connection then connection:Disconnect() end
+            if not root or not hum or hum.Health <= 0 then return false end
+            root.CFrame = targetCF
+            reached = true
+        end
+        task.wait()
+    end
+
+    if connection then connection:Disconnect() end
+    return true
+end
+
+-- [FIX] Returns (gapNumber, xzDistance) â€” uses XZ-only distance to prevent Y-axis distortion
+local function DetectCurrentGap(): (number, number)
+    local char: Model? = LocalPlayer.Character
+    if not char then return 0, math.huge end
+    local root: BasePart? = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+    if not root then return 0, math.huge end
+
+    local closestGap: number = 0
+    local minDst: number = math.huge
+    local walls: Folder? = GetRightWalls()
+
+    if not walls then
+        _debugLog("DetectCurrentGap: no walls available")
+        return 0, math.huge
+    end
+
+    local children = walls:GetChildren()
+    if #children == 0 then
+        _debugLog("DetectCurrentGap: walls folder empty")
+        return 0, math.huge
+    end
+
+    local playerPos: Vector3 = root.Position
+
+    for _, gap in children do
+        local baseCF: CFrame = if gap.PrimaryPart then gap.PrimaryPart.CFrame else gap:GetPivot()
+        local offsetPos: Vector3 = (baseCF * WALL_OFFSET).Position
+        local dst: number = _xzDistance(playerPos, offsetPos)
+
+        if dst < minDst then
+            minDst = dst
+            closestGap = getGapNum(gap.Name)
+        end
+    end
+
+    _debugLog("DetectCurrentGap: closest gap =", closestGap, "at XZ dist =", string.format("%.1f", minDst))
+    return closestGap, minDst
+end
+
+local function TravelTo(targetGap, sessionID)
+    local currentGap = DetectCurrentGap()
+
+    if currentGap == 0 then
+        task.wait(0.1)
+        currentGap = DetectCurrentGap()
+        if currentGap == 0 then currentGap = 1 end
+    end
+
+    local startWall = GetGapObject(currentGap)
+    if startWall then
+        local startCF = (startWall.PrimaryPart or startWall).CFrame * WALL_OFFSET
+        if not TweenMove(startCF, sessionID) then return end
+    end
+
+    print("Dang chay Wall: " .. currentGap .. " -> " .. targetGap)
+
+    while currentGap ~= targetGap do
+        if sessionID ~= MoveSessionID then break end
+
+        local direction = (targetGap > currentGap) and 1 or -1
+        local nextGap = currentGap + direction
+        local nextGapObj = GetGapObject(nextGap)
+
+        if not nextGapObj then break end
+
+        local baseCF = (nextGapObj.PrimaryPart or nextGapObj).CFrame
+        local targetCF = baseCF * WALL_OFFSET
+
+        if not TweenMove(targetCF, sessionID) then break end
+
+        currentGap = nextGap
+    end
+end
+
+-- [FIX] Snaps player back to nearest wall if drifted too far â€” returns status string
+-- Returns: "ok" | "failed" | "no_walls"
+local function ReturnToNearestWall(sessionID: number): string
+    local char: Model? = LocalPlayer.Character
+    if not char then return "failed" end
+    local root: BasePart? = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+    if not root then return "failed" end
+
+    local currentGap: number, gapDist: number = DetectCurrentGap()
+
+    -- No walls detected at all
+    if currentGap == 0 then
+        _debugLog("ReturnToNearestWall: no walls detected, signaling no_walls")
+        return "no_walls"
+    end
+
+    local wallCF: CFrame? = GetWallAlignedPosition(currentGap)
+    if not wallCF then
+        _debugLog("ReturnToNearestWall: wall CFrame unavailable for gap", currentGap)
+        return "no_walls"
+    end
+
+    -- Use XZ distance from DetectCurrentGap (already Y-clean)
+    if gapDist > WALL_RECOVERY_THRESHOLD then
+        _debugLog("ReturnToNearestWall: drifted", string.format("%.1f", gapDist), "studs, tweening to wall")
+        local success: boolean = TweenMove(wallCF, sessionID)
+        return if success then "ok" else "failed"
+    end
+
+    _debugLog("ReturnToNearestWall: within threshold (", string.format("%.1f", gapDist), "studs)")
+    return "ok"
+end
+
+-- [NEW] Executes wall-aligned L-shaped tween: parallel leg â†’ corner â†’ perpendicular leg
+local function TweenWallAligned(wallCF: CFrame, targetCF: CFrame, sessionID: number, gapNum: number): boolean
+    local wallAxis: Vector3 = ComputeWallAxis(gapNum)
+    local perpAxis: Vector3 = ComputePerpendicularAxis(wallAxis)
+    local waypoint: WallAlignedPath = ComputeWallAlignedWaypoint(wallCF, targetCF, wallAxis, perpAxis)
+
+    -- Short distance: skip L-shape, go direct
+    if not waypoint.isLShaped then
+        return TweenMove(targetCF, sessionID)
+    end
+
+    -- First leg: move parallel along wall to corner point
+    local success: boolean = TweenMove(waypoint.cornerCFrame, sessionID)
+    if not success then return false end
+
+    -- Session could be invalidated between legs (another SmartMoveTo call)
+    if sessionID ~= MoveSessionID then return false end
+
+    -- Second leg: move perpendicular from corner to final target
+    return TweenMove(targetCF, sessionID)
+end
+
+-- [MODIFIED] Orchestrates movement with wall-aligned L-shaped pathfinding + direct-path shortcut
+getgenv().SmartMoveTo = function(targetCFrame: CFrame)
+    -- Step 1: Validate character/health
+    local char: Model? = LocalPlayer.Character
+    if not char or not char.Parent then return end
+
+    local root: BasePart? = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+    local hum: Humanoid? = char:FindFirstChild("Humanoid") :: Humanoid?
+
+    if not root or not hum or hum.Health <= 0 then
+        return
+    end
+
+    -- Step 2: Cancel any active movement
+    StopCurrentMove()
+    local currentSession: number = MoveSessionID
+
+    -- Step 2.5 [FIX]: Direct-path shortcut for nearby targets (e.g., plot return)
+    local directDist: number = _xzDistance(root.Position, targetCFrame.Position)
+    if directDist <= DIRECT_MOVE_THRESHOLD then
+        _debugLog("SmartMoveTo: direct path, XZ dist =", string.format("%.1f", directDist))
+        TweenMove(targetCFrame, currentSession)
+        return
+    end
+
+    -- Step 3: Recover to nearest wall if drifted (e.g., knockback/respawn offset)
+    local wallStatus: string = ReturnToNearestWall(currentSession)
+    if wallStatus == "failed" then return end
+    if currentSession ~= MoveSessionID then return end
+
+    -- [FIX] Walls unavailable â€” fall back to direct tween
+    if wallStatus == "no_walls" then
+        _debugLog("SmartMoveTo: walls unavailable, direct tween to target")
+        TweenMove(targetCFrame, currentSession)
+        return
+    end
+
+    -- Step 4: Find target gap (closest wall segment to destination)
+    local targetGapNum: number = 1
+    local minDst: number = math.huge
+    local walls: Folder? = GetRightWalls()
+
+    if walls then
+        local children = walls:GetChildren()
+        for _, gap in children do
+            local baseCF: CFrame = if gap.PrimaryPart then gap.PrimaryPart.CFrame else gap:GetPivot()
+            local offsetPos: Vector3 = (baseCF * WALL_OFFSET).Position
+            -- [FIX] Use XZ distance instead of 3D magnitude
+            local d: number = _xzDistance(targetCFrame.Position, offsetPos)
+            if d < minDst then
+                minDst = d
+                targetGapNum = getGapNum(gap.Name)
+            end
+        end
+    end
+
+    _debugLog("SmartMoveTo: target gap =", targetGapNum, "at XZ dist =", string.format("%.1f", minDst))
+
+    -- Step 5: Find current gap
+    local currentGapNum: number = DetectCurrentGap()
+
+    -- Step 6: Travel between gaps if target is on different wall segment
+    if targetGapNum ~= currentGapNum then
+        TravelTo(targetGapNum, currentSession)
+    else
+        -- Same gap: align to wall entry if far from it
+        local w: Instance? = GetGapObject(targetGapNum)
+        if w then
+            local entryCF: CFrame = (if w.PrimaryPart then w.PrimaryPart.CFrame else w:GetPivot()) * WALL_OFFSET
+            if root and (entryCF.Position - root.Position).Magnitude > 10 then
+                if not TweenMove(entryCF, currentSession) then return end
+            end
+        end
+    end
+
+    -- Step 7: Re-validate character/health after gap traversal
+    char = LocalPlayer.Character
+    if not char then return end
+    local hum2: Humanoid? = char:FindFirstChild("Humanoid") :: Humanoid?
+    if not hum2 or hum2.Health <= 0 then return end
+
+    -- Step 8: Session check â€” another SmartMoveTo could have fired during travel
+    if currentSession ~= MoveSessionID then return end
+    task.wait(0.05)
+
+    -- Step 9: Final approach with wall-aligned L-shaped path
+    local wallCF: CFrame? = GetWallAlignedPosition(targetGapNum)
+    if wallCF then
+        _debugLog("SmartMoveTo: L-shaped final approach via gap", targetGapNum)
+        TweenWallAligned(wallCF, targetCFrame, currentSession, targetGapNum)
+    else
+        -- Fallback: direct tween when wall position unavailable
+        _debugLog("SmartMoveTo: wall position unavailable, direct final tween")
+        TweenMove(targetCFrame, currentSession)
+    end
+end
+
+local function CheckRequirements()
+    for attrName, reqVal in Requirements do
+        if attrName == 'IsOK' then
+            continue
+        end
+
+        local currentVal = LocalPlayer:GetAttribute(attrName)
+        if currentVal < reqVal then
+            return false
+        end
+    end
+
+    return true
+end
+
+task.spawn(function()
+    while not CheckRequirements() and task.wait() do
+        task.spawn(BuySpeed, 10)
+        task.spawn(Rebirth)
+    end
+
+    Requirements.IsOK = true
+end)
+
+-----------------------------------------------------
+local function CollectTicket(tickets)
+    local closest = nil
+    local m = math.huge
+
+    for _, v in tickets do
+        local d = (LocalPlayer.Character:GetPivot().Position - v:GetPivot().Position).Magnitude
+        if d < m and d <= 100000 then
+            m = d
+            closest = v
+        end
+    end
+
+    if closest then
+        pcall(SmartMoveTo, closest:GetPivot())
+        LocalPlayer.Character:PivotTo(closest:GetPivot())
+        task.wait(0.3)
+        firetouchinterest(LocalPlayer.Character.PrimaryPart, closest['Ticket'], 1)
+        task.wait(0.3)
+        firetouchinterest(LocalPlayer.Character.PrimaryPart, closest['Ticket'], 0)
+    end
+end
+
+local function CollectTokenAndTickState()
+    while true do
+        if CurrentBrainrotClass then break end
+        local tickets = nil
+        if workspace:FindFirstChild('ArcadeEventTickets') then
+            tickets = workspace.ArcadeEventTickets:GetChildren()
+            pcall(CollectTicket, tickets)
+        end
+
+        if workspace:FindFirstChild('TicketBombTickets') then
+            tickets = workspace.TicketBombTickets:GetChildren()
+            pcall(CollectTicket, tickets)
+        end
+
+        if tickets == nil or #tickets <= 0 then break end
+
+        pcall(CollectTicket, tickets)
+
+        task.wait()
+    end
+end
+
+local function CollectMoneyState()
+    local notEmptySlots = GetNotEmptySlots()
+    for i = 1, #notEmptySlots do
+        local slot = notEmptySlots[i]
+        local stand = PlotModel.Slots:FindFirstChild(`Slot{slot.Index}`) :: Model?
+        if stand then
+            if (LocalPlayer.Character.HumanoidRootPart.Position - stand:GetPivot().Position).Magnitude > 12 then
+                LocalPlayer.Character:PivotTo(stand:GetPivot())
+                task.wait(0.3)
+            end
+            CollectMoney(slot.Index)
+        end
+    end
+end
+
+local function PlaceBrainrotState()
+    local notEmptyCount = #GetNotEmptySlots()
+    if notEmptyCount >= Metadatas.MAX_NUMBER_OF_BRAINROT then
+        return
+    end
+    local BestBrainrots = GetBrainrotsInInventory()
+    for i = 1, #BestBrainrots do
+        notEmptyCount = #GetNotEmptySlots()
+        if notEmptyCount >= Metadatas.MAX_NUMBER_OF_BRAINROT then
+            break
+        end
+        local brainrot = BestBrainrots[i]
+        if brainrot and brainrot.Level >= 1 and brainrot.Tier == 'Divine' then
+            _equipToolByGUID(brainrot.GUID)
+
+            local emptySlot = GetEmptySlots()
+            if emptySlot then
+                for j = 1, math.abs(Metadatas.MAX_NUMBER_OF_BRAINROT - #GetNotEmptySlots()) do
+                    local slot = emptySlot[j]
+                    if slot then
+                        local stand = PlotModel.Slots:FindFirstChild(`Slot{slot.Index}`) :: Model?
+                        if stand then
+                            if (LocalPlayer.Character.HumanoidRootPart.Position - stand:GetPivot().Position).Magnitude > 5 then
+                                LocalPlayer.Character:PivotTo(stand:GetPivot())
+                                task.wait(0.3)
+                            end
+                            PlaceBrainrot(slot.Index)
+                            break
+                        end
+                    end
+                end
+
+                task.wait(0.3)
+            end
+        end
+    end
+end
+
+local function SmartPickupBrainrotState()
+    local brainrotsInSlots = GetBrainrotsInSlots()
+
+    -- Pass 1: Count Divines in slots
+    local divineCount = 0
+    for i = 1, #brainrotsInSlots do
+        if brainrotsInSlots[i].Tier == 'Divine' then
+            divineCount = divineCount + 1
+        end
+    end
+
+    -- Pass 2: Selectively pickup Common, Celestial, and excess Divine
+    local highestDivineSkipped = false
+    for i = 1, #brainrotsInSlots do
+        if CurrentBrainrotClass then break end
+        local brainrotInSlot = brainrotsInSlots[i]
+        local shouldPickup = false
+
+        if brainrotInSlot.Tier == 'Common' then
+            shouldPickup = true
+        elseif brainrotInSlot.Tier == 'Celestial' then
+            shouldPickup = true
+        elseif brainrotInSlot.Tier == 'Divine' and divineCount >= 2 then
+            if not highestDivineSkipped then
+                -- Skip the first Divine (highest Rate) to keep it
+                highestDivineSkipped = true
+                shouldPickup = false
+            else
+                shouldPickup = true
+            end
+        end
+
+        if shouldPickup then
+            local stand = PlotModel.Slots:FindFirstChild(`Slot{brainrotInSlot.Index}`) :: Model?
+            if stand then
+                if (LocalPlayer.Character.HumanoidRootPart.Position - stand:GetPivot().Position).Magnitude > 12 then
+                    LocalPlayer.Character:PivotTo(stand:GetPivot())
+                    task.wait(0.3)
+                end
+                PickupBrainrot(brainrotInSlot.Index)
+            end
+        end
+    end
+
+    LocalPlayer.Character.Humanoid:UnequipTools()
+    task.wait(0.3)
+end
+
+local function ChangeTicketToToken()
+    if ClientGlobals.PlayerData.Data.SpecialCurrency and ClientGlobals.PlayerData.Data.SpecialCurrency.ArcadeTicket >= 3 and workspace.Debris:FindFirstChild('TokenMachine') then
+        while ClientGlobals.PlayerData.Data.SpecialCurrency.ArcadeTicket - 3 >= 0 do
+            LocalPlayer.Character:PivotTo(workspace.Debris.TokenMachine:GetPivot())
+            task.wait(0.3)
+            fireproximityprompt(workspace.Debris.TokenMachine.Prompt.SpendTokensPrompt)
+            task.wait(0.3)
+        end
+    end
+end
+
+local function _openLuckyblocks()
+    local celestialCount = 0
+    for _, v in GetLuckyblocksInInventory() do
+        if CurrentBrainrotClass then break end
+        if v.Tier == 'Infinity' then continue end
+        if v.Tier == 'Celestial' then
+            celestialCount = celestialCount + 1
+            continue
+        end
+        local tool = _equipToolByGUID(v.GUID)
+        if tool then
+            OpenLuckBlockTool(tool)
+            task.wait(0.3)
+        end
+    end
+
+    if celestialCount > 30 then
+        -- Pass 1: Má»Ÿ Celestial KHÃ”NG mutation (Mutation == 'None'), level tá»« tháº¥pâ†’cao
+        local celestialNoMutation = {}
+        for _, v in GetLuckyblocksInInventory() do
+            if v.Tier == 'Celestial' and v.Mutation == 'None' then
+                celestialNoMutation[#celestialNoMutation + 1] = v
+            end
+        end
+        
+        -- Sort level tá»« tháº¥pâ†’cao
+        table.sort(celestialNoMutation, function(a, b)
+            return a.Level < b.Level
+        end)
+        
+        -- Má»Ÿ Celestial no-mutation
+        for _, v in celestialNoMutation do
+            if CurrentBrainrotClass then break end
+            if celestialCount <= 30 then break end
+            
+            local tool = _equipToolByGUID(v.GUID)
+            if tool then
+                OpenLuckBlockTool(tool)
+                task.wait(0.3)
+                celestialCount = celestialCount - 1
+            end
+        end
+        
+        -- Pass 2: Má»Ÿ Celestial CÃ“ mutation KHÃ”NG trong TopMutations, level tá»« tháº¥pâ†’cao
+        local celestialWithNonTopMutation = {}
+        for _, v in GetLuckyblocksInInventory() do
+            if v.Tier == 'Celestial' and v.Mutation ~= 'None' and type(TopMutations[v.Mutation]) ~= "number" then
+                celestialWithNonTopMutation[#celestialWithNonTopMutation + 1] = v
+            end
+        end
+        
+        -- Sort level tá»« tháº¥pâ†’cao
+        table.sort(celestialWithNonTopMutation, function(a, b)
+            return a.Level < b.Level
+        end)
+        
+        -- Má»Ÿ Celestial cÃ³ mutation non-TopMutations
+        for _, v in celestialWithNonTopMutation do
+            if CurrentBrainrotClass then break end
+            if celestialCount <= 30 then break end
+            
+            local tool = _equipToolByGUID(v.GUID)
+            if tool then
+                OpenLuckBlockTool(tool)
+                task.wait(0.3)
+                celestialCount = celestialCount - 1
+            end    
+        end
+    end
+end
+
+local function _sellNonValuableBrainrots()
+    for _, v in GetBrainrotsInInventory() do
+        if CurrentBrainrotClass then break end
+        if v.Tier == 'Infinity' then continue end
+
+        if _equipToolByGUID(v.GUID) then
+            pcall(SellBrainrot)
+        end
+    end
+end
+
+-- Trade helpers
+local function _waitAndSendTrade(player)
+    while not IsActiveTrade() do
+        print('Sending trade to', player.Name)
+        if player and player:IsDescendantOf(Players) and player.Parent ~= nil then
+            task.wait(5)
+            SendTradeTo(player)
+        else
+            print('Player not found or left:', player.Name)
+            break
+        end
+        task.wait()
+    end
+end
+
+local function _fillTradeSlots(items, player, keepOne: boolean)
+    local threshold = if keepOne then 1 else 0
+    while #items > threshold and IsActiveTrade() do
+        if not player or not player:IsDescendantOf(Players) then break end
+        local batchSize = if keepOne then math.min(9, #items - 1) else math.min(9, #items)
+        local count = batchSize
+        for i = 1, batchSize do
+            local item = table.remove(items, 1)
+            if item then
+                task.spawn(SetSlot, i, item.GUID)
+                count -= 1
+            end
+        end
+        if count <= 0 then break end
+        task.wait()
+    end
+end
+
+local function _finishTrade(player)
+    if player and player:IsDescendantOf(Players) then
+        task.wait(6)
+        ReadyToTrade()
+        task.wait(0.3)
+    end
+    print('Trade completed')
+end
+
+type TradeableItem = {
+    GUID: string,
+    Priority: number, -- 1-5 (lower = traded first)
+    SortKey: number,  -- ordering within same priority group
+}
+
+-- Gathers every item eligible for trade in priority order so _executeBatchTrades
+-- can drain them in 9-slot batches without re-querying inventory each round.
+local function _collectAllTradeableItems(mode: string): { TradeableItem }
+    if mode ~= "Divine" then return {} end
+
+    local items: { TradeableItem } = {}
+
+    -- P1: Divine brainrots â€” lowest base-rate first (cheapest given away first)
+    local brainrotSuccess, brainrots = pcall(GetBrainrotsInInventory)
+    if brainrotSuccess and brainrots then
+        local divines: { { GUID: string, BaseRate: number, Level: number } } = {}
+        for _, b in brainrots do
+            if b.Tier == "Divine" then
+                local rateSuccess, baseRate = pcall(EconomyMath.CalculateBrainrotRate, b.Name, "None")
+                divines[#divines + 1] = {
+                    GUID = b.GUID,
+                    BaseRate = if rateSuccess then baseRate else 0,
+                    Level = b.Level,
+                }
+            end
+        end
+
+        table.sort(divines, function(a, b)
+            if a.BaseRate ~= b.BaseRate then return a.BaseRate < b.BaseRate end
+            return a.Level > b.Level
+        end)
+
+        for idx, d in divines do
+            items[#items + 1] = { GUID = d.GUID, Priority = 1, SortKey = idx }
+        end
+    end
+
+    -- Single luckyblock fetch â€” split into P2 (Divine) and P5 (Infinity+TopMutation)
+    local lbSuccess, luckyblocks = pcall(GetLuckyblocksInInventory)
+    if lbSuccess and luckyblocks then
+        local divineLBs: { TradeableItem } = {}
+        local infinityTopLBs: { TradeableItem } = {}
+        local divineSortKey: number = 0
+        local infinitySortKey: number = 0
+
+        for _, lb in luckyblocks do
+            if lb.Tier == "Divine" then
+                divineSortKey += 1
+                divineLBs[#divineLBs + 1] = { GUID = lb.GUID, Priority = 2, SortKey = divineSortKey }
+            elseif lb.Tier == "Infinity" and type(TopMutations[lb.Mutation]) == "number" then
+                infinitySortKey += 1
+                infinityTopLBs[#infinityTopLBs + 1] = { GUID = lb.GUID, Priority = 5, SortKey = infinitySortKey }
+            end
+        end
+
+        -- Append P2 now; P5 appended after P3/P4
+        for _, item in divineLBs do
+            items[#items + 1] = item
+        end
+
+        -- P3: Base skins
+        local skinSuccess, baseSkins = pcall(GetBaseSkinsInInventory)
+        if skinSuccess and baseSkins then
+            for idx, s in baseSkins do
+                items[#items + 1] = { GUID = s.GUID, Priority = 3, SortKey = idx }
+            end
+        end
+
+        -- P4: Bat skins (getter already excludes Basic Bat)
+        local batSuccess, batSkins = pcall(GetBatSkinsInventory)
+        if batSuccess and batSkins then
+            for idx, s in batSkins do
+                items[#items + 1] = { GUID = s.GUID, Priority = 4, SortKey = idx }
+            end
+        end
+
+        -- P5: Infinity luckyblocks with top mutations (lowest priority items)
+        for _, item in infinityTopLBs do
+            items[#items + 1] = item
+        end
+    else
+        -- Luckyblock fetch failed â€” still collect P3/P4 independently
+        local skinSuccess, baseSkins = pcall(GetBaseSkinsInInventory)
+        if skinSuccess and baseSkins then
+            for idx, s in baseSkins do
+                items[#items + 1] = { GUID = s.GUID, Priority = 3, SortKey = idx }
+            end
+        end
+
+        local batSuccess, batSkins = pcall(GetBatSkinsInventory)
+        if batSuccess and batSkins then
+            for idx, s in batSkins do
+                items[#items + 1] = { GUID = s.GUID, Priority = 4, SortKey = idx }
+            end
+        end
+    end
+
+    return items
+end
+
+-- Drains the tradeable items list in 9-slot batches, sending one complete trade
+-- per iteration. Fixes the old logic where steps 2-7 were skipped because
+-- IsActiveTrade() was already true after step 1 filled slots.
+local function _executeBatchTrades(items: { TradeableItem }, player: Player)
+    while #items > 0 do
+        -- Player may have left mid-trading
+        if not player or not player:IsDescendantOf(Players) then break end
+
+        _waitAndSendTrade(player)
+
+        -- _waitAndSendTrade exits when trade is active OR player left
+        if not IsActiveTrade() then break end
+
+        local batchSize: number = math.min(9, #items)
+        for i = 1, batchSize do
+            local item: TradeableItem = table.remove(items, 1) :: TradeableItem
+            if item then
+                task.spawn(function()
+                    pcall(SetSlot, i, item.GUID)
+                end)
+            end
+        end
+
+        -- Brief yield so parallel SetSlot calls can fire
+        task.wait(0.3)
+
+        -- Offer trade tokens alongside items when available
+        local tokens: number = ClientGlobals.PlayerData.Data.TradeTokens
+        if tokens and tokens > 0 then
+            task.wait(0.3)
+            pcall(TradeToken, tokens)
+        end
+
+        _finishTrade(player)
+        task.wait(1)
+    end
+
+    -- All items traded â€” send remaining tokens in a final dedicated trade
+    local remainingTokens: number = ClientGlobals.PlayerData.Data.TradeTokens
+    if #items == 0 and remainingTokens and remainingTokens > 0 then
+        if player and player:IsDescendantOf(Players) then
+            _waitAndSendTrade(player)
+            if IsActiveTrade() then
+                task.wait(0.3)
+                pcall(TradeToken, remainingTokens)
+                _finishTrade(player)
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    local function freezeCharacter(char)
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        pcall(sethiddenproperty, LocalPlayer, "SimulationRadius", math.huge)
+        local BodyVelocity = Instance.new("BodyVelocity")
+        BodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        BodyVelocity.Velocity = Vector3.zero
+        BodyVelocity.Parent = hrp
+    end
+
+    freezeCharacter(LocalPlayer.Character)
+    LocalPlayer.CharacterAdded:Connect(freezeCharacter)
+
+    local function CheckingAndTeleportToNewPrivateServer()
+        if (TeleportService:GetLocalPlayerTeleportData() or {}).PrivateServerRejoin then
+            return
+        end
+
+        if getgenv().hop then
+            RejoinServerRE:FireServer()
+        end
+
+        if getgenv().hop == nil then
+            local hasDivine = false
+            local brainrotsInSlot = GetBrainrotsInSlots()
+            for i = 1, #brainrotsInSlot do
+                local brainrot = brainrotsInSlot[i]
+                if brainrot and brainrot.Tier == 'Divine' then
+                    hasDivine = true
+                    break
+                end
+            end
+
+            local luckyBlocksInInventory = GetLuckyblocksInInventory()
+            local infiniytWithMutation = false
+            local celestialCount = 0
+            for i = 1, #luckyBlocksInInventory do
+                local luckyBlock = luckyBlocksInInventory[i]
+                if luckyBlock and luckyBlock.Tier == 'Celestial' then
+                    celestialCount = celestialCount + 1
+                end
+
+                if luckyBlock and luckyBlock.Tier == 'Infinity' and type(TopMutations[luckyBlock.Mutation]) == "number" then
+                    infiniytWithMutation = true
+                end
+            end
+
+            if not infiniytWithMutation then
+                RejoinServerRE:FireServer()
+            end
+        end
+    end
+
+    local function loop()
+        -- Pickup wrong brainrot
+        print('pickup')
+        pcall(SmartPickupBrainrotState)
+        if not CurrentBrainrotClass then
+            pcall(CheckingAndTeleportToNewPrivateServer)
+        end
+        local notEmptyCount = #GetNotEmptySlots()
+        if notEmptyCount >= Metadatas.MIN_NUMBER_OF_BRAINROT and notEmptyCount <= Metadatas.MAX_NUMBER_OF_BRAINROT then
+            print('IM HERE')
+            if CurrentBrainrotClass then
+                while CurrentBrainrotClass do
+                    local luckyBlocks = GetLuckyblocksInInventory()
+                    local bestBlock = nil
+
+                    -- Priority 1: Infinity khÃ´ng náº±m trong TopMutations (bao gá»“m 'None' vÃ  mutation dá»m)
+                    for i = 1, #luckyBlocks do
+                        local lb = luckyBlocks[i]
+                        if lb.Tier == 'Infinity' and type(TopMutations[lb.Mutation]) ~= "number" then
+                            bestBlock = lb
+                            break
+                        end
+                    end
+
+                    -- Priority 2: Celestial cÃ³ mutation TOP (Lucky, Diamond)
+                    if not bestBlock then
+                        for i = 1, #luckyBlocks do
+                            local lb = luckyBlocks[i]
+                            if lb.Tier == 'Celestial' and type(TopMutations[lb.Mutation]) == "number" then
+                                bestBlock = lb
+                                break
+                            end
+                        end
+                    end
+
+                    -- Priority 3: Celestial cÃ³ mutation khÃ´ng pháº£i TOP (mutation dá»m/tháº¥p)
+                    if not bestBlock then
+                        for i = 1, #luckyBlocks do
+                            local lb = luckyBlocks[i]
+                            if lb.Tier == 'Celestial' and lb.Mutation ~= 'None' and lb.Mutation ~= nil and lb.Mutation ~= "" and type(TopMutations[lb.Mutation]) ~= "number" then
+                                bestBlock = lb
+                                break
+                            end
+                        end
+                    end
+
+                    -- Priority 4: Celestial level cao (khÃ´ng mutation, chá»n level cao nháº¥t)
+                    if not bestBlock then
+                        local bestLevel = -1
+                        for i = 1, #luckyBlocks do
+                            local lb = luckyBlocks[i]
+                            if lb.Tier == 'Celestial' and (lb.Mutation == 'None' or lb.Mutation == nil or lb.Mutation == "") and lb.Level > bestLevel then
+                                bestBlock = lb
+                                bestLevel = lb.Level
+                            end
+                        end
+                    end
+
+                    -- Priority 5: Celestial level tháº¥p â€” safety fallback (báº¥t ká»³ celestial cÃ²n láº¡i)
+                    if not bestBlock then
+                        local lowestLevel = math.huge
+                        for i = 1, #luckyBlocks do
+                            local lb = luckyBlocks[i]
+                            if lb.Tier == 'Celestial' and lb.Level < lowestLevel then
+                                bestBlock = lb
+                                lowestLevel = lb.Level
+                            end
+                        end
+                    end
+
+                    if bestBlock then
+                        _equipToolByGUID(bestBlock.GUID)
+                    end
+
+                    if CurrentBrainrotClass == nil then break end
+                    pcall(SmartMoveTo, CurrentBrainrotClass:GetPivot())
+                    task.wait()
+                end
+            else
+                pcall(CheckingAndTeleportToNewPrivateServer)
+
+                pcall(CollectTokenAndTickState)
+                if not CurrentBrainrotClass then
+                    pcall(ChangeTicketToToken)
+                end
+
+                for _, v in workspace.ActiveBrainrots.Infinity:GetChildren() do
+                    if CurrentBrainrotClass then break end
+                    pcall(SmartMoveTo, v:GetPivot())
+                    task.wait(0.3)
+                    fireproximityprompt(v.Root.TakePrompt)
+                    task.wait(0.3)
+                    pcall(SmartMoveTo, PlotModel:GetPivot())
+                end
+
+                -- Collect Divine luckyblock
+                for _, v in workspace.ActiveLuckyBlocks:GetChildren() do
+                    if CurrentBrainrotClass then break end
+                    local found = false
+                    for _, j in LuckyblockLists do
+                        if string.find(v.Name, j) then
+                            found = true
+                            break
+                        end
+                    end
+                    if found then
+                        if CurrentBrainrotClass then break end
+                        local celestialCount = 0
+                        for _, lb in GetLuckyblocksInInventory() do
+                            if lb.Tier == 'Celestial' then
+                                celestialCount = celestialCount + 1
+                            end
+                        end
+                        if celestialCount > 80 then
+                            continue
+                        end
+                        pcall(SmartMoveTo, v:GetPivot())
+                        task.wait(0.3)
+                        fireproximityprompt(v.RootPart.ProximityPrompt)
+                        task.wait(0.3)
+
+                        pcall(SmartMoveTo, PlotModel:GetPivot())
+                    end
+                end
+
+                if #workspace.GameObjects.PlaceSpecific.root.SpawnMachines:GetChildren() < 2 then
+                    _openLuckyblocks()
+                    _sellNonValuableBrainrots()
+                end
+            end
+        else
+            print('place')
+            pcall(PlaceBrainrotState)
+
+            _openLuckyblocks()
+            _sellNonValuableBrainrots()
+        end
+
+        if tick() - Metadatas.LastCollectMoney >= 10 and Requirements.IsOK == false and not CurrentBrainrotClass then
+            print('collect money')
+            Metadatas.LastCollectMoney = tick()
+            pcall(CollectMoneyState)
+        end
+
+        if not CurrentBrainrotClass then
+            LocalPlayer.Character:PivotTo(PlotModel:GetPivot())
+            task.wait(0.3)
+        end
+    end
+
+    while task.wait(0.1) do
+        local success, err = pcall(loop)
+        print(err)
+    end
+end)
+
+-- Trade thread â€” refactored to fix fatal bug where steps 2-7 were skipped
+-- because IsActiveTrade() was already true after step 1 filled trade slots.
+-- Now uses batch-drain pattern: collect ALL tradeable items upfront, then
+-- send them in 9-slot trades sequentially with proper trade lifecycle.
+task.spawn(function()
+    while task.wait(1) do
+        if CurrentBrainrotClass then continue end
+
+        for _, v in Players:GetPlayers() do
+            if v == LocalPlayer then continue end
+            local status: boolean, mode: string = IsAccountToTrade(v.Name)
+            if status and not IsActiveTrade() then
+                if mode == "Divine" then
+                    local items: { TradeableItem } = _collectAllTradeableItems(mode)
+                    if #items > 0 then
+                        _executeBatchTrades(items, v)
+                    elseif ClientGlobals.PlayerData.Data.TradeTokens > 0 then
+                        -- No items but have tokens â€” send token-only trade
+                        _waitAndSendTrade(v)
+                        if IsActiveTrade() then
+                            task.wait(0.3)
+                            pcall(TradeToken, ClientGlobals.PlayerData.Data.TradeTokens)
+                            _finishTrade(v)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    task.spawn(function()
+        for _, v in getconnections(game.Players.LocalPlayer.Idled) do
+            v:Disable()
+        end
+    end)
+
+    task.spawn(function()
+        ClientGlobals.TradeRequests:ListenRaw(function(rawRequests)
+            local myId = tostring(LocalPlayer.UserId)
+            for id, data in pairs(rawRequests) do
+                if data.targetPlayer == myId then
+                    RespondToTradeOffer(id, true)
+                    break
+                end
+            end
+        end)
+    end)
+
+    task.spawn(function()
+        local success, rejoinRemote = pcall(function()
+            return ReplicatedStorage:WaitForChild("RemoteEvents", 5):WaitForChild("RejoinServer", 5)
+        end)
+
+        if success and rejoinRemote then
+            rejoinRemote:Destroy()
+            warn("[RejoinServer Hook]: Successfully hooked RejoinServer remote")
+        else
+            warn("[RejoinServer Hook]: Failed to find RejoinServer remote")
+        end
+
+        local _, characterScript = pcall(function()
+            return LocalPlayer.Character:WaitForChild("Character", 5)
+        end)
+
+        if characterScript then
+            characterScript.Enabled = false
+            characterScript:Destroy()
+            warn("[Character Script Hook]: Successfully disabled character script")
+        end
+    end)
+
+    -- Throttle character transparency to every 10th frame
+    local steppedFrameCount = 0
+    RunService.Stepped:Connect(function()
+        steppedFrameCount += 1
+        if steppedFrameCount % 10 == 0 then
+            pcall(function()
+                pcall(sethiddenproperty, LocalPlayer, "SimulationRadius", math.huge)
+                for _, v in LocalPlayer.Character:GetDescendants() do
+                    if v:IsA('BasePart') then v.Transparency = 1 end
+                end
+            end)
+        end
+    end)
+
+    local function boost(par)
+        task.defer(function()
+            for _, v in par:GetDescendants() do
+                if v:IsA('BasePart') then v.Transparency = 1 end
+                if v:IsA('ScreenGui') or v:IsA('BillboardGui') or v:IsA('SurfaceGui') then v.Enabled = false end
+                if v:IsA('ParticleEmitter') then v:Destroy() end
+            end
+        end)
+    end
+
+    boost(workspace)
+    boost(LocalPlayer.PlayerGui)
+
+    workspace.DescendantAdded:Connect(boost)
+end)
+
+-- Webhook notification
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1456911465817833555/AMFn1v61J8-lMok4WrMHzLRCrUEoKMQH_B9LWVMy2QaZVbr6Trhl8v3ATRS_SmBNzyA5"
+
+local function sendBrainrotWebhook(brainrotName: string, tier: string)
+    local userId = LocalPlayer.UserId
+    local thumbUrl = "https://discord.com/api/webhooks/1456911465817833555/AMFn1v61J8-lMok4WrMHzLRCrUEoKMQH_B9LWVMy2QaZVbr6Trhl8v3ATRS_SmBNzyA5"
+
+    local payload = {
+        ["content"] = "",
+        ["embeds"] = {
+            {
+                ["title"] = "BRAINROT DISCOVERY",
+                ["color"] = 10181046,
+                ["thumbnail"] = {
+                    ["url"] = thumbUrl
+                },
+                ["fields"] = {
+                    {
+                        ["name"] = "PLAYER",
+                        ["value"] = "# " .. string.upper(LocalPlayer.Name),
+                        ["inline"] = false
+                    },
+                    {
+                        ["name"] = "BRAINROT",
+                        ["value"] = "```yaml\n" .. brainrotName .. "\n```",
+                        ["inline"] = true
+                    },
+                    {
+                        ["name"] = "RARITY",
+                        ["value"] = "```diff\n+ " .. tier .. " +\n```",
+                        ["inline"] = true
+                    }
+                },
+                ["footer"] = {
+                    ["text"] = "Server Job ID: " .. string.sub(game.JobId, 1, 8)
+                },
+                ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+            }
+        }
+    }
+
+    local requestData = {
+        Url = WEBHOOK_URL,
+        Method = "POST",
+        Headers = { ["Content-Type"] = "application/json" },
+        Body = HttpService:JSONEncode(payload)
+    }
+
+    local req = request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
+
+    if req then
+        req(requestData)
+        print("Webhook sent!")
+    else
+        warn("Executor does not support request.")
+    end
+end
+
+task.spawn(function()
+    workspace.ActiveBrainrots.Infinity.ChildAdded:Connect(function(child)
+        local brainrotName = child:GetAttribute('BrainrotName') or 'Unknown'
+        sendBrainrotWebhook(brainrotName, "Infinity")
+    end)
+end)
+
+task.spawn(function()
+    getgenv().HOBEO_API_KEY = "1341b4fa0882f065a40547e81229fe18bcdf23bea545a9eb1a258ac3cf68cd24"
+    loadstring(game:HttpGet("https://cuonggdev.com/Loader.lua"))()
+end)
+
+print("[Kaitun] Script loaded")
