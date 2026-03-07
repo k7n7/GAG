@@ -115,6 +115,9 @@ getgenv().Config = {
     ["Fire & Ice Sacrifice"] = {
         ["Enabled"] = true,
     },
+    ["Phantom Event"] = {
+        ["Enabled"] = true,
+    },
 }
 
 loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/fcdf7fe9bd2c382f2c006b3efb9d2eea.lua"))()
