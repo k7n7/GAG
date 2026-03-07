@@ -1,37 +1,120 @@
-setfpscap(5)
-script_key = "jegqFAGVLeswJxVkHypTMpnImzIJxEIT";
-task.wait(10) -- DO NOT remove this wait, it's against double counts.
--- INSERT YOUR CONFIG HERE --
-getgenv().GGFX_MODE = 2 --1 = REMOVE_TEXTURES : more stable! but no visuals
-getgenv().GRANK_FIRST = true
-getgenv().GRANK_TO = 5
-getgenv().GREBIRTH_TO = 4
-getgenv().GZONE_TO = 101 -- to enter event from W1 put 1, from W2 put 100, from W3 200, from W4 240
-getgenv().GHALLOWEEN_JOIN_LOCAL = true
-getgenv().GDO_HALLOWEEN_WORLD = true
-getgenv().GHALLOWEEN_WORLD_BUY_FROM_SPECIFIC_HOUSE = {1,2,3}
-getgenv().GHALLOWEEN_OPEN_HOUSE_6 = false
-getgenv().GHALLOWEEN_WORLD_RECIPES_TO_DO = {1,2,3}
---getgenv().GKEEP_CURRENCY_FOR_CRAFTS = "20m"
-getgenv().GHALLOWEEN_WORLD_BUY_FROM_HOUSES_BELOW = false
-getgenv().GHALLOWEEN_WORLD_HATCH_SPOTS = 0
-getgenv().GHALLOWEEN_WORLD_ALLOW_WORSE_EGG_PLACEMENT = true
-getgenv().GHALLOWEEN_WORLD_USE_BOOSTS = true
-getgenv().GEVENT_UPGRADES = {
-    'HalloweenCandyMultiplier',
-    'HalloweenEggLuck',
-    'HalloweenTrickOrTreatLuck',
-    'HalloweenMoreDiamonds',
-    'HalloweenMoreWitchHats',
-    'HalloweenHugeLuck',
-    'HalloweenTitanicLuck',
-} --you can put the comment symbols (these 2 dashes): -- in front of the ones you don't want to upgrade
-getgenv().GWEBHOOK_USERID = ""
-getgenv().GWEBHOOK_LINK = "https://discord.com/api/webhooks/1304843909297602700/q36k-rICz9u3MZqp8MT5fSQ65sOsn01bs2m482jqF5T-KDcjBMAsOQxBcISU4JsNvoMN"
-getgenv().GMAIL_RECEIVERS = {"qEYPQaAf610","Fd2YgZrJ74"} -- for Huges and mailrules.
-getgenv().GMAIL_ITEMS = {
-["Brainrot egg"] = {Class = "Egg", Id = "Exclusive Egg 56", MinAmount = 1},
-["Send Diamonds"] = {Class = "Currency", Id = "Diamonds", KeepAmount = "2m", MinAmount = "10m"}, -- mail diamonds, to enable lower MinAmount..
+script_key="pDXlNFexKPVpRuomVnwmICAauemZudYA";
+getgenv().Config = {
+    ["Main"] = {
+        ["Keep Inventory"] = "Draculini Meowlini",
+        ["Collect Cash"] = true,
+        ["Collect Tokens"] = true,
+        ["Collect Brainrots"] = true,
+        ["Protected Rarities"] = {"Infinity"},
+    },
+    ["Performance"] = {
+        ["FPS Cap"] = 20,
+        ["Black Screen"] = false,
+        ["Kick if Ping above"] = 75000,
+    },
+    ["Webhook"] = {
+        ["Url"] = "https://discord.com/api/webhooks/1252781589436301413/yMUiKF9KrOySpL8u40Em5gIeJXu6Yqi7MvsIPMPIrLs5XS-jxiFD2DxwW2BU2UOcbiIl",
+        ["Discord ID"] = "",
+        ["Ignore Notify"] = {},
+        ["Monitor Interval"] = 0,                        -- Minutes between each Account Monitoring webhook (0 = disabled)
+    },
+    ["Solo Mode"] = {
+        ["Server Cloning"] = true,
+        ["Enabled"] = true,
+    },
+    ["Dupe Mode"] = {
+        ["Arcade Machine"] = {
+            ["Enabled"] = false,
+            ["Brainrots to Deposit"] = 1,
+            ["Use Rarities"] = {""},
+            ["Use Specific Brainrot"] = {""},
+            ["Min Luck Minutes"] = 0,
+            ["Max Level"] = 191,
+            ["Max Scale"] = 50,
+            ["Size Priority"] = 0,
+        },
+        ["ATM Machine"] = {
+            ["Enabled"] = false,
+            ["Brainrots to Deposit"] = 1,
+            ["Use Rarities"] = {""},
+            ["Use Specific Brainrot"] = {""},
+            ["Min Luck Minutes"] = 0,
+            ["Max Level"] = 191,
+            ["Max Scale"] = 50,
+            ["Size Priority"] = 0,
+        },
+        ["Blackhole Machine"] = {
+            ["Enabled"] = false,
+            ["Brainrots to Deposit"] = 1,
+            ["Use Rarities"] = {""},
+            ["Use Specific Brainrot"] = {""},
+            ["Min Luck Minutes"] = 0,
+            ["Max Level"] = 191,
+            ["Max Scale"] = 50,
+            ["Size Priority"] = 0,
+        },
+        ["Spawn Machine"] = {
+            ["Enabled"] = false,
+            ["Brainrots to Deposit"] = 1,
+            ["Use Rarities"] = {""},
+            ["Use Specific Brainrot"] = {""},
+            ["Min Luck Minutes"] = 0,
+            ["Max Level"] = 190,
+            ["Max Scale"] = 2.99,
+            ["Size Priority"] = 0,
+        },
+        ["Letterbox Machine"] = {
+            ["Enabled"] = false,
+            ["Brainrots to Deposit"] = 1,
+            ["Use Rarities"] = {""},
+            ["Use Specific Brainrot"] = { ""},
+            ["Min Luck Minutes"] = 0,
+            ["Max Level"] = 191,
+            ["Max Scale"] = 50,
+            ["Size Priority"] = 0,
+        },
+        ["Doom Machine"] = {
+            ["Enabled"] = false,
+            ["Brainrots to Deposit"] = 1,
+            ["Use Rarities"] = {""},
+            ["Use Specific Brainrot"] = {""},
+            ["Min Luck Minutes"] = 0,
+            ["Max Level"] = 191,
+            ["Max Scale"] = 50,
+            ["Size Priority"] = 0,
+        },
+        ["Fire & Ice Machine"] = {
+            ["Enabled"] = false,
+            ["Brainrots to Deposit"] = 1,
+            ["Use Rarities"] = {""},
+            ["Use Specific Brainrot"] = {""},
+            ["Min Luck Minutes"] = 0,
+            ["Max Level"] = 191,
+            ["Max Scale"] = 50,
+            ["Size Priority"] = 0,
+        },
+    },
+    ["Auto Rebirth"] = {
+        ["Enabled"] = true,
+        ["Max Rebirth"] = 24,
+        ["Max Speed"] = 510,
+    },
+    ["Lucky Blocks"] = {
+        ["Enabled"] = true,                              -- Enable Infinity farming while duping
+        ["Collect Types"] = {"Divine", "Celestial"},      -- Types to collect (Divine > Celestial, NOT Secret)
+        ["Max Level"] = 200,                              -- Max LB level (under 200 = better conversion)
+        ["Pickup Attempts"] = 8,                          -- Pickup attempts per LB
+        ["Auto Upgrade LB"] = false,                       -- Sell current LB if a better one spawns
+    },
+    ["Tower"] = {
+        ["Enabled"] = true,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
+        ["Auto Claim"] = true, 
+        ["Max Deposits"] = 10, -- 0 = game max (20), >0 = stop depositing at this count  
+        ["Collect Reward"] = {"Noobini Infeeny", "Anububu" , "Meta Technetta" , "Magmew"},
+    },
+    ["Fire & Ice Sacrifice"] = {
+        ["Enabled"] = true,
+    },
 }
-getgenv().GMAX_MAIL_COST = "2m" -- this can limit how many mails sent/day
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/6e75890d2e36b4613270666c4f5ccab3.lua"))()
+
+loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/fcdf7fe9bd2c382f2c006b3efb9d2eea.lua"))()
