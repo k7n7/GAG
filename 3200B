@@ -105,7 +105,7 @@ getgenv().Config = {
         ["Max Level"] = 200,                              -- Max LB level (under 200 = better conversion)
         ["Pickup Attempts"] = 8,                          -- Pickup attempts per LB
         ["Auto Upgrade LB"] = false,                       -- Sell current LB if a better one spawns
-        ["Auto Open"] = {"Divine Lucky Block", "Phantom Block"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
+        ["Auto Open"] = {"Divine", "Phantom"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
     },
     ["Tower"] = {
         ["Enabled"] = true,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
