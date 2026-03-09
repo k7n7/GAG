@@ -96,7 +96,7 @@ getgenv().Config = {
     },
     ["Auto Rebirth"] = {
         ["Enabled"] = true,
-        ["Max Rebirth"] = 24,
+        ["Max Rebirth"] = 27,
         ["Max Speed"] = 510,
     },
     ["Lucky Blocks"] = {
