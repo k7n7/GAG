@@ -30,7 +30,7 @@ getgenv().Config = {
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
-            ["Max Scale"] = 50,
+            ["Max Scale"] = 0,
             ["Size Priority"] = 0,
         },
         ["ATM Machine"] = {
@@ -40,7 +40,7 @@ getgenv().Config = {
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
-            ["Max Scale"] = 50,
+            ["Max Scale"] = 0,
             ["Size Priority"] = 0,
         },
         ["Blackhole Machine"] = {
@@ -50,7 +50,7 @@ getgenv().Config = {
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
-            ["Max Scale"] = 50,
+            ["Max Scale"] = 0,
             ["Size Priority"] = 0,
         },
         ["Spawn Machine"] = {
@@ -70,7 +70,7 @@ getgenv().Config = {
             ["Use Specific Brainrot"] = { "Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
-            ["Max Scale"] = 50,
+            ["Max Scale"] = 0,
             ["Size Priority"] = 0,
         },
         ["Doom Machine"] = {
@@ -80,7 +80,7 @@ getgenv().Config = {
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
-            ["Max Scale"] = 50,
+            ["Max Scale"] = 0,
             ["Size Priority"] = 0,
         },
         ["Fire & Ice Machine"] = {
@@ -90,7 +90,7 @@ getgenv().Config = {
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
-            ["Max Scale"] = 50,
+            ["Max Scale"] = 0,
             ["Size Priority"] = 0,
         },
     },
@@ -105,6 +105,7 @@ getgenv().Config = {
         ["Max Level"] = 200,                              -- Max LB level (under 200 = better conversion)
         ["Pickup Attempts"] = 8,                          -- Pickup attempts per LB
         ["Auto Upgrade LB"] = false,                       -- Sell current LB if a better one spawns
+        ["Auto Open"] = {"Divine"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
     },
     ["Tower"] = {
         ["Enabled"] = true,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
