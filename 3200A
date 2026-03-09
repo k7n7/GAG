@@ -116,7 +116,7 @@ getgenv().Config = {
         ["Enabled"] = false,
     },
     ["Phantom Event"] = {
-        ["Enabled"] = true,
+        ["Enabled"] = false,
     },
 }
 
