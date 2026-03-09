@@ -13,7 +13,7 @@ getgenv().Config = {
         ["Kick if Ping above"] = 75000,
     },
     ["Webhook"] = {
-        ["Url"] = "https://discord.com/api/webhooks/1477665244691304539/kOvvqkLnCLr2q-7Hxm8gLctRvBdimZWmwn1jqHGnBILB2zA0Y9XrmWuv9lGuXHXkG3eZ",
+        ["Url"] = "https://discordapp.com/api/webhooks/1477665244691304539/kOvvqkLnCLr2q-7Hxm8gLctRvBdimZWmwn1jqHGnBILB2zA0Y9XrmWuv9lGuXHXkG3eZ",
         ["Discord ID"] = "402895905986052106",
         ["Ignore Notify"] = {},
         ["Monitor Interval"] = 0,                        -- Minutes between each Account Monitoring webhook (0 = disabled)
