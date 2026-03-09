@@ -1,7 +1,7 @@
 script_key="pDXlNFexKPVpRuomVnwmICAauemZudYA";
 getgenv().Config = {
     ["Main"] = {
-        ["Keep Inventory"] = "Draculini Meowlini",
+        ["Keep Inventory"] = "Dutchmello Velerino",
         ["Collect Cash"] = true,
         ["Collect Tokens"] = true,
         ["Collect Brainrots"] = true,
@@ -24,30 +24,30 @@ getgenv().Config = {
     },
     ["Dupe Mode"] = {
         ["Arcade Machine"] = {
-            ["Enabled"] = false,
+            ["Enabled"] = true,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
-            ["Use Specific Brainrot"] = {""},
+            ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
             ["Max Scale"] = 50,
             ["Size Priority"] = 0,
         },
         ["ATM Machine"] = {
-            ["Enabled"] = false,
+            ["Enabled"] = true,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
-            ["Use Specific Brainrot"] = {""},
+            ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
             ["Max Scale"] = 50,
             ["Size Priority"] = 0,
         },
         ["Blackhole Machine"] = {
-            ["Enabled"] = false,
+            ["Enabled"] = true,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
-            ["Use Specific Brainrot"] = {""},
+            ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
             ["Max Scale"] = 50,
@@ -64,30 +64,30 @@ getgenv().Config = {
             ["Size Priority"] = 0,
         },
         ["Letterbox Machine"] = {
-            ["Enabled"] = false,
+            ["Enabled"] = true,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
-            ["Use Specific Brainrot"] = { ""},
+            ["Use Specific Brainrot"] = { "Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
             ["Max Scale"] = 50,
             ["Size Priority"] = 0,
         },
         ["Doom Machine"] = {
-            ["Enabled"] = false,
+            ["Enabled"] = true,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
-            ["Use Specific Brainrot"] = {""},
+            ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
             ["Max Scale"] = 50,
             ["Size Priority"] = 0,
         },
         ["Fire & Ice Machine"] = {
-            ["Enabled"] = false,
+            ["Enabled"] = true,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
-            ["Use Specific Brainrot"] = {""},
+            ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
             ["Min Luck Minutes"] = 0,
             ["Max Level"] = 191,
             ["Max Scale"] = 50,
@@ -96,7 +96,7 @@ getgenv().Config = {
     },
     ["Auto Rebirth"] = {
         ["Enabled"] = true,
-        ["Max Rebirth"] = 27,
+        ["Max Rebirth"] = 24,
         ["Max Speed"] = 510,
     },
     ["Lucky Blocks"] = {
@@ -105,13 +105,12 @@ getgenv().Config = {
         ["Max Level"] = 200,                              -- Max LB level (under 200 = better conversion)
         ["Pickup Attempts"] = 8,                          -- Pickup attempts per LB
         ["Auto Upgrade LB"] = false,                       -- Sell current LB if a better one spawns
-        ["Auto Open"] = {"Divine"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
     },
     ["Tower"] = {
         ["Enabled"] = true,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
         ["Auto Claim"] = true, 
-        ["Max Deposits"] = 15, -- 0 = game max (20), >0 = stop depositing at this count  
-        ["Collect Reward"] = {"Noobini Infeeny", "Anububu" , "Meta Technetta" , "Magmew" , "Doomini Tiktookini"},
+        ["Max Deposits"] = 10, -- 0 = game max (20), >0 = stop depositing at this count  
+        ["Collect Reward"] = {"Noobini Infeeny", "Anububu" , "Meta Technetta" , "Magmew"},
     },
     ["Fire & Ice Sacrifice"] = {
         ["Enabled"] = true,
