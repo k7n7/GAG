@@ -8,7 +8,7 @@ getgenv().Config = {
         ["Protected Rarities"] = {"Infinity"},
     },
     ["Performance"] = {
-        ["FPS Cap"] = 20,
+        ["FPS Cap"] = 15,
         ["Black Screen"] = false,
         ["Kick if Ping above"] = 75000,
     },
