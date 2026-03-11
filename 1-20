@@ -108,7 +108,7 @@ getgenv().Config = {
         ["Auto Open"] = {"Divine"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
     },
     ["Tower"] = {
-        ["Enabled"] = true,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
+        ["Enabled"] = false,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
         ["Auto Claim"] = true, 
         ["Max Deposits"] = 15, -- 0 = game max (20), >0 = stop depositing at this count  
         ["Collect Reward"] = {"Noobini Infeeny", "Anububu" , "Meta Technetta" , "Magmew"},
