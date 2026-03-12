@@ -7,7 +7,7 @@ getgenv().Config = {
         ["Collect Brainrots"] = true,
         ["Protected Rarities"] = {"Infinity"},
         ["Auto Sell"] = {
-            ["Names"] = {"Candy", "Phantom"},      
+            ["Names"] = {"Candy", "Phantom", "Celestial"},      
             ["Rarities"] = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Cosmic", "Secret", "Celestial", "Divine"},  -- rarities to auto-sell
         },
     },
