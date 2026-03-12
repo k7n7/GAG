@@ -1,11 +1,15 @@
 script_key="pDXlNFexKPVpRuomVnwmICAauemZudYA";
 getgenv().Config = {
     ["Main"] = {
-        ["Keep Inventory"] = "Dutchmello Velerino",
+        ["Keep Inventory"] = {"Dutchmello Velerino"},
         ["Collect Cash"] = true,
         ["Collect Tokens"] = true,
         ["Collect Brainrots"] = true,
         ["Protected Rarities"] = {"Infinity"},
+        ["Auto Sell"] = {
+            ["Names"] = {"Candy", "Phantom", "Celestial"},      
+            ["Rarities"] = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Cosmic", "Secret", "Celestial", "Divine"},  -- rarities to auto-sell
+        },
     },
     ["Performance"] = {
         ["FPS Cap"] = 15,
@@ -14,7 +18,7 @@ getgenv().Config = {
     },
     ["Webhook"] = {
         ["Url"] = "https://discord.com/api/webhooks/1479892711149666304/fcq2pTPV4DHvOrNFguV3ZwIxEaCl-yWlnSy6BzVlBwQ7bRhn4UwEAMi2wPD4J4gfpyMw",
-        ["Discord ID"] = "",
+        ["Discord ID"] = "402895905986052106",
         ["Ignore Notify"] = {},
         ["Monitor Interval"] = 0,                        -- Minutes between each Account Monitoring webhook (0 = disabled)
     },
@@ -101,7 +105,7 @@ getgenv().Config = {
     },
     ["Lucky Blocks"] = {
         ["Enabled"] = true,                              -- Enable Infinity farming while duping
-        ["Collect Types"] = {"Divine", "Celestial"},      -- Types to collect (Divine > Celestial, NOT Secret)
+        ["Collect Types"] = {"Divine"},      -- Types to collect (Divine > Celestial, NOT Secret)
         ["Max Level"] = 200,                              -- Max LB level (under 200 = better conversion)
         ["Pickup Attempts"] = 8,                          -- Pickup attempts per LB
         ["Auto Upgrade LB"] = false,                       -- Sell current LB if a better one spawns
