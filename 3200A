@@ -7,7 +7,7 @@ getgenv().Config = {
         ["Collect Brainrots"] = true,
         ["Protected Rarities"] = {"Infinity"},
         ["Auto Sell"] = {
-            ["Names"] = {},      
+            ["Names"] = {"Candy", "Phantom"},      
             ["Rarities"] = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Cosmic", "Secret", "Celestial", "Divine"},  -- rarities to auto-sell
         },
     },
@@ -109,7 +109,7 @@ getgenv().Config = {
         ["Max Level"] = 200,                              -- Max LB level (under 200 = better conversion)
         ["Pickup Attempts"] = 8,                          -- Pickup attempts per LB
         ["Auto Upgrade LB"] = false,                       -- Sell current LB if a better one spawns
-        ["Auto Open"] = {"Divine", "Candy", "Phantom"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
+        ["Auto Open"] = {"Divine"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
     },
     ["Tower"] = {
         ["Enabled"] = false,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
