@@ -18,7 +18,7 @@ getgenv().Config = {
     },
     ["Webhook"] = {
         ["Url"] = "https://discord.com/api/webhooks/1479892711149666304/fcq2pTPV4DHvOrNFguV3ZwIxEaCl-yWlnSy6BzVlBwQ7bRhn4UwEAMi2wPD4J4gfpyMw",
-        ["Discord ID"] = "402895905986052106",
+        ["Discord ID"] = "xxx",
         ["Ignore Notify"] = {},
         ["Monitor Interval"] = 0,                        -- Minutes between each Account Monitoring webhook (0 = disabled)
     },
