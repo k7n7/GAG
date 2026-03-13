@@ -8,7 +8,7 @@ getgenv().Config = {
         ["Protected Rarities"] = {"Infinity"},
         ["Auto Sell"] = {
             ["Names"] = {"Candy", "Phantom"},      
-            ["Rarities"] = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Cosmic", "Secret", "Divine"},  -- rarities to auto-sell
+            ["Rarities"] = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Cosmic", "Secret", "Celestial", "Divine"},  -- rarities to auto-sell
         },
     },
     ["Performance"] = {
