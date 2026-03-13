@@ -12,7 +12,7 @@ getgenv().Config = {
         },
     },
     ["Performance"] = {
-        ["FPS Cap"] = 15,
+        ["FPS Cap"] = 20,
         ["Black Screen"] = false,
         ["Kick if Ping above"] = 75000,
     },
@@ -28,7 +28,7 @@ getgenv().Config = {
     },
     ["Dupe Mode"] = {
         ["Arcade Machine"] = {
-            ["Enabled"] = true,
+            ["Enabled"] = false,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
@@ -38,7 +38,7 @@ getgenv().Config = {
             ["Size Priority"] = 0,
         },
         ["ATM Machine"] = {
-            ["Enabled"] = true,
+            ["Enabled"] = false,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
@@ -48,7 +48,7 @@ getgenv().Config = {
             ["Size Priority"] = 0,
         },
         ["Blackhole Machine"] = {
-            ["Enabled"] = true,
+            ["Enabled"] = false,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
@@ -68,7 +68,7 @@ getgenv().Config = {
             ["Size Priority"] = 0,
         },
         ["Letterbox Machine"] = {
-            ["Enabled"] = true,
+            ["Enabled"] = false,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
             ["Use Specific Brainrot"] = { "Dutchmello Velerino"},
@@ -78,7 +78,7 @@ getgenv().Config = {
             ["Size Priority"] = 0,
         },
         ["Doom Machine"] = {
-            ["Enabled"] = true,
+            ["Enabled"] = false,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
@@ -88,7 +88,7 @@ getgenv().Config = {
             ["Size Priority"] = 0,
         },
         ["Fire & Ice Machine"] = {
-            ["Enabled"] = true,
+            ["Enabled"] = false,
             ["Brainrots to Deposit"] = 1,
             ["Use Rarities"] = {""},
             ["Use Specific Brainrot"] = {"Dutchmello Velerino"},
@@ -112,9 +112,9 @@ getgenv().Config = {
         ["Auto Open"] = {"Divine", "Candy", "Phantom", "Celestial"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
     },
     ["Tower"] = {
-        ["Enabled"] = false,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
+        ["Enabled"] = true,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
         ["Auto Claim"] = true, 
-        ["Max Deposits"] = 15, -- 0 = game max (20), >0 = stop depositing at this count  
+        ["Max Deposits"] = 20, -- 0 = game max (20), >0 = stop depositing at this count  
         ["Collect Reward"] = {"Noobini Infeeny", "Anububu" , "Meta Technetta" , "Magmew"},
     },
     ["Fire & Ice Sacrifice"] = {
