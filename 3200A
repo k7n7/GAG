@@ -12,8 +12,8 @@ getgenv().Config = {
         },
     },
     ["Performance"] = {
-        ["FPS Cap"] = 20,
-        ["Black Screen"] = false,
+        ["FPS Cap"] = 15,
+        ["Black Screen"] = true,
         ["Kick if Ping above"] = 75000,
     },
     ["Webhook"] = {
@@ -121,7 +121,7 @@ getgenv().Config = {
         ["Enabled"] = false,
     },
     ["Phantom Event"] = {
-        ["Enabled"] = true,
+        ["Enabled"] = false,
     },
 }
 
