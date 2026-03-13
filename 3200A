@@ -12,7 +12,7 @@ getgenv().Config = {
         },
     },
     ["Performance"] = {
-        ["FPS Cap"] = 20,
+        ["FPS Cap"] = 15,
         ["Black Screen"] = true,
         ["Kick if Ping above"] = 75000,
     },
