@@ -7,12 +7,12 @@ getgenv().Config = {
         ["Collect Brainrots"] = true,
         ["Protected Rarities"] = {"Infinity"},
         ["Auto Sell"] = {
-            ["Names"] = {"Candy", "Phantom", "Celestial"},      
-            ["Rarities"] = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Cosmic", "Secret", "Celestial", "Divine"},  -- rarities to auto-sell
+            ["Names"] = {"Candy", "Phantom"},      
+            ["Rarities"] = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical", "Cosmic", "Secret", "Divine"},  -- rarities to auto-sell
         },
     },
     ["Performance"] = {
-        ["FPS Cap"] = 15,
+        ["FPS Cap"] = 20,
         ["Black Screen"] = true,
         ["Kick if Ping above"] = 75000,
     },
@@ -105,11 +105,11 @@ getgenv().Config = {
     },
     ["Lucky Blocks"] = {
         ["Enabled"] = true,                              -- Enable Infinity farming while duping
-        ["Collect Types"] = {"Divine"},      -- Types to collect (Divine > Celestial, NOT Secret)
+        ["Collect Types"] = {"Celestial", "Divine"},      -- Types to collect (Divine > Celestial, NOT Secret)
         ["Max Level"] = 200,                              -- Max LB level (under 200 = better conversion)
         ["Pickup Attempts"] = 8,                          -- Pickup attempts per LB
         ["Auto Upgrade LB"] = false,                       -- Sell current LB if a better one spawns
-        ["Auto Open"] = {"Divine", "Candy", "Phantom", "Celestial"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
+        ["Auto Open"] = {"Divine", "Candy", "Phantom"},     -- auto-open LB tools from inventory (table of types to open, true = same as Collect Types, false = disabled)
     },
     ["Tower"] = {
         ["Enabled"] = true,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
@@ -121,7 +121,7 @@ getgenv().Config = {
         ["Enabled"] = false,
     },
     ["Phantom Event"] = {
-        ["Enabled"] = false,
+        ["Enabled"] = true,
     },
 }
 
