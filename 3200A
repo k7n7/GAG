@@ -12,7 +12,7 @@ getgenv().Config = {
         },
     },
     ["Performance"] = {
-        ["FPS Cap"] = 15,
+        ["FPS Cap"] = 10,
         ["Black Screen"] = true,
         ["Kick if Ping above"] = 75000,
     },
@@ -114,11 +114,11 @@ getgenv().Config = {
     ["Tower"] = {
         ["Enabled"] = true,                                 -- Auto Tower Trials for Secret/Celestial/Divine/Infinity
         ["Auto Claim"] = true, 
-        ["Max Deposits"] = 20, -- 0 = game max (20), >0 = stop depositing at this count  
+        ["Max Deposits"] = 15, -- 0 = game max (20), >0 = stop depositing at this count  
         ["Collect Reward"] = {"Noobini Infeeny", "Anububu" , "Meta Technetta" , "Magmew"},
     },
     ["Fire & Ice Sacrifice"] = {
-        ["Enabled"] = false,
+        ["Enabled"] = true,
     },
     ["Phantom Event"] = {
         ["Enabled"] = true,
