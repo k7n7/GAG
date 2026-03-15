@@ -32,7 +32,7 @@ getgenv().Config = {
         ["Server Cloning"] = true,                -- teleport to private server if not alone
     },
     ["Phantom"] = {
-        ["Enabled"] = true,                        -- auto-collect orbs & deposit when Phantom Event spawns
+        ["Enabled"] = false,                        -- auto-collect orbs & deposit when Phantom Event spawns
         ["Deposit Threshold"] = 100,               -- deposit orbs at cannon when carrying this many (50-200)
     },
 }
