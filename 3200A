@@ -31,6 +31,10 @@ getgenv().Config = {
     ["Solo Mode"] = {
         ["Server Cloning"] = true,                -- teleport to private server if not alone
     },
+    ["Phantom"] = {
+        ["Enabled"] = true,                        -- auto-collect orbs & deposit when Phantom Event spawns
+        ["Deposit Threshold"] = 100,               -- deposit orbs at cannon when carrying this many (50-200)
+    },
 }
 
 loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/b380a8faecf94bbe3b160297a5aa8249.lua"))()
