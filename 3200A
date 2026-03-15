@@ -26,7 +26,7 @@ getgenv().Config = {
     },
     ["Auto Rebirth"] = {
         ["Enabled"] = true,                        -- master switch for auto-rebirth
-        ["Max Rebirth"] = 27,                       -- 0 = NO auto-rebirth; set to target rebirth level (e.g. 24) to auto-rebirth up to that level
+        ["Max Rebirth"] = 24,                       -- 0 = NO auto-rebirth; set to target rebirth level (e.g. 24) to auto-rebirth up to that level
     },
     ["Solo Mode"] = {
         ["Server Cloning"] = true,                -- teleport to private server if not alone
