@@ -1,4 +1,3 @@
-task.wait(30)
 script_key="rbQOgCYMMBVaMrlHwRjdcgTkjpRpIUBv";
 getgenv().SailorPieceConfig = {
     AutoFarm         = true,          -- Auto đánh mob + làm quest
