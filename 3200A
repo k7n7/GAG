@@ -20,7 +20,7 @@ getgenv().SailorPieceConfig = {
         "Mythical Chest",
     },
     AutoBlessing     = true,          -- Auto bless vũ khí đang cầm (tự detect)
-    AutoReroll       = true,          -- Auto dùng Race/Clan Reroll
+    AutoReroll       = false,          -- Auto dùng Race/Clan Reroll
     TargetRace       = "Kitsune",     -- Race mục tiêu (dừng khi đạt)
     TargetClan       = "Monarch",     -- Clan mục tiêu (dừng khi đạt)
     AutoTraitReroll  = true,          -- Auto reroll trait đến khi đạt rarity mục tiêu
