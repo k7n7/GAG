@@ -3,8 +3,8 @@ setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     FARM_UNTIL_LEVEL = 11500,
-    AUTO_FARM = { "Jinwoo Boss", "Alucard Boss", "Yuji Boss", "Gojo Boss", "Sukuna Boss", "Anos Boss", "Aizen Boss", "Strongest of Today Boss", "Strongest in History Boss", "Rimuru Boss", "Saber Boss", "QinShi Boss", "Ichigo Boss", "Gilgamesh Boss", "Blessed Maiden Boss", "Saber Alter Boss", "Yamato Boss", "Swordsman" },
-    SUMMON_BOSS = { "Saber Alter Normal", "Blessed Maiden Normal", "Gilgamesh Normal", "Ichigo", "Qin Shi", "Saber" },
+    AUTO_FARM = { "Jinwoo Boss", "Alucard Boss", "Yuji Boss", "Gojo Boss", "Sukuna Boss", "Anos Boss", "Aizen Boss", "Strongest of Today Boss", "Strongest in History Boss", "Rimuru Boss", "Saber Boss", "QinShi Boss", "Ichigo Boss", "Swordsman" },
+    SUMMON_BOSS = { "Ichigo", "Qin Shi", "Saber" },
 
     EQUIP_SWORD = { "Shadow Monarch", "Escanor", "Rimuru", "Shadow", "Ichigo", "Aizen", "Ragna", "Jinwoo", "Gryphon", "Saber", "Dark Blade", "Katana" },
     BUY_SWORD = { "Gryphon", "Dark Blade", "Katana" },
