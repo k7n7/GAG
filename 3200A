@@ -1,5 +1,6 @@
 script_key="gsPzKFMxllrpfVFBhEsHlGUoBaQJTvmq";
 setfpscap(10)
+
 getgenv().sailorPieceConfig = {  
     FARM_UNTIL_LEVEL = 11500,
     AUTO_FARM = { "Jinwoo Boss", "Alucard Boss", "Yuji Boss", "Gojo Boss", "Sukuna Boss", "Anos Boss", "Aizen Boss", "Strongest of Today Boss", "Strongest in History Boss", "Rimuru Boss", "Saber Boss", "QinShi Boss", "Ichigo Boss", "Gilgamesh Boss", "Blessed Maiden Boss", "Saber Alter Boss", "Yamato Boss", "Swordsman" },
@@ -10,7 +11,7 @@ getgenv().sailorPieceConfig = {
     BLESS_WEAPON = { ["Gryphon"] = 6, ["Dark Blade"] = 3 },
 
     STAT_POINT_PERCENTAGE = { ["Sword"] = 90, ["Defense"] = 10, ["Melee"] = 0, ["Power"] = 0 },
-    USE_ITEM = { "Common Chest", "Rare Chest" },
+    USE_ITEM = { "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest", "Mythical Chest" },
     BUY_MERCHANT = {},
 
     REROLL_RACE_UNTIL = { "Sunborn", "Servant", "Kitsune", "Swordblessed", "Galevorn", "Leviathan", "Oni", "Slime" },
@@ -18,6 +19,15 @@ getgenv().sailorPieceConfig = {
     REROLL_TRAIT_UNTIL = { "Overlord", "Cataclysm", "Singularity", "Celestial" },
     REROLL_STAT_UNTIL = { ["Damage"] = "S", ["Defense"] = "S", ["CooldownReduction"] = "S", ["CritChance"] = "S", ["CritDamage"] = "S", ["DamageReduction"] = "S", ["Luck"] = "S" },
     REROLL_PASSIVE_UNTIL = { ["Gryphon"] = { "Fortune Chosen", "Executioner", "Damage V" } },
-}   
+
+    -- Discord
+    WEBHOOK_ITEM_NAME = { "Aura Crate", "Cosmetic Crate", "Secret Chest" },
+    WEBHOOK_URL = "https://discord.com/api/webhooks/1477665244691304539/kOvvqkLnCLr2q-7Hxm8gLctRvBdimZWmwn1jqHGnBILB2zA0Y9XrmWuv9lGuXHXkG3eZ",
+    DISCORD_ID = "",
+    WEBHOOK_NOTE = "",
+    SHOW_PUBLIC_DISCORD_ID = true,
+    SHOW_WEBHOOK_USERNAME = true,
+    SHOW_WEBHOOK_JOBID = true,
+}
 
 loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/1c7ac2a2f86ecf894218a424a1be7667.lua"))()
