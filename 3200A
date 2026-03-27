@@ -2,6 +2,7 @@ script_key="gsPzKFMxllrpfVFBhEsHlGUoBaQJTvmq";
 setfpscap(20)
 
 getgenv().sailorPieceConfig = {  
+    TEST_OPTI = true,
     AUTO_UPDATE_RESTART = true,
     FARM_UNTIL_LEVEL = 13000,
     AUTO_FARM = { "Jinwoo Boss", "Yuji Boss", "Sukuna Boss", "Alucard Boss" },
