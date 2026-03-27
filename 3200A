@@ -6,7 +6,7 @@ getgenv().sailorPieceConfig = {
     AUTO_UPDATE_RESTART = true,
     FARM_UNTIL_LEVEL = 13000,
     AUTO_FARM = { "Jinwoo Boss", "Alucard Boss", "Yuji Boss", "Sukuna Boss" },
-    SUMMON_BOSS = { "Ichigo" },
+    SUMMON_BOSS = { "Ichigo", "Qin Shi", "Saber" },
 
     EQUIP_SWORD = { "Ichigo", "Gryphon", "Dark Blade", "Katana" },
     BUY_SWORD = { "Gryphon", "Dark Blade", "Katana" },
