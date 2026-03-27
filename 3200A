@@ -10,7 +10,7 @@ getgenv().sailorPieceConfig = {
 
     EQUIP_SWORD = { "Ichigo", "Gryphon", "Dark Blade", "Katana" },
     BUY_SWORD = { "Gryphon", "Dark Blade", "Katana" },
-    BLESS_WEAPON = { ["Ichigo"] = 12, ["Gryphon"] = 6, ["Dark Blade"] = 3 }
+    BLESS_WEAPON = { ["Ichigo"] = 12, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
 
     STAT_POINT_PERCENTAGE = { ["Sword"] = 90, ["Defense"] = 10, ["Melee"] = 0, ["Power"] = 0 },
     USE_ITEM = { "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest" },
