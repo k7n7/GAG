@@ -16,7 +16,7 @@ getgenv().sailorPieceConfig = {
     USE_ITEM = { "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest" },
     BUY_MERCHANT = {},
 
-    REROLL_RACE_UNTIL = { "Warlord", "Sunborn", "Servant", "Kitsune", "Swordblessed", "Galevorn", "Leviathan", "Oni", "Slime" },
+    REROLL_RACE_UNTIL = { "Kitsune" },
     REROLL_CLAN_UNTIL = { "Raikage", "Zoldyck", "Mugetsu", "Monarch", "Voldigoat", "Pride", "Espada", "Alter",  "Eminence", "Yamato" },
     REROLL_TRAIT_UNTIL = { "Overlord", "Cataclysm", "Singularity", "Celestial", "Emperor" },
     REROLL_STAT_UNTIL = { ["Damage"] = "S", ["Defense"] = "S", ["CooldownReduction"] = "S", ["CritChance"] = "S", ["CritDamage"] = "S", ["DamageReduction"] = "S", ["Luck"] = "SSS" },
