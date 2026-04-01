@@ -5,16 +5,15 @@ getgenv().sailorPieceConfig = {
     TEST_OPTI = true,
     AUTO_UPDATE_RESTART = true,
     FARM_UNTIL_LEVEL = 13000,
-
     DO_REPEATABLE_QUEST = "QuestNPC19",
-    AUTO_FARM = { "Jinwoo Boss", "Alucard Boss", "Yuji Boss", "Gojo Boss", "Sukuna Boss", "Anos Boss", "Aizen Boss", "Strongest of Today Boss", "Strongest in History Boss", "Rimuru Boss", "Saber Boss", "QinShi Boss", "Ichigo Boss", "ArenaFighter" },
+    AUTO_FARM = { "Thief", "Monkey", "DesertBandit", "FrostRogue", "Sorcerer", "Hollow", "Curse", "StrongSorcerer", "Slime", "AcademyTeacher", "Swordsman", "Quincy", "Ninja", "ArenaFighter" },
     SUMMON_BOSS = { "Ichigo", "Qin Shi", "Saber" },
 
     EQUIP_SWORD = { "Ichigo", "Gryphon", "Dark Blade", "Katana" },
-    BLESS_WEAPON = { ["Ichigo"] = 10, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
+    BLESS_WEAPON = { ["Ichigo"] = 12, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
 
     STAT_POINT_PERCENTAGE = { ["Sword"] = 90, ["Defense"] = 10, ["Melee"] = 0, ["Power"] = 0 },
-    USE_ITEM = { "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest", "Mythical Chest" },
+    USE_ITEM = { "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest" },
     BUY_MERCHANT = {},
 
     REROLL_RACE_UNTIL = { "Kitsune" },
@@ -22,18 +21,19 @@ getgenv().sailorPieceConfig = {
     REROLL_TRAIT_UNTIL = { "Emperor" },
     REROLL_STAT_UNTIL = { ["Damage"] = "S", ["Defense"] = "S", ["CooldownReduction"] = "S", ["CritChance"] = "S", ["CritDamage"] = "S", ["DamageReduction"] = "S", ["Luck"] = "SSS" },
     REROLL_PASSIVE_UNTIL = { ["Gryphon"] = { "Fortune Chosen", "Executioner", "Damage V" }, ["Ichigo"] = { "Fortune Chosen" } },
+    REROLL_POWER_UNTIL = { "Cursebrand", "Colossus", "Eternal", "Abyssal", "Apex" },
 
     DELETE_ARTIFACT_RARITY = { "Common", "Rare" },
     EQUIP_ARTIFACT_SET = "Abyssal Crown",
 
     -- Discord
-    WEBHOOK_ITEM_NAME = { "Aura Crate", "Cosmetic Crate", "Secret Chest" },
+    WEBHOOK_ITEM_NAME = { "Aura Crate", "Cosmetic Crate" },
     WEBHOOK_URL = "https://discord.com/api/webhooks/1456911663864217622/x9yVntAbLK-l0AFjYhHRIdoLf_5nKLm8gP6s5hk-2jhjMPnuLbKoByT43M6VCZY_Ln8N",
     DISCORD_ID = "",
     WEBHOOK_NOTE = "",
     SHOW_PUBLIC_DISCORD_ID = true,
     SHOW_WEBHOOK_USERNAME = true,
     SHOW_WEBHOOK_JOBID = true,
-}   
+}
 
 loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/1c7ac2a2f86ecf894218a424a1be7667.lua"))()
