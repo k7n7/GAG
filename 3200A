@@ -7,7 +7,7 @@ getgenv().sailorPieceConfig = {
     FARM_UNTIL_LEVEL = 13000,
     DO_REPEATABLE_QUEST = "QuestNPC19",
     AUTO_FARM = { "Thief", "Monkey", "DesertBandit", "FrostRogue", "Sorcerer", "Hollow", "Curse", "StrongSorcerer", "Slime", "AcademyTeacher", "Swordsman", "Quincy", "Ninja", "ArenaFighter" },
-    SUMMON_BOSS = { "Ichigo", "Qin Shi", "Saber" },
+    SUMMON_BOSS = {},
 
     EQUIP_SWORD = { "Ichigo", "Gryphon", "Dark Blade", "Katana" },
     BLESS_WEAPON = { ["Ichigo"] = 12, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
