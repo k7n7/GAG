@@ -1,20 +1,19 @@
 script_key="pMCwTHBsnHwcfirYWIlIWGJUXhEtegmE";
 setfpscap(10)
 
-getgenv().sailorPieceConfig = {
+getgenv().sailorPieceConfig = {  
     TEST_OPTI = true,
     AUTO_UPDATE_RESTART = true,
     FARM_UNTIL_LEVEL = 13000,
-
     DO_REPEATABLE_QUEST = "QuestNPC19",
-    AUTO_FARM = { "Jinwoo Boss", "Alucard Boss", "Yuji Boss", "Gojo Boss", "Sukuna Boss", "Anos Boss", "Aizen Boss", "Strongest of Today Boss", "Strongest in History Boss", "Rimuru Boss", "Saber Boss", "QinShi Boss", "Ichigo Boss", "ArenaFighter" },
-    SUMMON_BOSS = { "Ichigo", "Qin Shi", "Saber" },
+    AUTO_FARM = { "Thief", "Monkey", "DesertBandit", "FrostRogue", "Sorcerer", "Hollow", "Curse", "StrongSorcerer", "Slime", "AcademyTeacher", "Swordsman", "Quincy", "Ninja", "ArenaFighter" },
+    SUMMON_BOSS = {},
 
     EQUIP_SWORD = { "Ichigo", "Gryphon", "Dark Blade", "Katana" },
-    BLESS_WEAPON = { ["Ichigo"] = 10, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
+    BLESS_WEAPON = { ["Ichigo"] = 12, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
 
     STAT_POINT_PERCENTAGE = { ["Sword"] = 90, ["Defense"] = 10, ["Melee"] = 0, ["Power"] = 0 },
-    USE_ITEM = { "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest", "Mythical Chest", "Secret Chest" },
+    USE_ITEM = { "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest" },
     BUY_MERCHANT = {},
 
     REROLL_RACE_UNTIL = { "Kitsune" },
@@ -28,7 +27,7 @@ getgenv().sailorPieceConfig = {
     EQUIP_ARTIFACT_SET = "Abyssal Crown",
 
     -- Discord
-    WEBHOOK_ITEM_NAME = { "Aura Crate", "Cosmetic Crate", "Secret Chest" },
+    WEBHOOK_ITEM_NAME = { "Aura Crate", "Cosmetic Crate" },
     WEBHOOK_URL = "",
     DISCORD_ID = "",
     WEBHOOK_NOTE = "",
