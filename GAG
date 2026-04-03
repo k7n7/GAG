@@ -28,7 +28,7 @@ getgenv().sailorPieceConfig = {
 
     -- Discord
     WEBHOOK_ITEM_NAME = { "Aura Crate", "Cosmetic Crate" },
-    WEBHOOK_URL = "",
+    WEBHOOK_URL = "https://discordapp.com/api/webhooks/1477665244691304539/kOvvqkLnCLr2q-7Hxm8gLctRvBdimZWmwn1jqHGnBILB2zA0Y9XrmWuv9lGuXHXkG3eZ",
     DISCORD_ID = "",
     WEBHOOK_NOTE = "",
     SHOW_PUBLIC_DISCORD_ID = true,
