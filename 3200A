@@ -1,12 +1,13 @@
 script_key="gsPzKFMxllrpfVFBhEsHlGUoBaQJTvmq";
-setfpscap(15)
+setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     TEST_OPTI = true,
     AUTO_UPDATE_RESTART = true,
+    MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     FARM_UNTIL_LEVEL = 13000,
     DO_REPEATABLE_QUEST = "QuestNPC19",
-    AUTO_FARM = { "Thief", "Monkey", "DesertBandit", "FrostRogue", "Sorcerer", "Hollow", "Curse", "StrongSorcerer", "Slime", "AcademyTeacher", "Swordsman", "Quincy", "Ninja", "ArenaFighter" },
+    AUTO_FARM = { "Jinwoo Boss", "Alucard Boss", "Yuji Boss", "Gojo Boss", "Sukuna Boss", "Anos Boss", "Aizen Boss", "Strongest of Today Boss", "Strongest in History Boss", "Rimuru Boss", "Saber Boss", "QinShi Boss" },
     SUMMON_BOSS = {},
 
     EQUIP_SWORD = { "Ichigo", "Gryphon", "Dark Blade", "Katana" },
