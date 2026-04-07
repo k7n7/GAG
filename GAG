@@ -2,9 +2,8 @@ script_key="PAZBmvtfMnQuAYCiZidlnGftGCPGFtUp";
 setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
-    TEST_OPTI = true,
     AUTO_UPDATE_RESTART = true,
-    MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
+    MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer" },
     FARM_UNTIL_LEVEL = 13000,
     DO_REPEATABLE_QUEST = "QuestNPC19",
     AUTO_FARM = {},
@@ -20,7 +19,7 @@ getgenv().sailorPieceConfig = {
     REROLL_PASSIVE_UNTIL = { ["Ichigo"] = { "Fortune Chosen" }, ["Strongest In History"] = { "Fortune Chosen" } },
     REROLL_POWER_UNTIL = { "Cursebrand", "Colossus", "Eternal", "Abyssal", "Apex" },
 
-    DELETE_ARTIFACT_RARITY = { "Common", "Rare" },
+    DELETE_ARTIFACT_RARITY = { "Common" },
     EQUIP_ARTIFACT_SET = "Abyssal Crown",
 
     BUILD_MODE = "Luck",  -- Damage/Luck
