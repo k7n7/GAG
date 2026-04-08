@@ -3,7 +3,7 @@ setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     AUTO_UPDATE_RESTART = true,
-    MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer" },
+    MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     FARM_UNTIL_LEVEL = 13000,
     DO_REPEATABLE_QUEST = "QuestNPC19",
     AUTO_FARM = {},
@@ -12,14 +12,14 @@ getgenv().sailorPieceConfig = {
     EQUIP_WEAPON = { "Strongest In History", "Ichigo", "Gryphon", "Dark Blade", "Katana" },
     BLESS_WEAPON = { ["Strongest In History"] = 10, ["Ichigo"] = 10, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
 
-    REROLL_RACE_UNTIL = { "Kitsune" },
-    REROLL_CLAN_UNTIL = { "Pride", "Monarch", "Alter", "Espada", "Voldigoat", "Eminence", "Upper" },
-    REROLL_TRAIT_UNTIL = { "Overlord", "Cataclysm", "Singularity", "Celestial", "Emperor" },
-    REROLL_STAT_UNTIL = { ["Damage"] = "S", ["Defense"] = "S", ["CooldownReduction"] = "S", ["CritChance"] = "S", ["CritDamage"] = "S", ["DamageReduction"] = "S", ["Luck"] = "Z" },
+    REROLL_RACE_UNTIL = { "Luckborn" },
+    REROLL_CLAN_UNTIL = { "Eminence" },
+    REROLL_TRAIT_UNTIL = { "Emperor" },
+    REROLL_STAT_UNTIL = { ["Damage"] = "Z", ["Defense"] = "Z", ["CooldownReduction"] = "Z", ["CritChance"] = "Z", ["CritDamage"] = "Z", ["DamageReduction"] = "Z", ["Luck"] = "Z" },
     REROLL_PASSIVE_UNTIL = { ["Ichigo"] = { "Fortune Chosen" }, ["Strongest In History"] = { "Fortune Chosen" } },
-    REROLL_POWER_UNTIL = { "Cursebrand", "Colossus", "Eternal", "Abyssal", "Apex" },
+    REROLL_POWER_UNTIL = { "Colossus" },
 
-    DELETE_ARTIFACT_RARITY = { "Common" },
+    DELETE_ARTIFACT_RARITY = { "Common", "Rare" },
     EQUIP_ARTIFACT_SET = "Abyssal Crown",
 
     BUILD_MODE = "Luck",  -- Damage/Luck
