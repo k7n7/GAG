@@ -1,6 +1,7 @@
 script_key="PAZBmvtfMnQuAYCiZidlnGftGCPGFtUp";
 setfpscap(10)
 
+getgenv().sailorPieceConfig = {  
     AUTO_UPDATE_RESTART = true,
     MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     FARM_UNTIL_LEVEL = 13000,
