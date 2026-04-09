@@ -6,8 +6,8 @@ getgenv().sailorPieceConfig = {
     MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     FARM_UNTIL_LEVEL = 13000,
     DO_REPEATABLE_QUEST = "QuestNPC19",
-    AUTO_FARM = { "Ice Queen Boss" },
-    SUMMON_BOSS = { "Ice Queen Normal" },
+    AUTO_FARM = {},
+    SUMMON_BOSS = {},
 
     EQUIP_WEAPON = {"Ice Queen", "Strongest Shinobi", "Moon Slayer", "Saber Alter", "Gilgamesh", "Strongest In History", "Ichigo", "Gryphon", "Dark Blade", "Katana"},
     BUY_WEAPON = {"Katana", "Dark Blade", "Gryphon", "Ichigo", "Strongest In History", "Gilgamesh", "Saber Alter", "Moon Slayer", "Strongest Shinobi", "Ice Queen"},
