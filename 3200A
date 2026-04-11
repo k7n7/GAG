@@ -10,10 +10,6 @@ getgenv().sailorPieceConfig = {
     AUTO_FARM = {},
     SUMMON_BOSS = {},
 
-    AUTO_DUNGEON = { ["RuneDungeon"] = "Extreme"},
-    AUTO_REPLAY_DUNGEON = true,
-    DO_DUNGEON_MIN_KEY = 100,
-
     EQUIP_WEAPON = {"Strongest In History", "Ichigo", "Gryphon", "Dark Blade", "Katana"},
     BUY_WEAPON = {"Katana", "Dark Blade", "Gryphon", "Ichigo", "Strongest In History"},
     BLESS_WEAPON = { ["Strongest In History"] = 10, ["Ichigo"] = 10, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
