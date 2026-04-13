@@ -3,7 +3,7 @@ setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     AUTO_UPDATE_RESTART = true,
-    ASCEND_UNTIL_LEVEL = 9,
+    ASCEND_UNTIL_LEVEL = 8,
 
     MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     DO_REPEATABLE_QUEST = "QuestNPC19",
