@@ -10,22 +10,15 @@ getgenv().sailorPieceConfig = {
     AUTO_FARM = {},
     SUMMON_BOSS = {},
 
-    EQUIP_WEAPON = {"Strongest Shinobi", "Moon Slayer", "Saber Alter", "Gilgamesh", "Strongest In History", "Ichigo", "Gryphon", "Dark Blade", "Katana"},
-    BUY_WEAPON = {"Katana", "Dark Blade", "Gryphon", "Ichigo", "Strongest In History", "Gilgamesh", "Ice Queen"},
-    BLESS_WEAPON = { 
-      ["Ice Queen"] = 10, 
-      ["Gilgamesh"] = 10, 
-      ["Strongest In History"] = 10, 
-      ["Ichigo"] = 10, 
-      ["Gryphon"] = 6, 
-      ["Dark Blade"] = 3 
-    },
+    EQUIP_WEAPON = {"Strongest In History", "Ichigo", "Gryphon", "Dark Blade", "Katana"},
+    BUY_WEAPON = {"Katana", "Dark Blade", "Gryphon", "Ichigo", "Strongest In History", "Gilgamesh", "Saber Alter", "Moon Slayer", "Strongest Shinobi", "Ice Queen"},
+    BLESS_WEAPON = { ["Ice Queen"] = 10, ["Strongest Shinobi"] = 10, ["Moon Slayer"] = 6, ["Saber Alter"] = 6, ["Gilgamesh"] = 6, ["Strongest In History"] = 10, ["Ichigo"] = 6, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
 
     REROLL_RACE_UNTIL = { "Luckborn" },
     REROLL_CLAN_UNTIL = { "Eminence" },
     REROLL_TRAIT_UNTIL = { "Emperor" },
-    REROLL_STAT_UNTIL = { ["Damage"] = "S", ["Defense"] = "S", ["CooldownReduction"] = "S", ["CritChance"] = "S", ["CritDamage"] = "S", ["DamageReduction"] = "S", ["Luck"] = "S" },
-    REROLL_PASSIVE_UNTIL = { ["Ichigo"] = { "Fortune Chosen" }, ["Strongest In History"] = { "Fortune Chosen" } },
+    REROLL_STAT_UNTIL = { ["Damage"] = "Z", ["Defense"] = "SSS", ["CooldownReduction"] = "SSS", ["CritChance"] = "SSS", ["CritDamage"] = "SSS", ["DamageReduction"] = "SSS", ["Luck"] = "Z" },
+    REROLL_PASSIVE_UNTIL = { ["Strongest In History"] = { "Fortune Chosen" } },
     REROLL_POWER_UNTIL = { "Colossus" },
 
     DELETE_ARTIFACT_RARITY = { "Common", "Rare" },
