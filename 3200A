@@ -5,6 +5,7 @@ getgenv().sailorPieceConfig = {
     AUTO_UPDATE_RESTART = true,
     ASCEND_UNTIL_LEVEL = 8,
 
+    AUTO_REPLAY_DUNGEON = true,
     AUTO_DUNGEON = { ["RuneDungeon"] = "Extreme" },  -- "CidDungeon", "RuneDungeon", "DoubleDungeon"
     DO_DUNGEON_MIN_KEY = 100,  -- have 100 or more key then open portal (prevent spam serverhop, use with AUTO_REPLAY_DUNGEON)
     BUY_DUNGEON_SHOP = {},
