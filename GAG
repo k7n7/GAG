@@ -1,41 +1,14 @@
-script_key="PAZBmvtfMnQuAYCiZidlnGftGCPGFtUp";
 setfpscap(10)
+script_key="oqYUaHWfTgMsPCdUuOmMaeSpGmwHbZcf";
+getgenv().SailorVIP = {
+    Optimization = {
+        Enable = true, -- On/Off toàn bộ optimization script
+        FPSCap = 10, -- Số FPS cần lock (ví dụ: 10, 15, 30, 60)
+    },
 
-getgenv().sailorPieceConfig = {  
-    AUTO_UPDATE_RESTART = true,
-    ASCEND_UNTIL_LEVEL = 8,
-
-    MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
-    DO_REPEATABLE_QUEST = "QuestNPC19",
-    AUTO_FARM = {},
-    SUMMON_BOSS = {},
-
-    EQUIP_WEAPON = {"Strongest In History", "Ichigo", "Gryphon", "Dark Blade", "Katana"},
-    BUY_WEAPON = {"Katana", "Dark Blade", "Gryphon", "Ichigo", "Strongest In History", "Ice Queen"},
-    BLESS_WEAPON = { ["Ice Queen"] = 10, ["Strongest In History"] = 10, ["Ichigo"] = 6, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
-
-    REROLL_RACE_UNTIL = { "Luckborn" },
-    REROLL_CLAN_UNTIL = { "Eminence" },
-    REROLL_TRAIT_UNTIL = { "Emperor" },
-    REROLL_STAT_UNTIL = { ["Damage"] = "SSS", ["Defense"] = "SSS", ["CooldownReduction"] = "SSS", ["CritChance"] = "SSS", ["CritDamage"] = "SSS", ["DamageReduction"] = "SSS", ["Luck"] = "SSS" },
-    REROLL_PASSIVE_UNTIL = { ["Strongest In History"] = { "Fortune Chosen" } },
-    REROLL_POWER_UNTIL = { "Colossus" },
-
-    DELETE_ARTIFACT_RARITY = { "Common", "Rare" },
-    EQUIP_ARTIFACT_SET = "Abyssal Crown",
-
-    BUILD_MODE = "Luck",  -- Damage/Luck
-    USE_ITEM = { "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest", "Aura Crate (Untradeable)", "Cosmetic Crate (Untradeable)", "Secret Chest (Untradeable)" },
-    BUY_MERCHANT = { "Race Reroll", "Trait Reroll", "Clan Reroll", "Passive Shard", "Boss Key", "Dungeon Key", "Rush Key", "Boss Ticket", "Haki Color Reroll", "Common Chest", "Rare Chest", "Epic Chest", "Legendary Chest", "Mythical Chest", "Secret Chest" },
-
-    -- Discord
-    WEBHOOK_ITEM_NAME = { "Aura Crate", "Cosmetic Crate" },
-    WEBHOOK_URL = "https://discord.com/api/webhooks/1456911663864217622/x9yVntAbLK-l0AFjYhHRIdoLf_5nKLm8gP6s5hk-2jhjMPnuLbKoByT43M6VCZY_Ln8N",
-    DISCORD_ID = "",
-    WEBHOOK_NOTE = "",
-    SHOW_PUBLIC_DISCORD_ID = true,
-    SHOW_WEBHOOK_USERNAME = true,
-    SHOW_WEBHOOK_JOBID = true,
+    Webhook = {
+        Enable = true, -- On/Off gửi webhook thông báo crate
+        URL = "https://discord.com/api/webhooks/1493659429571137618/rS0vld9JWJrCiT7eW7vIeHeDMvsF-G97o1Ho1Kbplyogas9sb1RgCEvGTnim5iAWIlOy", 
+    },
 }
-
-loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/1c7ac2a2f86ecf894218a424a1be7667.lua"))()
+loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/a8255d759144bb6127c5b72221cce5cd.lua"))()
