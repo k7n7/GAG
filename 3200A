@@ -5,7 +5,7 @@ getgenv().sailorPieceConfig = {
     AUTO_UPDATE_RESTART = true,
     ASCEND_UNTIL_LEVEL = 8,
 
-    MULTI_FARM = { "FrostRogue", "Sorcerer", "Hollow", "Curse", "StrongSorcerer", "Slime", "AcademyTeacher", "Swordsman", "Quincy", "Ninja", "ArenaFighter" },
+    MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     DO_REPEATABLE_QUEST = "QuestNPC19",
     AUTO_FARM = {},
     SUMMON_BOSS = {},
