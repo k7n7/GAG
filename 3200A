@@ -5,6 +5,11 @@ getgenv().sailorPieceConfig = {
     AUTO_UPDATE_RESTART = true,
     ASCEND_UNTIL_LEVEL = 8,
 
+    AUTO_REPLAY_DUNGEON = true,
+    AUTO_DUNGEON = { ["RuneDungeon"] = "Extreme" },
+    DO_BOSS_RUSH_MIN_KEY = 100,
+    BUY_BOSS_RUSH_SHOP = {},
+
     MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     DO_REPEATABLE_QUEST = "QuestNPC19",
     AUTO_FARM = {},
