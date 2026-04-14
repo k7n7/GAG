@@ -5,10 +5,9 @@ getgenv().sailorPieceConfig = {
     AUTO_UPDATE_RESTART = true,
     ASCEND_UNTIL_LEVEL = 8,
 
-    AUTO_INFINITE_TOWER = true,
-    DO_INFINITE_TOWER_MIN_KEY = 100, 
-    BUY_INFINITE_TOWER_SHOP = {"Cosmetic Crate", "Aura Crate"},
-    SET_AUTO_TOWER_RESET = 50,
+    AUTO_DUNGEON = { ["RuneDungeon"] = "Extreme" },  -- "CidDungeon", "RuneDungeon", "DoubleDungeon"
+    DO_DUNGEON_MIN_KEY = 100,  -- have 100 or more key then open portal (prevent spam serverhop, use with AUTO_REPLAY_DUNGEON)
+    BUY_DUNGEON_SHOP = {},
 
     MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "Quincy", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     DO_REPEATABLE_QUEST = "QuestNPC19",
