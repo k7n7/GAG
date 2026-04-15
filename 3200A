@@ -18,7 +18,7 @@ getgenv().sailorPieceConfig = {
     REROLL_RACE_UNTIL = { "Luckborn" },
     REROLL_CLAN_UNTIL = { "Eminence" },
     REROLL_TRAIT_UNTIL = { "Emperor" },
-    REROLL_STAT_UNTIL = { ["Damage"] = "SSS", ["Defense"] = "S", ["CooldownReduction"] = "S", ["CritChance"] = "S", ["CritDamage"] = "S", ["DamageReduction"] = "S", ["Luck"] = "SSS" },
+    REROLL_STAT_UNTIL = { ["Damage"] = "S", ["Defense"] = "S", ["CooldownReduction"] = "S", ["CritChance"] = "S", ["CritDamage"] = "S", ["DamageReduction"] = "S", ["Luck"] = "S" },
     REROLL_PASSIVE_UNTIL = { ["Strongest In History"] = { "Fortune Chosen" } },
     REROLL_POWER_UNTIL = { "Colossus" },
 
