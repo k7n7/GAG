@@ -3,7 +3,7 @@ setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     AUTO_UPDATE_RESTART = true,
-    ASCEND_UNTIL_LEVEL = 10,
+    ASCEND_UNTIL_LEVEL = 9,
     AUTO_CELESTIAL_FAVOR_TITLE = true,
 
     MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
