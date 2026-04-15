@@ -6,6 +6,7 @@ getgenv().sailorPieceConfig = {
     ASCEND_UNTIL_LEVEL = 10,
     AUTO_CELESTIAL_FAVOR_TITLE = true,
     SET_AUTO_TOWER_RESET = 999,
+    DO_INFINITE_TOWER_MIN_KEY = 100,
 
     MULTI_FARM = { "ArenaFighter", "Ninja", "Swordsman", "AcademyTeacher", "Slime", "Curse", "StrongSorcerer", "Hollow" },
     DO_REPEATABLE_QUEST = "QuestNPC19",
