@@ -1,4 +1,4 @@
-script_key="gsPzKFMxllrpfVFBhEsHlGUoBaQJTvmq";
+script_key="PAZBmvtfMnQuAYCiZidlnGftGCPGFtUp";
 setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
