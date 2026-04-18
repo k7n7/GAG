@@ -3,6 +3,7 @@ setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     AUTO_UPDATE_RESTART = true,
+    FARM_SECRET_CHEST = true,
     FAST_MULTI_FARM = true,
     ASCEND_UNTIL_LEVEL = 10,
     AUTO_CELESTIAL_FAVOR_TITLE = true, -- Auto attack 5000 island bosses
