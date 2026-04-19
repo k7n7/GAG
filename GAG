@@ -3,19 +3,19 @@ setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     AUTO_UPDATE_RESTART = true,
-    ASCEND_UNTIL_LEVEL = 10,
+    FARM_SECRET_CHEST = true,
+    AUTO_BOSS_RUSH_AND_INFINITE_TOWER_STAT_BONUS = true,
     FAST_MULTI_FARM = true,
+    ASCEND_UNTIL_LEVEL = 5,
     AUTO_CELESTIAL_FAVOR_TITLE = true, -- Auto attack 5000 island bosses
     
     -- Autofarm
     DO_REPEATABLE_QUEST = "QuestNPC19",
-    -- MULTI_FARM -> Instant tp kill npc (Must have Strongest In History/Ichigo/Gryphon)
-    MULTI_FARM = { "Bunny", "ArenaFighter", "Ninja", "Swordsman", "AcademyTeacher", "Slime", "StrongSorcerer", "Curse", "Hollow", "Sorcerer", "FrostRogue", "DesertMonkey", "Monkey", "Thief" },  
-    AUTO_FARM = {},  -- Auto farm ascend/quest/weapon bosses 
+    MULTI_FARM = { "Bunny", "ArenaFighter", "Ninja", "Swordsman", "AcademyTeacher", "Slime", "StrongSorcerer", "Curse", "Hollow", "Sorcerer", "FrostRogue", "DesertMonkey", "Monkey", "Thief" },  -- Instant tp kill npc
+    AUTO_FARM = {},  -- Auto farm ascend/quest/weapon bosses
     SUMMON_BOSS = {},  -- Auto summon ascend/quest/weapon bosses
     
     -- Weapons
-    -- Script will auto equip (Ice Queen + Damage) build for dungeon/inf tower
     EQUIP_WEAPON = {"Strongest In History", "Ichigo", "Gryphon", "Dark Blade", "Katana"},
     BUY_WEAPON = {"Katana", "Dark Blade", "Gryphon", "Ichigo", "Strongest In History", "Ice Queen"},
     BLESS_WEAPON = { ["Ice Queen"] = 10, ["Strongest In History"] = 10, ["Ichigo"] = 6, ["Gryphon"] = 6, ["Dark Blade"] = 3 },
@@ -58,8 +58,8 @@ getgenv().sailorPieceConfig = {
     WEBHOOK_URL = "",
     DISCORD_ID = "",
     WEBHOOK_NOTE = "",
-    SHOW_PUBLIC_DISCORD_ID = true,
-    SHOW_WEBHOOK_USERNAME = true,
+    SHOW_PUBLIC_DISCORD_ID = false,
+    SHOW_WEBHOOK_USERNAME = false,
     SHOW_WEBHOOK_JOBID = true,
 }
 
