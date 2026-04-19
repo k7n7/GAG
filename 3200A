@@ -38,7 +38,7 @@ getgenv().sailorPieceConfig = {
         ["Strongest In History"] = { "Fortune Chosen" }, 
         ["Ichigo"] = { "Fortune Chosen", "Executioner", "Rampage", "Damage V", "Damage IV" } 
     },
-    REROLL_POWER_UNTIL = { "Colossus" },
+    REROLL_POWER_UNTIL = { "Subjugator" },
 
     -- Artifact
     DELETE_ARTIFACT_RARITY = { "Common" },
