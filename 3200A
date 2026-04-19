@@ -3,6 +3,7 @@ setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     AUTO_UPDATE_RESTART = true,
+    WORLD = "Sea 1",  -- "Sea 1", "Sea 2"
     FARM_SECRET_CHEST = true,
     AUTO_BOSS_RUSH_AND_INFINITE_TOWER_STAT_BONUS = true,
     FAST_MULTI_FARM = true,
@@ -11,7 +12,7 @@ getgenv().sailorPieceConfig = {
     
     -- Autofarm
     DO_REPEATABLE_QUEST = "QuestNPC19",
-    MULTI_FARM = { "Bunny", "ArenaFighter", "Ninja", "Swordsman", "AcademyTeacher", "Slime", "StrongSorcerer", "Curse", "Hollow", "Sorcerer", "FrostRogue", "DesertMonkey", "Monkey", "Thief" },  -- Instant tp kill npc
+    MULTI_FARM = { "Bunny", "ArenaFighter", "Ninja", "Swordsman", "AcademyTeacher", "Slime", "StrongSorcerer", "Curse", "Hollow", "Sorcerer", "FrostRogue", "DesertBandit", "Monkey", "Thief" },  -- Instant tp kill npc
     AUTO_FARM = {},  -- Auto farm ascend/quest/weapon bosses
     SUMMON_BOSS = {},  -- Auto summon ascend/quest/weapon bosses
     
@@ -39,7 +40,7 @@ getgenv().sailorPieceConfig = {
         ["Ichigo"] = { "Fortune Chosen", "Executioner", "Rampage", "Damage V", "Damage IV" } 
     },
     REROLL_POWER_UNTIL = { "Subjugator" },
-    REROLL_BLOODLINE_UNTIL = {},
+    REROLL_BLOODLINE_UNTIL = { "Cosmic" },
 
     -- Artifact
     DELETE_ARTIFACT_RARITY = { "Common" },
