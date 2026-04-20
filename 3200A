@@ -3,7 +3,6 @@ setfpscap(10)
 
 getgenv().sailorPieceConfig = {  
     AUTO_UPDATE_RESTART = true,
-    FAST_MULTI_FARM = true,
     WORLD = "Sea 2",  -- "Sea 1", "Sea 2"
     ASCEND_UNTIL_LEVEL = 2,
     AUTO_CELESTIAL_FAVOR_TITLE = true, -- Auto attack 5000 island bosses
