@@ -1,7 +1,7 @@
 getgenv().Config = getgenv().Config or {
     Performance = {
         Optimization = true,
-        FpsCap = 20,
+        FpsCap = 15,
     },
 
     AutoUseDice = {
