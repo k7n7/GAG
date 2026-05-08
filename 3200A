@@ -1,44 +1,42 @@
-getgenv().Config = getgenv().Config or {
-    Performance = {
-        Optimization = true,
-        FpsCap = 15,
+getgenv().Config = {
+    ["Performance"] = {
+        ["Optimization"] = true,
+        ["FPS Cap"] = 10,
     },
-
-    AutoUseDice = {
+    ["Auto Roll"] = {
+        ["Enabled"] = true,                          -- master switch for auto-rolling
+        ["Hide Roll"] = true,                        -- hide roll animation
+        ["Equip Best"] = true,                       -- auto-equip best slimes
+    },
+    ["Auto Use Dice"] = {                            -- dice to auto-use when available
         "jackpotSpin",
         "bigDice",
         "hugeDice",
         "shinyDice",
         "invertedDice",
     },
-
-    AutoUseBoost = {
+    ["Auto Use Boost"] = {                           -- boosts to auto-activate
         "luck",
         "ultraLuck",
         "currency",
         "rollSpeed",
     },
-
-    AutoUseFood = {
+    ["Auto Use Food"] = {                            -- food to auto-feed slimes
         "apple", "carrot", "cherries", "grapes",
         "banana", "watermelon", "pizza", "chicken", "drumstick",
     },
-
-    Rebirth = {
-        Auto = true,
-        MaxRebirths = 100,
+    ["Auto Upgrade"] = {
+        ["Enabled"] = true,                          -- auto-buy upgrades in priority order
     },
-
-    Webhook = {
-        Enabled = true,
-        Url = "https://discord.com/api/webhooks/1502116958857072694/FCUuRlFDn40nFxmIRnRDjOluYHZf8osrFKEbZgtrTqVfJ6lcou-jEbBmZFXDwXxDqO8S", -- webhook rieng cua ban
-        MinRarity = 1000000, -- gui webhook rieng neu pet hiem hon hoac bang 1/1M
+    ["Rebirth"] = {
+        ["Enabled"] = true,                          -- auto-rebirth when affordable
+        ["Max Rebirths"] = 100,                      -- stop rebirthing after this count
     },
-
-    Friend = {
-        AutoSend = true,
-        AutoAccept = true,
-        RescanDelay = 15,
+    ["Webhook"] = {
+        ["Url"] = "https://discord.com/api/webhooks/1502116958857072694/FCUuRlFDn40nFxmIRnRDjOluYHZf8osrFKEbZgtrTqVfJ6lcou-jEbBmZFXDwXxDqO8S",                                -- your Discord webhook URL
+        ["Discord ID"] = "402895905986052106",                         -- your Discord user ID (for pings, right-click → Copy User ID)
+        ["Min Rarity"] = 1000000,                    -- only notify for slimes rarer than 1/X
     },
 }
-loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/cbd1cbb86cb8b720712d5629f2c4fcba.lua"))()
+
+loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/d0ab46b287e5c0ebc658e9f5dc7a8dcb.lua"))()
