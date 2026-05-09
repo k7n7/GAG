@@ -2,7 +2,7 @@ task.wait(10)
 getgenv().Config = {
     ["Performance"] = {
         ["Optimization"] = true,                  
-        ["FPS Cap"] = 15,                           
+        ["FPS Cap"] = 10,                           
     },
     ["Auto Roll"] = {
         ["Enabled"] = true,                          -- master switch for auto-rolling
