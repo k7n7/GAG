@@ -30,15 +30,15 @@ getgenv().Config = {
         ["Enabled"] = true,                          -- auto-buy upgrades in priority order
     },
     ["Rebirth"] = {
-        ["Enabled"] = true,                          -- auto-rebirth when affordable
-        ["Max Rebirths"] = 100,                      -- stop rebirthing after this count
-        ["Switch Account"] = false,                  -- enable external account swapper (creates Username.txt)
-        ["Switch At Rebirth"] = 15,                  -- rebirth level to trigger the account switch
+        ["Enabled"] = true,
+        ["Max Rebirths"] = 100,
+        ["Switch Account"] = true,
+        ["Switch At Rebirth"] = 10,
     },
     ["Webhook"] = {
         ["Url"] = "https://discord.com/api/webhooks/1502116958857072694/FCUuRlFDn40nFxmIRnRDjOluYHZf8osrFKEbZgtrTqVfJ6lcou-jEbBmZFXDwXxDqO8S",                                -- your Discord webhook URL
         ["Discord ID"] = "402895905986052106",                         -- your Discord user ID (for pings, right-click → Copy User ID)
-        ["Min Rarity"] = 1000000,                    -- only notify for slimes rarer than 1/X
+        ["Min Rarity"] = 10000000,                    -- only notify for slimes rarer than 1/X
     },
 }
 
