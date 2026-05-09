@@ -1,7 +1,7 @@
 getgenv().Config = {
     ["Performance"] = {
-        ["Optimization"] = true,
-        ["FPS Cap"] = 10,
+        ["Optimization"] = true,                  
+        ["FPS Cap"] = 10,                           
     },
     ["Auto Roll"] = {
         ["Enabled"] = true,                          -- master switch for auto-rolling
@@ -31,6 +31,8 @@ getgenv().Config = {
     ["Rebirth"] = {
         ["Enabled"] = true,                          -- auto-rebirth when affordable
         ["Max Rebirths"] = 100,                      -- stop rebirthing after this count
+        ["Switch Account"] = false,                  -- enable external account swapper (creates Username.txt)
+        ["Switch At Rebirth"] = 15,                  -- rebirth level to trigger the account switch
     },
     ["Webhook"] = {
         ["Url"] = "https://discord.com/api/webhooks/1502116958857072694/FCUuRlFDn40nFxmIRnRDjOluYHZf8osrFKEbZgtrTqVfJ6lcou-jEbBmZFXDwXxDqO8S",                                -- your Discord webhook URL
