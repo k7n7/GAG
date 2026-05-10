@@ -1,4 +1,3 @@
-task.wait(10)
 getgenv().Config = {
     ["Performance"] = {
         ["Optimization"] = true,                  
