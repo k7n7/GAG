@@ -1,7 +1,7 @@
 getgenv().Config = {
     ["Performance"] = {
         ["Optimization"] = true,                  
-        ["FPS Cap"] = 10,                           
+        ["FPS Cap"] = 5,                           
     },
     ["Auto Roll"] = {
         ["Enabled"] = true,                          -- master switch for auto-rolling
