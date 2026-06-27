@@ -60,7 +60,6 @@ getgenv().UserConfig = {
         ["Venom Spitter"] = 10,
         ["Venus Fly Trap"] = 10,
         --["Pomegranate"] = 5,
-        ["Poison Apple"] = 10,
         ["Moon Bloom"] = 50000,
         ["Dragon's Breath"] = 50000,
     },
