@@ -58,7 +58,7 @@ getgenv().GAG2Config = {
         ["Sunflower"] = 20,
         ["Venom Spitter"] = 10,
         ["Venus Fly Trap"] = 10,
-        --["Poison Apple"] = 10,
+       -- ["Poison Apple"] = 10,
         ["Moon Bloom"] = 50000,
         ["Dragon's Breath"] = 50000,
     },
@@ -123,7 +123,7 @@ getgenv().GAG2Config = {
 
     ["Collect Mail"] = true,
     ["Stop Money Cap"] = 0,
-
+    ["Blacklist Seed"] = {"Mega","Dragon's Breath","Venom Spitter","Moon Bloom"},
     ["Webhook URL"]      = "https://discord.com/api/webhooks/1520307834179555378/Rn6UuQeOnlZwWVLrK2pLdKB4IjR0iwcKYS052JKFJPTF7ytrIVTlfLROF3upnfSf8MMj",
     ["Webhook Seed URL"] = "https://discord.com/api/webhooks/1520307687550877737/-uSlUntsnZOK8xcn9C-8HrlNtRH-SBSmpYSqQJIs61dB2OqFcqpaq_DILJAc1ugOM352",
     ["Webhook Gear URL"] = "https://discord.com/api/webhooks/1520307892337508475/WurrfEpxh3WNHl-NmU06GKfJzd1CO7tFYyOFOFJwFe0TO4c7rbftU3AUgXlFInddUuMo",
