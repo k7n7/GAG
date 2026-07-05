@@ -58,7 +58,7 @@ end
 pcall(OptimizeGame)
 
 task.spawn(function()
-    pcall(function()
+    local ok, err = pcall(function()
         getgenv().UserConfig = {
             ["Auto Claim Mail"] = true,
             ["Auto Send Mail"] = false,
@@ -71,6 +71,12 @@ task.spawn(function()
 
         loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/69646c718a6612f0e46df24197570733.lua"))()
     end)
+
+    if ok then
+        print("MAIL SCRIPT LOADED")
+    else
+        warn("MAIL SCRIPT ERROR:", err)
+    end
 end)
 
 local Controllers = Player:WaitForChild("PlayerScripts"):WaitForChild("Controllers")
@@ -167,6 +173,22 @@ local function GetPlot()
     error("Không tìm thấy plot sau 15 giây.")
 end
 
+local function GetToolAmount(tool)
+    local name = tool.Name or ""
+
+    local fromName = tonumber(name:match("[xX](%d+)"))
+    if fromName then return fromName end
+
+    for _, attr in ipairs({"Amount", "Quantity", "Stack", "Count"}) do
+        local v = tool:GetAttribute(attr)
+        if type(v) == "number" then
+            return v
+        end
+    end
+
+    return 1
+end
+
 local function CountCarrotSeeds()
     RefreshCharacter()
 
@@ -174,14 +196,16 @@ local function CountCarrotSeeds()
 
     for _, tool in ipairs(Character:GetChildren()) do
         if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-            count += 1
+            count += GetToolAmount(tool)
         end
     end
 
-    local Backpack = Player:WaitForChild("Backpack")
-    for _, tool in ipairs(Backpack:GetChildren()) do
-        if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-            count += 1
+    local Backpack = Player:FindFirstChild("Backpack")
+    if Backpack then
+        for _, tool in ipairs(Backpack:GetChildren()) do
+            if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
+                count += GetToolAmount(tool)
+            end
         end
     end
 
@@ -483,13 +507,29 @@ local function CountSuperSprinklers()
     return count
 end
 
-local function UpdateUI()
+local function SafeSet(label, text)
     pcall(function()
-        CarrotPlantLabel.Text = "🥕  CARROT PLANTS: " .. CountCarrots()
-        CarrotSeedLabel.Text = "🎒  CARROT SEEDS: " .. CountCarrotSeeds()
-        SprinklerLabel.Text = "💧  SUPER SPRINKLER: " .. CountSuperSprinklers() .. " / " .. MAX_SUPER_SPRINKLER
-        PlotLabel.Text = "🌾  PLOT EXPAND: " .. GetPlotExpandText()
-        TimeLabel.Text = "⏱️  RUN TIME: " .. FormatTime(tick() - StartTime)
+        label.Text = text
+    end)
+end
+
+local function UpdateUI()
+    SafeSet(TimeLabel, "⏱️  RUN TIME: " .. FormatTime(tick() - StartTime))
+
+    pcall(function()
+        SafeSet(CarrotPlantLabel, "🥕  CARROT PLANTS: " .. CountCarrots())
+    end)
+
+    pcall(function()
+        SafeSet(CarrotSeedLabel, "🎒  CARROT SEEDS: " .. CountCarrotSeeds())
+    end)
+
+    pcall(function()
+        SafeSet(SprinklerLabel, "💧  SUPER SPRINKLER: " .. CountSuperSprinklers() .. " / " .. MAX_SUPER_SPRINKLER)
+    end)
+
+    pcall(function()
+        SafeSet(PlotLabel, "🌾  PLOT EXPAND: " .. GetPlotExpandText())
     end)
 end
 
