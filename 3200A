@@ -1,13 +1,61 @@
 task.wait(2)
+
 pcall(function()
     setfpscap(10)
 end)
 
 local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
+local Player = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
+
+repeat task.wait() until game:IsLoaded()
+task.wait(3)
+
+local Lighting = game:GetService("Lighting")
+
+local function OptimizeGame()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 9e9
+    Lighting.Brightness = 1
+    Lighting.EnvironmentDiffuseScale = 0
+    Lighting.EnvironmentSpecularScale = 0
+    Lighting.ClockTime = 12
+
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Material = Enum.Material.SmoothPlastic
+            obj.Reflectance = 0
+            obj.CastShadow = false
+
+            if obj:IsA("MeshPart") then
+                obj.TextureID = ""
+            end
+        elseif obj:IsA("ParticleEmitter")
+            or obj:IsA("Trail")
+            or obj:IsA("Beam")
+            or obj:IsA("Smoke")
+            or obj:IsA("Fire")
+            or obj:IsA("Sparkles") then
+            obj.Enabled = false
+        elseif obj:IsA("PointLight")
+            or obj:IsA("SpotLight")
+            or obj:IsA("SurfaceLight") then
+            obj.Enabled = false
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            obj.Transparency = 1
+        elseif obj:IsA("SurfaceAppearance") then
+            obj:Destroy()
+        end
+    end
+
+    print("OPTIMIZE DONE")
+end
+
+pcall(OptimizeGame)
 
 local Controllers = Player:WaitForChild("PlayerScripts"):WaitForChild("Controllers")
 
@@ -27,50 +75,49 @@ local RUN_FOREVER = true
 local StartTime = tick()
 local CurrentStatus = "Starting"
 
+-- FULL SCREEN UI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TrungPhanHubUI"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = game:GetService("CoreGui")
 
 local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 280, 0, 220)
-Main.Position = UDim2.new(0, 20, 0.5, -110)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+Main.Size = UDim2.new(1, 0, 1, 0)
+Main.Position = UDim2.new(0, 0, 0, 0)
+Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Main.BorderSizePixel = 0
 Main.Parent = ScreenGui
 
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 10)
-Corner.Parent = Main
-
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Size = UDim2.new(1, 0, 0, 90)
+Title.Position = UDim2.new(0, 0, 0.08, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "TRUNGPHANHUB"
-Title.TextColor3 = Color3.fromRGB(120, 255, 170)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
+Title.Text = "🌱 TRUNGPHANHUB 🌱"
+Title.TextColor3 = Color3.fromRGB(90, 255, 160)
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 42
 Title.Parent = Main
 
-local function MakeLabel(y, text)
+local function MakeBigLabel(y, icon, name, value)
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -20, 0, 28)
-    label.Position = UDim2.new(0, 10, 0, y)
+    label.Size = UDim2.new(1, 0, 0, 58)
+    label.Position = UDim2.new(0, 0, y, 0)
     label.BackgroundTransparency = 1
-    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Text = icon .. "  " .. name .. ": " .. value
     label.TextColor3 = Color3.fromRGB(235, 235, 255)
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 15
-    label.Text = text
+    label.TextSize = 28
     label.Parent = Main
     return label
 end
 
-local StatusLabel = MakeLabel(45, "Status: Starting")
-local CarrotLabel = MakeLabel(75, "Carrot: 0")
-local MoneyLabel = MakeLabel(105, "Money: ?")
-local PlotLabel = MakeLabel(135, "Plot Expand: ? / 5")
-local TimeLabel = MakeLabel(165, "Time: 00:00:00")
+local StatusLabel = MakeBigLabel(0.25, "⚙️", "STATUS", "Starting")
+local CarrotPlantLabel = MakeBigLabel(0.35, "🥕", "CARROT PLANTS", "0")
+local CarrotSeedLabel = MakeBigLabel(0.45, "🎒", "CARROT SEEDS", "0")
+local SprinklerLabel = MakeBigLabel(0.55, "💧", "SUPER SPRINKLER", "0 / 5")
+local PlotLabel = MakeBigLabel(0.65, "🌾", "PLOT EXPAND", "? / 5")
+local TimeLabel = MakeBigLabel(0.75, "⏱️", "RUN TIME", "00:00:00")
 
 local function FormatTime(sec)
     sec = math.floor(sec)
@@ -82,7 +129,9 @@ end
 
 local function SetStatus(text)
     CurrentStatus = text
-    StatusLabel.Text = "Status: " .. text
+    pcall(function()
+        StatusLabel.Text = "⚙️  STATUS: " .. text
+    end)
 end
 
 local function RefreshCharacter()
@@ -102,6 +151,27 @@ local function GetPlot()
     error("Không tìm thấy plot sau 15 giây.")
 end
 
+local function CountCarrotSeeds()
+    RefreshCharacter()
+
+    local count = 0
+
+    for _, tool in ipairs(Character:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
+            count += 1
+        end
+    end
+
+    local Backpack = Player:WaitForChild("Backpack")
+    for _, tool in ipairs(Backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
+            count += 1
+        end
+    end
+
+    return count
+end
+
 local function CountCarrots()
     local Plot = GetPlot()
     local Plants = Plot:WaitForChild("Plants")
@@ -116,21 +186,6 @@ local function CountCarrots()
     return count
 end
 
-local function GetMoneyText()
-    local leaderstats = Player:FindFirstChild("leaderstats")
-    if not leaderstats then return "?" end
-
-    for _, v in ipairs(leaderstats:GetChildren()) do
-        if v:IsA("IntValue") or v:IsA("NumberValue") then
-            if v.Name:lower():find("sheck") or v.Name:lower():find("money") then
-                return tostring(v.Value)
-            end
-        end
-    end
-
-    return "?"
-end
-
 local function GetPlotExpandText()
     local Plot = GetPlot()
     local Visual = Plot:FindFirstChild("Visual")
@@ -139,27 +194,16 @@ local function GetPlotExpandText()
     local TotalArea = Visual:FindFirstChild("GardenTotalArea")
     if not TotalArea then return "? / 5" end
 
-    local sizeX = math.floor(TotalArea.Size.X)
+    local x = math.floor(TotalArea.Size.X)
 
-    if sizeX >= 114 then
-        return "1 / 5+"
-    end
+    if x >= 250 then return "5 / 5" end
+    if x >= 210 then return "4 / 5" end
+    if x >= 170 then return "3 / 5" end
+    if x >= 130 then return "2 / 5" end
+    if x >= 100 then return "1 / 5" end
 
-    return "? / 5"
+    return "0 / 5"
 end
-
-local function UpdateUI()
-    CarrotLabel.Text = "Carrot: " .. CountCarrots()
-    MoneyLabel.Text = "Money: " .. GetMoneyText()
-    PlotLabel.Text = "Plot Expand: " .. GetPlotExpandText()
-    TimeLabel.Text = "Time: " .. FormatTime(tick() - StartTime)
-end
-
-task.spawn(function()
-    while task.wait(1) do
-        pcall(UpdateUI)
-    end
-end)
 
 local function GetPlantKg(Plant)
     local HarvestPart = Plant:FindFirstChild("HarvestPart")
@@ -423,6 +467,22 @@ local function CountSuperSprinklers()
     return count
 end
 
+local function UpdateUI()
+    pcall(function()
+        CarrotPlantLabel.Text = "🥕  CARROT PLANTS: " .. CountCarrots()
+        CarrotSeedLabel.Text = "🎒  CARROT SEEDS: " .. CountCarrotSeeds()
+        SprinklerLabel.Text = "💧  SUPER SPRINKLER: " .. CountSuperSprinklers() .. " / " .. MAX_SUPER_SPRINKLER
+        PlotLabel.Text = "🌾  PLOT EXPAND: " .. GetPlotExpandText()
+        TimeLabel.Text = "⏱️  RUN TIME: " .. FormatTime(tick() - StartTime)
+    end)
+end
+
+task.spawn(function()
+    while task.wait(1) do
+        UpdateUI()
+    end
+end)
+
 local function GetSuperSprinklerToolModel()
     RefreshCharacter()
 
@@ -543,9 +603,6 @@ local function FarmCycle()
 
     SetStatus("Going Garden")
     TeleportGardenIfNeeded()
-
-    SetStatus("Placing Sprinkler")
-    PlaceSuperSprinklers()
 
     SetStatus("Planting Carrot")
     PlantAllCarrot(true)
