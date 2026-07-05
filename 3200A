@@ -1,7 +1,7 @@
 pcall(function() setfpscap(8) end)
 
 --// CONFIG
-local WEBHOOK_URL = "" -- dán webhook vào đây
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1523234615329030285/Ao76IUXWmZDlfGYAmKrOyPrZ3Pjort-U2yFocySrYgFgHiRAYh7PVTn2vE6i3lvuAyf1" -- dán webhook vào đây
 local KEEP_KG = 20
 local LOOP_DELAY = 8
 local PLANT_PER_LOOP = 80
