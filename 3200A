@@ -87,6 +87,8 @@ local SprinklerController = require(Controllers:WaitForChild("SprinklerControlle
 local Net = debug.getupvalues(SprinklerController.TryPlace)[5]
 
 local BUY_TIMES = 10
+local BUY_COOLDOWN = 65
+local NextBuyTime = 0
 local MIN_KEEP_KG = 20
 local PLANT_SPACING = 5
 
@@ -190,73 +192,42 @@ local function GetToolAmount(tool)
 end
 
 local function CountCarrotSeeds()
-    local ok, result = pcall(function()
-        RefreshCharacter()
+    RefreshCharacter()
 
-        local count = 0
+    local count = 0
 
-        for _, tool in ipairs(Character:GetChildren()) do
-            if tool:IsA("Tool") then
-                print("CHAR TOOL:", tool.Name)
-
-                if tool.Name:lower():find("carrot") then
-                    count += GetToolAmount(tool)
-                end
-            end
+    for _, tool in ipairs(Character:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
+            count += GetToolAmount(tool)
         end
-
-        local Backpack = Player:FindFirstChild("Backpack")
-        if Backpack then
-            for _, tool in ipairs(Backpack:GetChildren()) do
-                if tool:IsA("Tool") then
-                    print("BACKPACK TOOL:", tool.Name)
-
-                    if tool.Name:lower():find("carrot") then
-                        count += GetToolAmount(tool)
-                    end
-                end
-            end
-        end
-
-        print("UI DEBUG CARROT SEEDS:", count)
-        return count
-    end)
-
-    if ok then
-        return result
     end
 
-    warn("CountCarrotSeeds ERROR:", result)
-    return 0
+    local Backpack = Player:FindFirstChild("Backpack")
+    if Backpack then
+        for _, tool in ipairs(Backpack:GetChildren()) do
+            if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
+                count += GetToolAmount(tool)
+            end
+        end
+    end
+
+    return count
 end
 
 local function CountCarrots()
-    local ok, result = pcall(function()
-        local Plot = GetPlot()
-        local Plants = Plot:WaitForChild("Plants")
+    local Plot = GetPlot()
+    local Plants = Plot:WaitForChild("Plants")
 
-        local total = 0
-        local carrot = 0
+    local carrot = 0
 
-        for _, Plant in ipairs(Plants:GetChildren()) do
-            total += 1
-
-            local SeedName = Plant:GetAttribute("SeedName")
-            if SeedName and tostring(SeedName):lower():find("carrot") then
-                carrot += 1
-            end
+    for _, Plant in ipairs(Plants:GetChildren()) do
+        local SeedName = Plant:GetAttribute("SeedName")
+        if SeedName and tostring(SeedName):lower():find("carrot") then
+            carrot += 1
         end
-
-        print("UI DEBUG PLANTS:", total, "CARROT:", carrot)
-        return carrot
-    end)
-
-    if ok then
-        return result
     end
 
-    warn("CountCarrots ERROR:", result)
-    return 0
+    return carrot
 end
 
 local function GetPlotExpandText()
@@ -327,12 +298,30 @@ local function HarvestAndSellUnder20kg()
 end
 
 local function BuyCarrotAll()
+    if tick() < NextBuyTime then
+        print("BUY SKIP: waiting stock")
+        return false
+    end
+
+    local before = CountCarrotSeeds()
+
     for i = 1, BUY_TIMES do
         Net.SeedShop.PurchaseSeed:Fire("Carrot")
         task.wait(0.08)
     end
 
-    print("BUY CARROT DONE:", BUY_TIMES)
+    task.wait(1)
+
+    local after = CountCarrotSeeds()
+
+    if after > before then
+        print("BUY CARROT SUCCESS:", before, "->", after)
+        return true
+    end
+
+    NextBuyTime = tick() + BUY_COOLDOWN
+    print("BUY CARROT FAILED: no stock or server rejected")
+    return false
 end
 
 local function GetCarrotTool()
