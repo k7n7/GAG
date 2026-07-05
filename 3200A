@@ -190,40 +190,73 @@ local function GetToolAmount(tool)
 end
 
 local function CountCarrotSeeds()
-    RefreshCharacter()
+    local ok, result = pcall(function()
+        RefreshCharacter()
 
-    local count = 0
+        local count = 0
 
-    for _, tool in ipairs(Character:GetChildren()) do
-        if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-            count += GetToolAmount(tool)
-        end
-    end
+        for _, tool in ipairs(Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                print("CHAR TOOL:", tool.Name)
 
-    local Backpack = Player:FindFirstChild("Backpack")
-    if Backpack then
-        for _, tool in ipairs(Backpack:GetChildren()) do
-            if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-                count += GetToolAmount(tool)
+                if tool.Name:lower():find("carrot") then
+                    count += GetToolAmount(tool)
+                end
             end
         end
+
+        local Backpack = Player:FindFirstChild("Backpack")
+        if Backpack then
+            for _, tool in ipairs(Backpack:GetChildren()) do
+                if tool:IsA("Tool") then
+                    print("BACKPACK TOOL:", tool.Name)
+
+                    if tool.Name:lower():find("carrot") then
+                        count += GetToolAmount(tool)
+                    end
+                end
+            end
+        end
+
+        print("UI DEBUG CARROT SEEDS:", count)
+        return count
+    end)
+
+    if ok then
+        return result
     end
 
-    return count
+    warn("CountCarrotSeeds ERROR:", result)
+    return 0
 end
 
 local function CountCarrots()
-    local Plot = GetPlot()
-    local Plants = Plot:WaitForChild("Plants")
+    local ok, result = pcall(function()
+        local Plot = GetPlot()
+        local Plants = Plot:WaitForChild("Plants")
 
-    local count = 0
-    for _, Plant in ipairs(Plants:GetChildren()) do
-        if Plant:GetAttribute("SeedName") == "Carrot" then
-            count += 1
+        local total = 0
+        local carrot = 0
+
+        for _, Plant in ipairs(Plants:GetChildren()) do
+            total += 1
+
+            local SeedName = Plant:GetAttribute("SeedName")
+            if SeedName and tostring(SeedName):lower():find("carrot") then
+                carrot += 1
+            end
         end
+
+        print("UI DEBUG PLANTS:", total, "CARROT:", carrot)
+        return carrot
+    end)
+
+    if ok then
+        return result
     end
 
-    return count
+    warn("CountCarrots ERROR:", result)
+    return 0
 end
 
 local function GetPlotExpandText()
