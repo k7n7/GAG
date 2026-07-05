@@ -164,7 +164,7 @@ local function RefreshCharacter()
 end
 
 local function GetPlot()
-    for i = 1, 30 do
+    for i = 1,30 do
         local Plot = PlantController:GetPlayerPlot()
         if Plot then
             return Plot
@@ -175,43 +175,51 @@ local function GetPlot()
     error("Không tìm thấy plot sau 15 giây.")
 end
 
-local function GetToolAmount(tool)
-    local name = tool.Name or ""
+local ReplicaController
+local LocalReplica
 
-    local fromName = tonumber(name:match("[xX](%d+)"))
-    if fromName then return fromName end
+local function GetLocalReplica()
+    if LocalReplica then
+        return LocalReplica
+    end
 
-    for _, attr in ipairs({"Amount", "Quantity", "Stack", "Count"}) do
-        local v = tool:GetAttribute(attr)
-        if type(v) == "number" then
-            return v
+    local PlotsController = require(Controllers:WaitForChild("PlotsController"))
+
+    for _, up in ipairs(debug.getupvalues(PlotsController.Start)) do
+        if type(up) == "table"
+            and type(up.GetLocalReplica) == "function"
+            and type(up.WaitForLocalReplica) == "function" then
+            ReplicaController = up
+            break
         end
     end
 
-    return 1
+    assert(ReplicaController, "Không tìm thấy ReplicaController.")
+
+    LocalReplica = ReplicaController:GetLocalReplica()
+
+    if not LocalReplica then
+        LocalReplica = ReplicaController:WaitForLocalReplica()
+    end
+    assert(LocalReplica, "Không tìm thấy LocalReplica.")
+
+    return LocalReplica
 end
 
 local function CountCarrotSeeds()
-    RefreshCharacter()
+    local ok, amount = pcall(function()
+        local Replica = GetLocalReplica()
+        local Data = Replica.Data
+        local Inventory = Data.Inventory
+        local Seeds = Inventory.Seeds or {}
+        return tonumber(Seeds.Carrot or 0)
+    end)
 
-    local count = 0
-
-    for _, tool in ipairs(Character:GetChildren()) do
-        if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-            count += GetToolAmount(tool)
-        end
+    if ok then
+        return amount
     end
 
-    local Backpack = Player:FindFirstChild("Backpack")
-    if Backpack then
-        for _, tool in ipairs(Backpack:GetChildren()) do
-            if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-                count += GetToolAmount(tool)
-            end
-        end
-    end
-
-    return count
+    return 0
 end
 
 local function CountCarrots()
@@ -676,14 +684,24 @@ local function FarmCycle()
         ExpandPlotToMax5()
     end
 
-    SetStatus("Buying Carrot")
-    BuyCarrotAll()
+    local seedCount = CountCarrotSeeds()
 
-    SetStatus("Going Garden")
-    TeleportGardenIfNeeded()
+    if seedCount <= 0 then
+        SetStatus("Buying Carrot")
+        BuyCarrotAll()
+        task.wait(0.5)
+        seedCount = CountCarrotSeeds()
+    end
 
-    SetStatus("Planting Carrot")
-    PlantAllCarrot(true)
+    if seedCount > 0 then
+        SetStatus("Going Garden")
+        TeleportGardenIfNeeded()
+
+        SetStatus("Planting Carrot")
+        PlantAllCarrot(true)
+    else
+        SetStatus("Waiting Carrot Stock")
+    end
 
     SetStatus("Cycle Done")
     print("===== CYCLE DONE:", cycle, "=====")
