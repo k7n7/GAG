@@ -280,6 +280,7 @@ local function GetPlantKg(Plant)
 
     local text = NameLabel.Text or ""
     return tonumber(text:match("([%d%.]+)kg")) or 0
+    print(NameLabel.Text)
 end
 
 local function HarvestAndSellUnder20kg()
@@ -288,6 +289,12 @@ local function HarvestAndSellUnder20kg()
 
     for _, Plant in ipairs(Plants:GetChildren()) do
         local Ready = Plant:GetAttribute("PlantGrowthReady")
+                print(
+                    SeedName,
+                    "Ready =",
+                    Ready,
+                    typeof(Ready)
+                )
         local SeedName = Plant:GetAttribute("SeedName")
         local Kg = GetPlantKg(Plant)
 
