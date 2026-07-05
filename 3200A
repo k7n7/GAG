@@ -93,7 +93,7 @@ local MIN_KEEP_KG = 20
 local PLANT_SPACING = 5
 local HIDE_UI = true
 local MAX_EXPAND_LEVEL = 5
-local PLANT_DELAY = 0.08
+local PLANT_DELAY = 0.02
 local SPRINKLER_CHECK_COOLDOWN = 120
 local NextSprinklerCheck = 0
 
@@ -701,22 +701,18 @@ local function FarmCycle()
         seedCount = CountCarrotSeeds()
     end
 
+    SetStatus("Going Garden")
+    TeleportGardenIfNeeded()
+
+    SetStatus("Placing Sprinkler")
+    PlaceSuperSprinklers()
+
     if seedCount > 0 then
-        SetStatus("Going Garden")
-        TeleportGardenIfNeeded()
-
-        SetStatus("Placing Sprinkler")
-        PlaceSuperSprinklers()
-
         SetStatus("Planting Carrot")
         PlantAllCarrot(true)
     else
         SetStatus("Waiting Carrot Stock")
     end
-
-    SetStatus("Cycle Done")
-    --print("===== CYCLE DONE:", cycle, "=====")
-end
 
 if RUN_FOREVER then
     while true do
