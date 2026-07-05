@@ -714,7 +714,10 @@ local function FarmCycle()
         SetStatus("Waiting Carrot Stock")
     end
 
-if RUN_FOREVER then
+    SetStatus("Cycle Done")
+    end
+
+    if RUN_FOREVER then
     while true do
         local ok, err = pcall(FarmCycle)
         if not ok then
