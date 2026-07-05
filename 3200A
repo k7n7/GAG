@@ -93,6 +93,9 @@ local MIN_KEEP_KG = 20
 local PLANT_SPACING = 5
 local HIDE_UI = true
 local MAX_EXPAND_LEVEL = 5
+local PLANT_DELAY = 0.08
+local SPRINKLER_CHECK_COOLDOWN = 120
+local NextSprinklerCheck = 0
 
 local LOOP_DELAY = 0.5 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
@@ -451,25 +454,24 @@ local function PlantAllCarrot(alreadyAtGarden)
         task.wait(1.5)
     end
 
-    local CarrotTool = GetCarrotTool()
+    local seedCount = CountCarrotSeeds()
+    if seedCount <= 0 then
+        return
+    end
 
+    local CarrotTool = GetCarrotTool()
     if not CarrotTool then
         warn("Không tìm thấy Carrot trong Backpack hoặc Character.")
         return
     end
 
     local positions = GetEmptyPlantPositions()
+    local plantAmount = math.min(#positions, seedCount)
 
-    for i, pos in ipairs(positions) do
-        if i > BUY_TIMES then
-            break
-        end
-
-        PlantAt(pos)
-        task.wait(0.35)
+    for i = 1, plantAmount do
+        PlantAt(positions[i])
+        task.wait(PLANT_DELAY)
     end
-
-    --print("PLANT CARROT DONE")
 end
 
 local function ExpandPlotToMax5()
@@ -609,6 +611,11 @@ end
 
 local function PlaceSuperSprinklers()
     local currentCount = CountSuperSprinklers()
+    if tick() < NextSprinklerCheck then
+        return
+    end
+
+    NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
 
     if currentCount >= MAX_SUPER_SPRINKLER then
         --print("SUPER SPRINKLER ĐÃ ĐỦ:", currentCount)
@@ -697,6 +704,9 @@ local function FarmCycle()
     if seedCount > 0 then
         SetStatus("Going Garden")
         TeleportGardenIfNeeded()
+
+        SetStatus("Placing Sprinkler")
+        PlaceSuperSprinklers()
 
         SetStatus("Planting Carrot")
         PlantAllCarrot(true)
