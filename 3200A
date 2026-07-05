@@ -98,6 +98,9 @@ local BUY_DELAY = 0.05
 local BUY_MAX_ATTEMPTS = 60
 local SPRINKLER_CHECK_COOLDOWN = 120
 local NextSprinklerCheck = 0
+local DEBUG_HARVEST = true
+local DEBUG_HARVEST_LIMIT = 25
+
 
 local LOOP_DELAY = 0.5 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
@@ -279,45 +282,60 @@ local function GetPlantKg(Plant)
     if not NameLabel then return 0 end
 
     local text = NameLabel.Text or ""
-    return tonumber(text:match("([%d%.]+)kg")) or 0
-    print(NameLabel.Text)
+    local kgText = text:match("([%d%.]+)%s*[kK][gG]")
+
+    return tonumber(kgText) or 0
 end
 
 local function HarvestAndSellUnder20kg()
     local Plot = GetPlot()
     local Plants = Plot:WaitForChild("Plants")
+    local debugCount = 0
 
     for _, Plant in ipairs(Plants:GetChildren()) do
         local Ready = Plant:GetAttribute("PlantGrowthReady")
-                print(
-                    SeedName,
-                    "Ready =",
-                    Ready,
-                    typeof(Ready)
-                )
         local SeedName = Plant:GetAttribute("SeedName")
         local Kg = GetPlantKg(Plant)
 
-        if Ready == true and Kg < MIN_KEEP_KG then
-            local HarvestPart = Plant:FindFirstChild("HarvestPart")
-            local Prompt = HarvestPart and HarvestPart:FindFirstChild("HarvestPrompt")
+        local HarvestPart = Plant:FindFirstChild("HarvestPart")
+        local Prompt = nil
 
-            if Prompt then
-                Prompt.MaxActivationDistance = 999999
-                Prompt.RequiresLineOfSight = false
+        if HarvestPart then
+            Prompt =
+                HarvestPart:FindFirstChild("HarvestPrompt")
+                or HarvestPart:FindFirstChildWhichIsA("ProximityPrompt", true)
+        end
 
-                --print("HARVEST:", SeedName, Kg .. "kg")
-                fireproximityprompt(Prompt)
-                task.wait(0.15)
-            end
-        elseif Ready == true then
-            --print("KEEP:", SeedName, Kg .. "kg")
+        local IsReady =
+            Ready == true
+            or Ready == 1
+            or Ready == "true"
+            or Ready == "Ready"
+            or Prompt ~= nil
+
+        if DEBUG_HARVEST and debugCount < DEBUG_HARVEST_LIMIT then
+            debugCount += 1
+            print(
+                "HARVEST DEBUG:",
+                SeedName,
+                "Ready =", Ready,
+                typeof(Ready),
+                "Kg =", Kg,
+                "Prompt =", Prompt
+            )
+        end
+
+        if IsReady and Kg < MIN_KEEP_KG and Prompt then
+            Prompt.MaxActivationDistance = 999999
+            Prompt.RequiresLineOfSight = false
+
+            fireproximityprompt(Prompt)
+            task.wait(0.08)
         end
     end
 
-    task.wait(1)
+    task.wait(0.5)
     Net.NPCS.SellAll:Fire()
-    --print("SELL ALL")
 end
 
 local function BuyCarrotAll()
