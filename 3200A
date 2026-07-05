@@ -269,7 +269,7 @@ local function GetPlotExpandText()
 end
 
 local function GetPlantKg(Plant)
-    -- Ưu tiên đọc Attribute nếu game có lưu kg ở data thật của cây.
+    -- Ưu tiên Attribute nếu game có lưu kg ở data thật của cây.
     for _, attr in ipairs({"Kg", "KG", "kg", "Weight", "Mass"}) do
         local value = Plant:GetAttribute(attr)
         if type(value) == "number" then
@@ -282,16 +282,14 @@ local function GetPlantKg(Plant)
         end
     end
 
-    local HarvestPart = Plant:FindFirstChild("HarvestPart")
-    if not HarvestPart then return nil end
-
-    -- Đọc mọi TextLabel/TextButton bên trong HarvestPart, không phụ thuộc đúng path cũ.
-    for _, obj in ipairs(HarvestPart:GetDescendants()) do
+    -- Quan trọng: KG label không nằm trong HarvestPart ở bản hiện tại,
+    -- nên phải quét TOÀN BỘ Plant:GetDescendants().
+    for _, obj in ipairs(Plant:GetDescendants()) do
         if obj:IsA("TextLabel") or obj:IsA("TextButton") then
-            local text = obj.Text or ""
-            local kgText = text:match("([%d%.]+)%s*[kK][gG]")
-            if kgText then
-                return tonumber(kgText)
+            local txt = obj.Text or ""
+            local parsed = tonumber(txt:match("([%d%.]+)%s*[kK][gG]"))
+            if parsed then
+                return parsed
             end
         end
     end
@@ -358,11 +356,13 @@ local function HasProtectedCarrotInInventory()
 end
 
 local function GetHarvestPrompt(Plant)
-    local HarvestPart = Plant:FindFirstChild("HarvestPart")
-    if not HarvestPart then return nil end
+    local HarvestPart = Plant:FindFirstChild("HarvestPart", true)
+    if HarvestPart then
+        return HarvestPart:FindFirstChild("HarvestPrompt")
+            or HarvestPart:FindFirstChildWhichIsA("ProximityPrompt", true)
+    end
 
-    return HarvestPart:FindFirstChild("HarvestPrompt")
-        or HarvestPart:FindFirstChildWhichIsA("ProximityPrompt", true)
+    return Plant:FindFirstChildWhichIsA("ProximityPrompt", true)
 end
 
 local function HarvestAndSellUnder20kg()
