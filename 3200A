@@ -59,17 +59,17 @@ pcall(OptimizeGame)
 
 task.spawn(function()
     local ok, err = pcall(function()
+        script_key = "wOkxVIksMSfRPvGOEsVLkGpfqPRyhata";
         getgenv().UserConfig = {
-            ["Auto Claim Mail"] = true,
-            ["Auto Send Mail"] = false,
-            ["Mail To Username"] = {},
-            ["Items To Mail"] = {
-                ["Pet"] = {},
-                ["Seed"] = {},
-            }
-        }
-
-        loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/69646c718a6612f0e46df24197570733.lua"))()
+    		["Auto Claim Mail"] = true,
+    		["Auto Send Mail"] = false,
+    		["Mail To Username"] = {}, -- Send all amount to username1 first then username2
+    		["Items To Mail"] = {
+        	["Pet"] = {},
+        	["Seed"] = {},
+    }
+}
+loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/790db43174cb636cf5fa1d87166bf85f.lua"))()
     end)
 
     if ok then
@@ -91,6 +91,8 @@ local BUY_COOLDOWN = 65
 local NextBuyTime = 0
 local MIN_KEEP_KG = 20
 local PLANT_SPACING = 5
+local HIDE_UI = true
+local MAX_EXPAND_LEVEL = 5
 
 local LOOP_DELAY = 0.5 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
@@ -105,6 +107,7 @@ ScreenGui.Name = "TrungPhanHubUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.Enabled = not HIDE_UI
 
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(1, 0, 1, 0)
@@ -239,22 +242,22 @@ local function CountCarrots()
 end
 
 local function GetPlotExpandText()
-    local Plot = GetPlot()
-    local Visual = Plot:FindFirstChild("Visual")
-    if not Visual then return "? / 5" end
+    local ok, value = pcall(function()
+        local Replica = GetLocalReplica()
+        local Data = Replica.Data
+        local owned = tonumber(Data.OwnedExpansions or 0)
 
-    local TotalArea = Visual:FindFirstChild("GardenTotalArea")
-    if not TotalArea then return "? / 5" end
+        if owned < 0 then owned = 0 end
+        if owned > MAX_EXPAND_LEVEL then owned = MAX_EXPAND_LEVEL end
 
-    local x = math.floor(TotalArea.Size.X)
+        return tostring(owned) .. " / " .. tostring(MAX_EXPAND_LEVEL)
+    end)
 
-    if x >= 250 then return "5 / 5" end
-    if x >= 210 then return "4 / 5" end
-    if x >= 170 then return "3 / 5" end
-    if x >= 130 then return "2 / 5" end
-    if x >= 100 then return "1 / 5" end
+    if ok then
+        return value
+    end
 
-    return "0 / 5"
+    return "? / " .. tostring(MAX_EXPAND_LEVEL)
 end
 
 local function GetPlantKg(Plant)
@@ -291,7 +294,7 @@ local function HarvestAndSellUnder20kg()
                 Prompt.MaxActivationDistance = 999999
                 Prompt.RequiresLineOfSight = false
 
-                print("HARVEST:", SeedName, Kg .. "kg")
+                --print("HARVEST:", SeedName, Kg .. "kg")
                 fireproximityprompt(Prompt)
                 task.wait(0.15)
             end
@@ -302,12 +305,12 @@ local function HarvestAndSellUnder20kg()
 
     task.wait(1)
     Net.NPCS.SellAll:Fire()
-    print("SELL ALL")
+    --print("SELL ALL")
 end
 
 local function BuyCarrotAll()
     if tick() < NextBuyTime then
-        print("BUY SKIP: waiting stock")
+        --print("BUY SKIP: waiting stock")
         return false
     end
 
@@ -323,12 +326,12 @@ local function BuyCarrotAll()
     local after = CountCarrotSeeds()
 
     if after > before then
-        print("BUY CARROT SUCCESS:", before, "->", after)
+        --print("BUY CARROT SUCCESS:", before, "->", after)
         return true
     end
 
     NextBuyTime = tick() + BUY_COOLDOWN
-    print("BUY CARROT FAILED: no stock or server rejected")
+    --print("BUY CARROT FAILED: no stock or server rejected")
     return false
 end
 
@@ -338,7 +341,7 @@ local function GetCarrotTool()
     -- Nếu đang cầm Carrot sẵn
     for _, tool in ipairs(Character:GetChildren()) do
         if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-            print("CARROT ALREADY EQUIPPED:", tool.Name)
+            --print("CARROT ALREADY EQUIPPED:", tool.Name)
             return tool
         end
     end
@@ -350,7 +353,7 @@ local function GetCarrotTool()
         for _, tool in ipairs(Backpack:GetChildren()) do
             if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
                 Humanoid:EquipTool(tool)
-                print("EQUIP CARROT:", tool.Name)
+                --print("EQUIP CARROT:", tool.Name)
                 task.wait(0.7)
                 return tool
             end
@@ -396,7 +399,7 @@ local function GetPlantAreas()
         return a.Name < b.Name
     end)
 
-    print("PLANT AREAS:", #areas)
+    --print("PLANT AREAS:", #areas)
     return areas
 end
 
@@ -426,7 +429,7 @@ local function GetEmptyPlantPositions()
         end
     end
 
-    print("EMPTY POSITIONS:", #positions)
+    --print("EMPTY POSITIONS:", #positions)
     return positions
 end
 
@@ -439,7 +442,7 @@ local function PlantAt(pos)
         PlantController:TryPlantWithRay(ray)
     end)
 
-    print("PLANT AT:", pos, ok, err)
+    --print("PLANT AT:", pos, ok, err)
 end
 
 local function PlantAllCarrot(alreadyAtGarden)
@@ -466,10 +469,8 @@ local function PlantAllCarrot(alreadyAtGarden)
         task.wait(0.35)
     end
 
-    print("PLANT CARROT DONE")
+    --print("PLANT CARROT DONE")
 end
-
-local MAX_EXPAND_LEVEL = 5
 
 local function ExpandPlotToMax5()
     for i = 1, MAX_EXPAND_LEVEL do
@@ -477,7 +478,7 @@ local function ExpandPlotToMax5()
             Net.Actions.ExpandGarden:Fire()
         end)
 
-        print("EXPAND TRY:", i, ok, err)
+        --print("EXPAND TRY:", i, ok, err)
         task.wait(0.6)
     end
 end
@@ -575,7 +576,7 @@ local function GetSuperSprinklerToolModel()
     -- Nếu đang cầm trên tay
     for _, tool in ipairs(Character:GetChildren()) do
         if tool.Name:lower():find("super sprinkler") then
-            print("SUPER SPRINKLER ALREADY EQUIPPED:", tool.Name)
+            --print("SUPER SPRINKLER ALREADY EQUIPPED:", tool.Name)
             return tool
         end
     end
@@ -586,7 +587,7 @@ local function GetSuperSprinklerToolModel()
     for _, tool in ipairs(Backpack:GetChildren()) do
         if tool.Name:lower():find("super sprinkler") then
             Humanoid:EquipTool(tool)
-            print("EQUIP SUPER SPRINKLER:", tool.Name)
+            --print("EQUIP SUPER SPRINKLER:", tool.Name)
             task.wait(0.7)
             return tool
         end
@@ -597,7 +598,7 @@ local function GetSuperSprinklerToolModel()
     if PlayerFolder then
         for _, obj in ipairs(PlayerFolder:GetChildren()) do
             if obj.Name:lower():find("super sprinkler") then
-                print("FOUND SUPER SPRINKLER MODEL:", obj.Name)
+                --print("FOUND SUPER SPRINKLER MODEL:", obj.Name)
                 return obj
             end
         end
@@ -610,7 +611,7 @@ local function PlaceSuperSprinklers()
     local currentCount = CountSuperSprinklers()
 
     if currentCount >= MAX_SUPER_SPRINKLER then
-        print("SUPER SPRINKLER ĐÃ ĐỦ:", currentCount)
+        --print("SUPER SPRINKLER ĐÃ ĐỦ:", currentCount)
         return
     end
 
@@ -638,10 +639,10 @@ local function PlaceSuperSprinklers()
                 1
             )
 
-            print("PLACE SUPER SPRINKLER:", pos)
+            --print("PLACE SUPER SPRINKLER:", pos)
             task.wait(0.6)
         else
-            print("SKIP, ĐÃ CÓ SPRINKLER GẦN:", pos)
+            --print("SKIP, ĐÃ CÓ SPRINKLER GẦN:", pos)
         end
     end
 end
@@ -661,7 +662,7 @@ end
 
 local function TeleportGardenIfNeeded()
     if IsNearGarden() then
-        print("ALREADY NEAR GARDEN, SKIP TELEPORT")
+        --print("ALREADY NEAR GARDEN, SKIP TELEPORT")
         return
     end
 
@@ -674,7 +675,7 @@ local cycle = 0
 
 local function FarmCycle()
     cycle += 1
-    print("===== FARM CYCLE:", cycle, "=====")
+    --print("===== FARM CYCLE:", cycle, "=====")
 
     SetStatus("Harvesting & Selling")
     HarvestAndSellUnder20kg()
@@ -704,7 +705,7 @@ local function FarmCycle()
     end
 
     SetStatus("Cycle Done")
-    print("===== CYCLE DONE:", cycle, "=====")
+    --print("===== CYCLE DONE:", cycle, "=====")
 end
 
 if RUN_FOREVER then
