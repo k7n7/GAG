@@ -93,7 +93,9 @@ local MIN_KEEP_KG = 20
 local PLANT_SPACING = 5
 local HIDE_UI = true
 local MAX_EXPAND_LEVEL = 5
-local PLANT_DELAY = 0.02
+local PLANT_DELAY = 0.01
+local BUY_DELAY = 0.05
+local BUY_MAX_ATTEMPTS = 60
 local SPRINKLER_CHECK_COOLDOWN = 120
 local NextSprinklerCheck = 0
 
@@ -302,7 +304,7 @@ local function HarvestAndSellUnder20kg()
                 task.wait(0.15)
             end
         elseif Ready == true then
-            print("KEEP:", SeedName, Kg .. "kg")
+            --print("KEEP:", SeedName, Kg .. "kg")
         end
     end
 
@@ -313,28 +315,38 @@ end
 
 local function BuyCarrotAll()
     if tick() < NextBuyTime then
-        --print("BUY SKIP: waiting stock")
         return false
     end
 
     local before = CountCarrotSeeds()
+    local lastAmount = before
+    local success = false
+    local failStreak = 0
 
-    for i = 1, BUY_TIMES do
+    for i = 1, BUY_MAX_ATTEMPTS do
         Net.SeedShop.PurchaseSeed:Fire("Carrot")
-        task.wait(0.08)
+        task.wait(BUY_DELAY)
+
+        local now = CountCarrotSeeds()
+
+        if now > lastAmount then
+            success = true
+            failStreak = 0
+            lastAmount = now
+        else
+            failStreak += 1
+        end
+
+        if failStreak >= 5 then
+            break
+        end
     end
 
-    task.wait(1)
-
-    local after = CountCarrotSeeds()
-
-    if after > before then
-        --print("BUY CARROT SUCCESS:", before, "->", after)
+    if success then
         return true
     end
 
     NextBuyTime = tick() + BUY_COOLDOWN
-    --print("BUY CARROT FAILED: no stock or server rejected")
     return false
 end
 
@@ -454,8 +466,7 @@ local function PlantAllCarrot(alreadyAtGarden)
         task.wait(1.5)
     end
 
-    local seedCount = CountCarrotSeeds()
-    if seedCount <= 0 then
+    if CountCarrotSeeds() <= 0 then
         return
     end
 
@@ -465,12 +476,23 @@ local function PlantAllCarrot(alreadyAtGarden)
         return
     end
 
-    local positions = GetEmptyPlantPositions()
-    local plantAmount = math.min(#positions, seedCount)
+    while CountCarrotSeeds() > 0 do
+        local positions = GetEmptyPlantPositions()
 
-    for i = 1, plantAmount do
-        PlantAt(positions[i])
-        task.wait(PLANT_DELAY)
+        if #positions <= 0 then
+            break
+        end
+
+        for _, pos in ipairs(positions) do
+            if CountCarrotSeeds() <= 0 then
+                break
+            end
+
+            PlantAt(pos)
+            task.wait(PLANT_DELAY)
+        end
+
+        task.wait(0.05)
     end
 end
 
@@ -610,34 +632,22 @@ local function GetSuperSprinklerToolModel()
 end
 
 local function PlaceSuperSprinklers()
-    local currentCount = CountSuperSprinklers()
     if tick() < NextSprinklerCheck then
         return
     end
 
     NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
 
-    if currentCount >= MAX_SUPER_SPRINKLER then
-        --print("SUPER SPRINKLER ĐÃ ĐỦ:", currentCount)
-        return
-    end
-
     local toolModel = GetSuperSprinklerToolModel()
-
     if not toolModel then
-        warn("Không tìm thấy Super Sprinkler để đặt.")
         return
     end
 
-    task.wait(0.3)
+    task.wait(0.2)
 
     local positions = GetSprinklerTargetPositions()
 
     for _, pos in ipairs(positions) do
-        if CountSuperSprinklers() >= MAX_SUPER_SPRINKLER then
-            break
-        end
-
         if not IsSuperSprinklerNear(pos) then
             Net.Place.PlaceSprinkler:Fire(
                 pos,
@@ -646,10 +656,7 @@ local function PlaceSuperSprinklers()
                 1
             )
 
-            --print("PLACE SUPER SPRINKLER:", pos)
-            task.wait(0.6)
-        else
-            --print("SKIP, ĐÃ CÓ SPRINKLER GẦN:", pos)
+            task.wait(0.25)
         end
     end
 end
