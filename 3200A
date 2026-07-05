@@ -96,7 +96,7 @@ local MAX_EXPAND_LEVEL = 5
 local PLANT_DELAY = 0.01
 local BUY_DELAY = 0.05
 local BUY_MAX_ATTEMPTS = 60
-local SPRINKLER_CHECK_COOLDOWN = 120
+local SPRINKLER_CHECK_COOLDOWN = 5
 local NextSprinklerCheck = 0
 local DEBUG_HARVEST = true
 local DEBUG_HARVEST_LIMIT = 25
@@ -334,7 +334,7 @@ local function HarvestAndSellUnder20kg()
         end
     end
 
-    task.wait(0.5)
+    task.wait(0.1)
     Net.NPCS.SellAll:Fire()
 end
 
@@ -501,23 +501,18 @@ local function PlantAllCarrot(alreadyAtGarden)
         return
     end
 
-    while CountCarrotSeeds() > 0 do
-        local positions = GetEmptyPlantPositions()
+    local positions = GetEmptyPlantPositions()
 
-        if #positions <= 0 then
-            break
-        end
+    if #positions <= 0 then
+        return
+    end
 
-        for _, pos in ipairs(positions) do
-            if CountCarrotSeeds() <= 0 then
-                break
-            end
+    local seedCount = CountCarrotSeeds()
+    local plantAmount = math.min(#positions, seedCount)
 
-            PlantAt(pos)
-            task.wait(PLANT_DELAY)
-        end
-
-        task.wait(0.05)
+    for i = 1, plantAmount do
+        PlantAt(positions[i])
+        task.wait(PLANT_DELAY)
     end
 end
 
@@ -533,13 +528,13 @@ local function ExpandPlotToMax5()
 end
 
 local MAX_SUPER_SPRINKLER = 5
-local SPRINKLER_CHECK_RADIUS = 12
+local SPRINKLER_CHECK_RADIUS = 18
 
 local function GetSprinklerTargetPositions()
     local positions = {}
 
     for _, area in ipairs(GetPlantAreas()) do
-        table.insert(positions, area.Position)
+        table.insert(positions, area.Position + Vector3.new(0, 0.2, 0))
     end
 
     return positions
