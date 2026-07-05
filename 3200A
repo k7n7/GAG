@@ -656,19 +656,23 @@ local function PlaceSuperSprinklers()
         return
     end
 
-    NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
-
-    local toolModel = GetSuperSprinklerToolModel()
-    if not toolModel then
-        return
-    end
-
-    task.wait(0.2)
-
     local positions = GetSprinklerTargetPositions()
+    print("SPRINKLER TARGETS:", #positions)
+
+    for i, pos in ipairs(positions) do
+        print("TARGET", i, pos, "NEAR =", IsSuperSprinklerNear(pos))
+    end
 
     for _, pos in ipairs(positions) do
         if not IsSuperSprinklerNear(pos) then
+            local toolModel = GetSuperSprinklerToolModel()
+
+            if not toolModel then
+                break
+            end
+
+            task.wait(0.15)
+
             Net.Place.PlaceSprinkler:Fire(
                 pos,
                 "Super Sprinkler",
@@ -676,9 +680,11 @@ local function PlaceSuperSprinklers()
                 1
             )
 
-            task.wait(0.25)
+            task.wait(0.35)
         end
     end
+
+    NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
 end
 
 local function IsNearGarden()
