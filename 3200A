@@ -270,32 +270,114 @@ end
 
 local function GetPlantKg(Plant)
     local HarvestPart = Plant:FindFirstChild("HarvestPart")
-    if not HarvestPart then return 0 end
+    if not HarvestPart then return nil end
 
     local Label = HarvestPart:FindFirstChild("HarvestPromptLabel")
-    if not Label then return 0 end
+    if not Label then return nil end
 
     local Frame = Label:FindFirstChild("Frame")
-    if not Frame then return 0 end
+    if not Frame then return nil end
 
     local NameLabel = Frame:FindFirstChild("Name")
-    if not NameLabel then return 0 end
+    if not NameLabel then return nil end
 
     local text = NameLabel.Text or ""
     local kgText = text:match("([%d%.]+)%s*[kK][gG]")
 
-    return tonumber(kgText) or 0
+    return tonumber(kgText)
+end
+
+local function GetToolKg(tool)
+    if not tool then return nil end
+
+    local name = tool.Name or ""
+    local kgText = name:match("([%d%.]+)%s*[kK][gG]")
+    if kgText then
+        return tonumber(kgText)
+    end
+
+    for _, attr in ipairs({"KG", "Kg", "kg", "Weight", "Mass"}) do
+        local value = tool:GetAttribute(attr)
+        if type(value) == "number" then
+            return value
+        elseif type(value) == "string" then
+            local parsed = tonumber(value:match("([%d%.]+)"))
+            if parsed then
+                return parsed
+            end
+        end
+    end
+
+    for _, obj in ipairs(tool:GetDescendants()) do
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") then
+            local text = obj.Text or ""
+            local parsed = tonumber(text:match("([%d%.]+)%s*[kK][gG]"))
+            if parsed then
+                return parsed
+            end
+        end
+    end
+
+    return nil
+end
+
+local function HasProtectedCarrotInInventory()
+    RefreshCharacter()
+
+    local function checkContainer(container)
+        if not container then return false end
+
+        for _, tool in ipairs(container:GetChildren()) do
+            if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
+                local kg = GetToolKg(tool)
+
+                if kg and kg >= MIN_KEEP_KG then
+                    warn("SKIP SELL: protected carrot in inventory:", tool.Name, kg .. "kg")
+                    return true
+                end
+            end
+        end
+
+        return false
+    end
+
+    local Backpack = Player:FindFirstChild("Backpack")
+
+    return checkContainer(Character) or checkContainer(Backpack)
 end
 
 local function HarvestAndSellUnder20kg()
     local Plot = GetPlot()
     local Plants = Plot:WaitForChild("Plants")
+
+    local harvested = 0
     local debugCount = 0
 
     for _, Plant in ipairs(Plants:GetChildren()) do
-        local Ready = Plant:GetAttribute("PlantGrowthReady")
         local SeedName = Plant:GetAttribute("SeedName")
         local Kg = GetPlantKg(Plant)
+
+        if not SeedName or not tostring(SeedName):lower():find("carrot") then
+            continue
+        end
+
+        -- Nếu không đọc được KG thì tuyệt đối bỏ qua để tránh harvest nhầm cây xịn.
+        if not Kg then
+            if DEBUG_HARVEST and debugCount < DEBUG_HARVEST_LIMIT then
+                debugCount += 1
+                warn("SKIP HARVEST: cannot read KG:", Plant.Name, SeedName)
+            end
+            continue
+        end
+
+        -- Cây >= 20kg phải giữ lại tuyệt đối.
+        if Kg >= MIN_KEEP_KG then
+            if DEBUG_HARVEST and debugCount < DEBUG_HARVEST_LIMIT then
+                debugCount += 1
+                print("KEEP CARROT:", Kg .. "kg")
+            end
+            continue
+        end
 
         local HarvestPart = Plant:FindFirstChild("HarvestPart")
         local Prompt = nil
@@ -306,35 +388,33 @@ local function HarvestAndSellUnder20kg()
                 or HarvestPart:FindFirstChildWhichIsA("ProximityPrompt", true)
         end
 
-        local IsReady =
-            Ready == true
-            or Ready == 1
-            or Ready == "true"
-            or Ready == "Ready"
-            or Prompt ~= nil
-
         if DEBUG_HARVEST and debugCount < DEBUG_HARVEST_LIMIT then
             debugCount += 1
-            print(
-                "HARVEST DEBUG:",
-                SeedName,
-                "Ready =", Ready,
-                typeof(Ready),
-                "Kg =", Kg,
-                "Prompt =", Prompt
-            )
+            print("HARVEST UNDER 20KG:", SeedName, Kg .. "kg", "Prompt =", Prompt)
         end
 
-        if IsReady and Kg < MIN_KEEP_KG and Prompt then
+        if Prompt then
             Prompt.MaxActivationDistance = 999999
             Prompt.RequiresLineOfSight = false
 
             fireproximityprompt(Prompt)
+            harvested += 1
             task.wait(0.08)
         end
     end
 
-    task.wait(0.1)
+    if harvested <= 0 then
+        return
+    end
+
+    task.wait(0.15)
+
+    -- Chốt an toàn cuối cùng: nếu trong inventory đang có carrot >= 20kg thì không SellAll.
+    if HasProtectedCarrotInInventory() then
+        warn("SELL CANCELLED: protected carrot detected.")
+        return
+    end
+
     Net.NPCS.SellAll:Fire()
 end
 
@@ -528,7 +608,7 @@ local function ExpandPlotToMax5()
 end
 
 local MAX_SUPER_SPRINKLER = 5
-local SPRINKLER_CHECK_RADIUS = 18
+local SPRINKLER_CHECK_RADIUS = 12
 
 local function GetSprinklerTargetPositions()
     local positions = {}
@@ -657,10 +737,10 @@ local function PlaceSuperSprinklers()
     end
 
     local positions = GetSprinklerTargetPositions()
-    print("SPRINKLER TARGETS:", #positions)
+    --print("SPRINKLER TARGETS:", #positions)
 
     for i, pos in ipairs(positions) do
-        print("TARGET", i, pos, "NEAR =", IsSuperSprinklerNear(pos))
+        --print("TARGET", i, pos, "NEAR =", IsSuperSprinklerNear(pos))
     end
 
     for _, pos in ipairs(positions) do
