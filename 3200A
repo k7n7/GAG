@@ -268,50 +268,151 @@ local function GetPlotExpandText()
     return "? / " .. tostring(MAX_EXPAND_LEVEL)
 end
 
+local function ParseKgFromText(text)
+    text = tostring(text or "")
+    text = text:gsub(",", ".")
+
+    local kgText = text:match("([%d%.]+)%s*[kK][gG]")
+    return kgText and tonumber(kgText) or nil
+end
+
+local function GetHarvestPart(Plant)
+    return Plant:FindFirstChild("HarvestPart", true)
+end
+
+local function GetHarvestPrompt(Plant)
+    local HarvestPart = GetHarvestPart(Plant)
+    if HarvestPart then
+        return HarvestPart:FindFirstChild("HarvestPrompt")
+            or HarvestPart:FindFirstChildWhichIsA("ProximityPrompt", true)
+    end
+
+    return Plant:FindFirstChildWhichIsA("ProximityPrompt", true)
+end
+
+local function GetTooltipKg()
+    local PlayerGui = Player:FindFirstChild("PlayerGui")
+    if not PlayerGui then return nil end
+
+    local Tooltip = PlayerGui:FindFirstChild("PlantHoverTooltip")
+    if not Tooltip then return nil end
+
+    local Frame = Tooltip:FindFirstChild("Frame")
+    if not Frame then return nil end
+
+    local Meters = Frame:FindFirstChild("Meters")
+    if not Meters then return nil end
+
+    return ParseKgFromText(Meters.Text)
+end
+
+local function AimAtPlant(Plant)
+    local HarvestPart = GetHarvestPart(Plant)
+        or Plant.PrimaryPart
+        or Plant:FindFirstChildWhichIsA("BasePart", true)
+
+    if not HarvestPart then
+        return false
+    end
+
+    RefreshCharacter()
+
+    local HRP = Character:FindFirstChild("HumanoidRootPart")
+    if HRP then
+        local targetPos = HarvestPart.Position
+        local standPos = targetPos + Vector3.new(0, 2.5, 5)
+        HRP.CFrame = CFrame.new(standPos, targetPos)
+    end
+
+    local Camera = workspace.CurrentCamera
+    if Camera then
+        local camPos = HarvestPart.Position + Vector3.new(0, 3, 7)
+        Camera.CFrame = CFrame.new(camPos, HarvestPart.Position)
+    end
+
+    -- Ép client cập nhật hover ở giữa màn hình nếu executor hỗ trợ.
+    pcall(function()
+        local VIM = game:GetService("VirtualInputManager")
+        local cam = workspace.CurrentCamera
+        local viewport = cam and cam.ViewportSize or Vector2.new(960, 540)
+        VIM:SendMouseMoveEvent(viewport.X / 2, viewport.Y / 2, game)
+    end)
+
+    return true
+end
+
+local function ReadPlantKgByHover(Plant, timeout)
+    timeout = timeout or 1.2
+
+    -- Clear tooltip cũ bằng cách chờ một nhịp trước khi aim cây mới.
+    AimAtPlant(Plant)
+
+    local started = tick()
+    local lastKg = nil
+
+    while tick() - started < timeout do
+        AimAtPlant(Plant)
+
+        local kg = GetTooltipKg()
+        if kg then
+            lastKg = kg
+
+            -- Đọc được 2 nhịp liên tiếp thì coi như tooltip ổn.
+            task.wait(0.06)
+            local kg2 = GetTooltipKg()
+            if kg2 and math.abs(kg2 - kg) < 0.001 then
+                return kg2
+            end
+        end
+
+        task.wait(0.08)
+    end
+
+    return lastKg
+end
+
 local function GetPlantKg(Plant)
-    -- Ưu tiên Attribute nếu game có lưu kg ở data thật của cây.
-    for _, attr in ipairs({"Kg", "KG", "kg", "Weight", "Mass"}) do
+    -- 1) Nếu game có Attribute kg thì lấy ngay.
+    for _, attr in ipairs({"Kg", "KG", "kg", "Weight", "Mass", "Size"}) do
         local value = Plant:GetAttribute(attr)
         if type(value) == "number" then
             return value
         elseif type(value) == "string" then
-            local parsed = tonumber(value:match("([%d%.]+)"))
+            local parsed = ParseKgFromText(value)
             if parsed then
                 return parsed
             end
         end
     end
 
-    -- Quan trọng: KG label không nằm trong HarvestPart ở bản hiện tại,
-    -- nên phải quét TOÀN BỘ Plant:GetDescendants().
+    -- 2) Text trực tiếp trong cây nếu có.
     for _, obj in ipairs(Plant:GetDescendants()) do
         if obj:IsA("TextLabel") or obj:IsA("TextButton") then
-            local txt = obj.Text or ""
-            local parsed = tonumber(txt:match("([%d%.]+)%s*[kK][gG]"))
+            local parsed = ParseKgFromText(obj.Text)
             if parsed then
                 return parsed
             end
         end
     end
 
-    return nil
+    -- 3) Cách chắc nhất hiện tại: hover vào cây rồi đọc PlantHoverTooltip.Frame.Meters.Text.
+    return ReadPlantKgByHover(Plant, 1.2)
 end
 
 local function GetToolKg(tool)
     if not tool then return nil end
 
-    local name = tool.Name or ""
-    local kgText = name:match("([%d%.]+)%s*[kK][gG]")
-    if kgText then
-        return tonumber(kgText)
+    local fromName = ParseKgFromText(tool.Name)
+    if fromName then
+        return fromName
     end
 
-    for _, attr in ipairs({"KG", "Kg", "kg", "Weight", "Mass"}) do
+    for _, attr in ipairs({"KG", "Kg", "kg", "Weight", "Mass", "Size"}) do
         local value = tool:GetAttribute(attr)
         if type(value) == "number" then
             return value
         elseif type(value) == "string" then
-            local parsed = tonumber(value:match("([%d%.]+)"))
+            local parsed = ParseKgFromText(value)
             if parsed then
                 return parsed
             end
@@ -320,8 +421,7 @@ local function GetToolKg(tool)
 
     for _, obj in ipairs(tool:GetDescendants()) do
         if obj:IsA("TextLabel") or obj:IsA("TextButton") then
-            local text = obj.Text or ""
-            local parsed = tonumber(text:match("([%d%.]+)%s*[kK][gG]"))
+            local parsed = ParseKgFromText(obj.Text)
             if parsed then
                 return parsed
             end
@@ -355,73 +455,65 @@ local function HasProtectedCarrotInInventory()
     return checkContainer(Character) or checkContainer(Backpack)
 end
 
-local function GetHarvestPrompt(Plant)
-    local HarvestPart = Plant:FindFirstChild("HarvestPart", true)
-    if HarvestPart then
-        return HarvestPart:FindFirstChild("HarvestPrompt")
-            or HarvestPart:FindFirstChildWhichIsA("ProximityPrompt", true)
-    end
-
-    return Plant:FindFirstChildWhichIsA("ProximityPrompt", true)
-end
-
 local function HarvestAndSellUnder20kg()
     local Plot = GetPlot()
     local Plants = Plot:WaitForChild("Plants")
 
-    local harvested = 0
-    local debugCount = 0
+    local carrots = {}
 
     for _, Plant in ipairs(Plants:GetChildren()) do
         local SeedName = Plant:GetAttribute("SeedName")
+        if SeedName and tostring(SeedName):lower():find("carrot") then
+            table.insert(carrots, Plant)
+        end
+    end
 
-        if not SeedName or not tostring(SeedName):lower():find("carrot") then
+    local harvested = 0
+    local debugCount = 0
+
+    for _, Plant in ipairs(carrots) do
+        if not Plant or not Plant.Parent then
+            continue
+        end
+
+        local Prompt = GetHarvestPrompt(Plant)
+        if not Prompt then
             continue
         end
 
         local Kg = GetPlantKg(Plant)
 
-        -- An toàn tuyệt đối: không đọc được KG thì KHÔNG harvest.
-        if not Kg then
-            if DEBUG_HARVEST and debugCount < DEBUG_HARVEST_LIMIT then
-                debugCount += 1
-                warn("SKIP HARVEST, cannot read KG:", Plant.Name, SeedName)
-            end
-            continue
-        end
-
-        -- An toàn tuyệt đối: >= 20kg thì giữ lại.
-        if Kg >= MIN_KEEP_KG then
-            if DEBUG_HARVEST and debugCount < DEBUG_HARVEST_LIMIT then
-                debugCount += 1
-                print("KEEP CARROT:", Kg .. "kg")
-            end
-            continue
-        end
-
-        local Prompt = GetHarvestPrompt(Plant)
-
         if DEBUG_HARVEST and debugCount < DEBUG_HARVEST_LIMIT then
             debugCount += 1
-            print("HARVEST UNDER 20KG:", SeedName, Kg .. "kg", "Prompt =", Prompt)
+            print("HARVEST CHECK:", Plant.Name, "Kg =", Kg, "Prompt =", Prompt)
         end
 
-        if Prompt then
-            Prompt.MaxActivationDistance = 999999
-            Prompt.RequiresLineOfSight = false
-            fireproximityprompt(Prompt)
-            harvested += 1
-            task.wait(0.06)
+        -- Không đọc được KG thì bỏ qua, tuyệt đối không harvest nhầm cây to.
+        if not Kg then
+            continue
         end
+
+        -- Cây >= 20kg giữ lại trong vườn.
+        if Kg >= MIN_KEEP_KG then
+            continue
+        end
+
+        -- Chỉ cây < 20kg mới harvest.
+        Prompt.MaxActivationDistance = 999999
+        Prompt.RequiresLineOfSight = false
+        fireproximityprompt(Prompt)
+
+        harvested += 1
+        task.wait(0.08)
     end
 
     if harvested <= 0 then
         return
     end
 
-    task.wait(0.12)
+    task.wait(0.15)
 
-    -- Nếu lỡ trong túi đang có carrot >= 20kg thì tuyệt đối không SellAll.
+    -- Nếu lỡ có carrot >=20kg trong túi thì hủy sell để bảo vệ.
     if HasProtectedCarrotInInventory() then
         warn("SELL CANCELLED: protected carrot >=20kg detected.")
         return
@@ -760,14 +852,22 @@ local function PlaceSuperSprinklers()
                 break
             end
 
-            Net.Place.PlaceSprinkler:Fire(
-                pos,
-                "Super Sprinkler",
-                toolModel,
-                1
-            )
+            local ok = pcall(function()
+                Net.Place.PlaceSprinkler:Fire(
+                    pos,
+                    "Super Sprinkler",
+                    toolModel,
+                    1
+                )
+            end)
 
-            task.wait(0.28)
+            if not ok then
+                pcall(function()
+                    SprinklerController:TryPlace(pos, "Super Sprinkler", toolModel, 1)
+                end)
+            end
+
+            task.wait(0.45)
         end
     end
 
