@@ -1,44 +1,447 @@
-getgenv().Config = {
-    ["Performance"] = {
-        ["Optimization"] = true,                  
-        ["FPS Cap"] = 10,                           
-    },
-    ["Auto Roll"] = {
-        ["Enabled"] = true,                          -- master switch for auto-rolling
-        ["Hide Roll"] = true,                        -- hide roll animation
-        ["Equip Best"] = true,                       -- auto-equip best slimes
-    },
-    ["Auto Use Dice"] = {                            -- dice to auto-use when available
-        "jackpotSpin",
-        "bigDice",
-        "hugeDice",
-        "shinyDice",
-        "invertedDice",
-    },
-    ["Auto Use Boost"] = {                           -- boosts to auto-activate
-        "luck",
-        "ultraLuck",
-        "currency",
-        "rollSpeed",
-    },
-    ["Auto Use Food"] = {                            -- food to auto-feed slimes
-        "apple", "carrot", "cherries", "grapes",
-        "banana", "watermelon", "pizza", "chicken", "drumstick",
-    },
-    ["Auto Upgrade"] = {
-        ["Enabled"] = true,                          -- auto-buy upgrades in priority order
-    },
-    ["Rebirth"] = {
-        ["Enabled"] = true,
-        ["Max Rebirths"] = 100,
-        ["Switch Account"] = true,
-        ["Switch At Rebirth"] = 10,
-    },
-    ["Webhook"] = {
-        ["Url"] = "https://discord.com/api/webhooks/1502116958857072694/FCUuRlFDn40nFxmIRnRDjOluYHZf8osrFKEbZgtrTqVfJ6lcou-jEbBmZFXDwXxDqO8S",                                -- your Discord webhook URL
-        ["Discord ID"] = "402895905986052106",                         -- your Discord user ID (for pings, right-click → Copy User ID)
-        ["Min Rarity"] = 10000000,                    -- only notify for slimes rarer than 1/X
-    },
+pcall(function()
+    setfpscap(8)
+end)
+
+--// CONFIG
+local WEBHOOK_URL = "" -- dán webhook vào đây
+local KEEP_KG = 20
+local LOOP_DELAY = 8
+local PLANT_PER_LOOP = 60
+local USE_DUCK_CLAIM_MAIL = true
+local USE_SUPER_SPRINKLER = true
+local TELE_FALLBACK_FOR_KG = true
+
+--// SERVICES
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local plr = Players.LocalPlayer
+local startTime = os.time()
+
+local Controllers = plr.PlayerScripts:WaitForChild("Controllers")
+local PlantController = require(Controllers:WaitForChild("PlantController"))
+local SprinklerController = require(Controllers:WaitForChild("SprinklerController"))
+
+local stats = {
+    Status = "Starting",
+    Bought = 0,
+    Planted = 0,
+    Harvested = 0,
+    BigCarrots = 0,
+    NoKg = 0,
+    SuperSprink = "None",
 }
 
-loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/d0ab46b287e5c0ebc658e9f5dc7a8dcb.lua"))()
+local function char()
+    return plr.Character or plr.CharacterAdded:Wait()
+end
+
+local function hrp()
+    return char():WaitForChild("HumanoidRootPart")
+end
+
+local function runtime()
+    local s = os.time() - startTime
+    return string.format("%02d:%02d:%02d", s // 3600, (s % 3600) // 60, s % 60)
+end
+
+--// UI
+local gui = Instance.new("ScreenGui")
+gui.Name = "TrungPhanDepTraiNhat_UI"
+gui.ResetOnSpawn = false
+gui.Parent = plr.PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 330, 0, 230)
+frame.Position = UDim2.new(0, 10, 0, 80)
+frame.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
+frame.BackgroundTransparency = 0.12
+frame.Parent = gui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 38)
+title.BackgroundTransparency = 1
+title.Text = "TrungPhanDepTraiNhat"
+title.TextColor3 = Color3.fromRGB(255, 230, 0)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = frame
+
+local info = Instance.new("TextLabel")
+info.Position = UDim2.new(0, 12, 0, 50)
+info.Size = UDim2.new(1, -24, 1, -60)
+info.BackgroundTransparency = 1
+info.TextColor3 = Color3.fromRGB(255, 255, 255)
+info.TextXAlignment = Enum.TextXAlignment.Left
+info.TextYAlignment = Enum.TextYAlignment.Top
+info.TextSize = 15
+info.Font = Enum.Font.GothamBold
+info.Parent = frame
+
+local function updateUI()
+    info.Text =
+        "👤 Username: " .. plr.Name ..
+        "\n📋 Status: " .. stats.Status ..
+        "\n🥕 Bought: " .. stats.Bought ..
+        "\n🌱 Planted: " .. stats.Planted ..
+        "\n🧺 Harvested: " .. stats.Harvested ..
+        "\n🥕 Big Carrots: " .. stats.BigCarrots ..
+        "\n💦 Super Sprink Planted: " .. stats.SuperSprink ..
+        "\n⚠️ No KG: " .. stats.NoKg ..
+        "\n⏰ Running: " .. runtime()
+end
+
+task.spawn(function()
+    while task.wait(1) do
+        updateUI()
+    end
+end)
+
+--// WEBHOOK
+local function sendWebhook(kg)
+    if WEBHOOK_URL == "" then return end
+
+    local req = syn and syn.request or http_request or request
+    if not req then return end
+
+    local data = {
+        embeds = {{
+            title = "🥕 BIG CARROT !!!",
+            color = 16753920,
+            fields = {
+                {name = "KG", value = tostring(kg), inline = true},
+                {name = "Action", value = "Kept in garden", inline = true},
+            },
+            footer = {text = "TrungPhanDepTraiNhat"},
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
+
+    pcall(function()
+        req({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode(data)
+        })
+    end)
+end
+
+--// PLOT
+local function getMyPlot()
+    for _, plot in ipairs(workspace.Gardens:GetChildren()) do
+        local plants = plot:FindFirstChild("Plants")
+        if plants then
+            for _, plant in ipairs(plants:GetChildren()) do
+                if plant:GetAttribute("UserId") == plr.UserId then
+                    return plot
+                end
+            end
+        end
+    end
+    return workspace.Gardens:FindFirstChild("Plot1")
+end
+
+local function getPlantArea(plot)
+    return plot:FindFirstChild("PlotSizeReference")
+        or plot.Visual:FindFirstChild("GardenTotalArea")
+end
+
+--// BUY CARROT
+local function openSeedShop()
+    local prompt = workspace.NPCS.Sam.HumanoidRootPart:FindFirstChild("ProximityPrompt")
+    if prompt then
+        prompt.MaxActivationDistance = 999999
+        prompt.RequiresLineOfSight = false
+        fireproximityprompt(prompt)
+        task.wait(1)
+    end
+end
+
+local function clickGui(obj)
+    if not obj then return end
+    if obj:IsA("GuiButton") then
+        pcall(function() firesignal(obj.MouseButton1Click) end)
+        pcall(function() firesignal(obj.Activated) end)
+    end
+end
+
+local function buyCarrots()
+    stats.Status = "Buying Carrot"
+    updateUI()
+
+    openSeedShop()
+
+    local shop = plr.PlayerGui:FindFirstChild("SeedShop")
+    if not shop then return end
+
+    local normal = shop.Frame:FindFirstChild("NormalShop")
+    if not normal then return end
+
+    local carrot = normal:FindFirstChild("Carrot")
+    local shelf = normal:FindFirstChild("Sheckles_Shelf")
+    if not carrot or not shelf then return end
+
+    local stockText = carrot.Main_Frame.Stock_Text.Text
+    local stock = tonumber(stockText:match("x(%d+)")) or 0
+    local buyButton = shelf.Main_Frame.Buttons:FindFirstChild("BuyButton")
+
+    for i = 1, stock do
+        clickGui(carrot)
+        task.wait(0.08)
+        clickGui(buyButton)
+        stats.Bought += 1
+        updateUI()
+        task.wait(0.12)
+    end
+end
+
+--// TOOLS
+local function findTool(keyword)
+    keyword = keyword:lower()
+
+    for _, v in ipairs(plr.Backpack:GetChildren()) do
+        if v:IsA("Tool") and v.Name:lower():find(keyword) then
+            return v
+        end
+    end
+
+    for _, v in ipairs(char():GetChildren()) do
+        if v:IsA("Tool") and v.Name:lower():find(keyword) then
+            return v
+        end
+    end
+end
+
+local function equipTool(keyword)
+    local tool = findTool(keyword)
+    if not tool then return false end
+    char():FindFirstChildOfClass("Humanoid"):EquipTool(tool)
+    task.wait(0.2)
+    return true
+end
+
+--// GRID SAFE POSITION
+local function occupied(plot, pos)
+    local plants = plot:FindFirstChild("Plants")
+    if plants then
+        for _, plant in ipairs(plants:GetChildren()) do
+            local base = plant:FindFirstChild("Base") or plant:FindFirstChild("HarvestPart", true)
+            if base and (base.Position - pos).Magnitude < 4 then
+                return true
+            end
+        end
+    end
+
+    local sprinklers = plot:FindFirstChild("Sprinklers")
+    if sprinklers then
+        for _, sp in ipairs(sprinklers:GetChildren()) do
+            local part = sp:IsA("BasePart") and sp or sp:FindFirstChildWhichIsA("BasePart", true)
+            if part and (part.Position - pos).Magnitude < 8 then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+local function makeRay(pos)
+    return Ray.new(pos + Vector3.new(0, 80, 0), Vector3.new(0, -160, 0))
+end
+
+--// SUPER SPRINKLER
+local function hasSuperSprinkler(plot)
+    local sprinklers = plot:FindFirstChild("Sprinklers")
+    if not sprinklers then return false end
+
+    for _, v in ipairs(sprinklers:GetChildren()) do
+        if v.Name:lower():find("super") then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function placeSuperSprinkler()
+    if not USE_SUPER_SPRINKLER then return end
+
+    local plot = getMyPlot()
+    local area = plot and getPlantArea(plot)
+    if not plot or not area then return end
+
+    if hasSuperSprinkler(plot) then
+        stats.SuperSprink = "Already Active"
+        return
+    end
+
+    if not equipTool("super sprinkler") then
+        stats.SuperSprink = "No Tool"
+        return
+    end
+
+    stats.Status = "Placing Super Sprinkler"
+    updateUI()
+
+    local pos = area.Position + Vector3.new(0, 2, 0)
+    local ok = pcall(function()
+        SprinklerController:TryPlace(makeRay(pos))
+    end)
+
+    if ok then
+        stats.SuperSprink = "Yes"
+    else
+        stats.SuperSprink = "Failed"
+    end
+
+    task.wait(0.5)
+end
+
+--// PLANT CARROT FROM RAY
+local function plantCarrots()
+    local plot = getMyPlot()
+    local area = plot and getPlantArea(plot)
+    if not plot or not area then return end
+
+    if not equipTool("carrot") then return end
+
+    stats.Status = "Planting Carrots"
+    updateUI()
+
+    local size = area.Size
+    local cf = area.CFrame
+    local planted = 0
+
+    for x = -size.X / 2 + 4, size.X / 2 - 4, 4 do
+        for z = -size.Z / 2 + 4, size.Z / 2 - 4, 4 do
+            if planted >= PLANT_PER_LOOP then return end
+            if not equipTool("carrot") then return end
+
+            local pos = (cf * CFrame.new(x, 2, z)).Position
+
+            if not occupied(plot, pos) then
+                local ok = pcall(function()
+                    PlantController:TryPlantWithRay(makeRay(pos))
+                end)
+
+                if ok then
+                    planted += 1
+                    stats.Planted += 1
+                    updateUI()
+                    task.wait(0.12)
+                end
+            end
+        end
+    end
+end
+
+--// HARVEST
+local bigSent = {}
+
+local function getKg(plant)
+    local label = plant:FindFirstChild("HarvestPromptLabel", true)
+    local nameLabel = label and label:FindFirstChild("Name", true)
+    if not nameLabel or not nameLabel:IsA("TextLabel") then return nil end
+    return tonumber(nameLabel.Text:match("([%d%.]+)kg"))
+end
+
+local function harvestCarrots()
+    local plot = getMyPlot()
+    if not plot or not plot:FindFirstChild("Plants") then return end
+
+    stats.Status = "Scanning Carrots"
+    updateUI()
+
+    for _, plant in ipairs(plot.Plants:GetChildren()) do
+        if plant:GetAttribute("SeedName") == "Carrot"
+        and plant:GetAttribute("PlantGrowthReady") == true then
+
+            local prompt = plant:FindFirstChild("HarvestPrompt", true)
+            local part = plant:FindFirstChild("HarvestPart", true)
+
+            if prompt then
+                prompt.MaxActivationDistance = 999999
+                prompt.RequiresLineOfSight = false
+            end
+
+            local kg = getKg(plant)
+
+            if not kg and TELE_FALLBACK_FOR_KG and part then
+                hrp().CFrame = part.CFrame + Vector3.new(0, 3, 0)
+                task.wait(0.2)
+                kg = getKg(plant)
+            end
+
+            if kg then
+                if kg >= KEEP_KG then
+                    stats.BigCarrots += 1
+
+                    if not bigSent[plant.Name] then
+                        bigSent[plant.Name] = true
+                        sendWebhook(kg)
+                    end
+                else
+                    if prompt then
+                        stats.Status = "Harvesting " .. kg .. "kg"
+                        updateUI()
+                        fireproximityprompt(prompt)
+                        stats.Harvested += 1
+                        task.wait(0.15)
+                    end
+                end
+            else
+                stats.NoKg += 1
+            end
+
+            updateUI()
+        end
+    end
+end
+
+--// SELL
+local function sellInventory()
+    stats.Status = "Selling Inventory"
+    updateUI()
+
+    local prompt = workspace.NPCS.Steven.HumanoidRootPart:FindFirstChild("ProximityPrompt")
+    if not prompt then return end
+
+    prompt.MaxActivationDistance = 999999
+    prompt.RequiresLineOfSight = false
+    fireproximityprompt(prompt)
+
+    task.wait(0.5)
+
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.One, false, game)
+    task.wait(0.05)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.One, false, game)
+end
+
+--// DUCK CLAIM MAIL
+if USE_DUCK_CLAIM_MAIL then
+    task.spawn(function()
+        task.wait(3)
+        getgenv().UserConfig = {
+            ["Auto Claim Mail"] = true,
+            ["Auto Send Mail"] = false,
+            ["Mail To Username"] = {},
+            ["Items To Mail"] = {
+                ["Pet"] = {},
+                ["Seed"] = {},
+            }
+        }
+        loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/69646c718a6612f0e46df24197570733.lua"))()
+    end)
+end
+
+--// MAIN LOOP
+while task.wait(LOOP_DELAY) do
+    buyCarrots()
+    placeSuperSprinkler()
+    plantCarrots()
+    harvestCarrots()
+    sellInventory()
+
+    stats.Status = "Waiting"
+    updateUI()
+end
