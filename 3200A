@@ -96,9 +96,9 @@ local MAX_EXPAND_LEVEL = 5
 local PLANT_DELAY = 0.01
 local BUY_DELAY = 0.05
 local BUY_MAX_ATTEMPTS = 60
-local SPRINKLER_CHECK_COOLDOWN = 5
+local SPRINKLER_CHECK_COOLDOWN = 1
 local NextSprinklerCheck = 0
-local DEBUG_HARVEST = true
+local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
 
 
