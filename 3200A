@@ -722,9 +722,9 @@ local function FarmCycle()
     end
 
     SetStatus("Cycle Done")
-    end
+end
 
-    if RUN_FOREVER then
+if RUN_FOREVER then
     while true do
         local ok, err = pcall(FarmCycle)
         if not ok then
