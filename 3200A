@@ -653,36 +653,54 @@ end)
 local function GetSuperSprinklerToolModel()
     RefreshCharacter()
 
-    local function isSuperSprinkler(obj)
-        local n = obj.Name:lower()
-        return n:find("super") and n:find("sprinkler")
-    end
-
-    -- Nếu đang cầm trên tay
-    for _, tool in ipairs(Character:GetChildren()) do
-        if tool:IsA("Tool") and isSuperSprinkler(tool) then
-            return tool
-        end
-    end
-
-    -- Nếu nằm trong Backpack thì equip trước
     local Backpack = Player:WaitForChild("Backpack")
-
-    for _, tool in ipairs(Backpack:GetChildren()) do
-        if tool:IsA("Tool") and isSuperSprinkler(tool) then
-            Humanoid:EquipTool(tool)
-            task.wait(0.35)
-            return tool
-        end
-    end
-
-    -- Nếu game tạo model trong workspace[Player.Name]
     local PlayerFolder = workspace:FindFirstChild(Player.Name)
-    if PlayerFolder then
+
+    local function findWorkspaceModel()
+        PlayerFolder = workspace:FindFirstChild(Player.Name)
+        if not PlayerFolder then return nil end
+
         for _, obj in ipairs(PlayerFolder:GetChildren()) do
-            if isSuperSprinkler(obj) then
+            local n = obj.Name:lower()
+            if n:find("super") and n:find("sprinkler") then
                 return obj
             end
+        end
+
+        return nil
+    end
+
+    local model = findWorkspaceModel()
+    if model then
+        return model
+    end
+
+    for _, tool in ipairs(Backpack:GetChildren()) do
+        local n = tool.Name:lower()
+        if tool:IsA("Tool") and n:find("super") and n:find("sprinkler") then
+            Humanoid:EquipTool(tool)
+            task.wait(0.5)
+
+            model = findWorkspaceModel()
+            if model then
+                return model
+            end
+
+            return tool
+        end
+    end
+
+    for _, tool in ipairs(Character:GetChildren()) do
+        local n = tool.Name:lower()
+        if tool:IsA("Tool") and n:find("super") and n:find("sprinkler") then
+            task.wait(0.3)
+
+            model = findWorkspaceModel()
+            if model then
+                return model
+            end
+
+            return tool
         end
     end
 
