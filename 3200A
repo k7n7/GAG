@@ -580,30 +580,44 @@ local function GetSprinklerTargetPositions()
 end
 
 local function IsSuperSprinklerNear(pos)
+
     local Plot = GetPlot()
-    local Sprinklers = Plot:WaitForChild("Sprinklers")
 
-    for _, sprinkler in ipairs(Sprinklers:GetChildren()) do
-        if sprinkler.Name:lower():find("super") then
-            local part =
-                sprinkler.PrimaryPart
-                or sprinkler:FindFirstChildWhichIsA("BasePart")
+    local folder = Plot:WaitForChild("Sprinklers")
 
-            if part then
-                local distance = (
-                    Vector3.new(pos.X, 0, pos.Z)
-                    -
-                    Vector3.new(part.Position.X, 0, part.Position.Z)
-                ).Magnitude
+    print("SPRINKLER COUNT =", #folder:GetChildren())
 
-                if distance <= SPRINKLER_CHECK_RADIUS then
-                    return true
-                end
+    for _,sprinkler in ipairs(folder:GetChildren()) do
+
+        print("MODEL =", sprinkler.Name)
+
+        local part =
+            sprinkler.PrimaryPart
+            or sprinkler:FindFirstChildWhichIsA("BasePart", true)
+
+        print("PART =", part)
+
+        if part then
+
+            local d =
+            (Vector3.new(part.Position.X,0,part.Position.Z)
+            -
+            Vector3.new(pos.X,0,pos.Z)).Magnitude
+
+            print("DIST =", d)
+
+            if d < SPRINKLER_CHECK_RADIUS then
+
+                return true
+
             end
+
         end
+
     end
 
     return false
+
 end
 
 local function CountSuperSprinklers()
@@ -693,32 +707,47 @@ local function GetSuperSprinklerToolModel()
 end
 
 local function PlaceSuperSprinklers()
+    --print("SPRINKLER CHECK START", tick(), "NEXT =", NextSprinklerCheck)
+
     if tick() < NextSprinklerCheck then
+        --print("SPRINKLER WAIT COOLDOWN")
         return
     end
 
     local positions = GetSprinklerTargetPositions()
+    --print("SPRINKLER TARGET COUNT:", #positions)
 
-    for _, pos in ipairs(positions) do
-        if not IsSuperSprinklerNear(pos) then
+    for i, pos in ipairs(positions) do
+        local near = IsSuperSprinklerNear(pos)
+        --print("AREA", i, "POS =", pos, "NEAR =", near)
+
+        if not near then
             local toolModel = GetSuperSprinklerToolModel()
+            --print("TOOLMODEL =", toolModel)
+
             if not toolModel then
+                --print("NO SUPER SPRINKLER TOOL")
                 NextSprinklerCheck = tick() + 1
                 return
             end
 
-            Net.Place.PlaceSprinkler:Fire(
-                pos,
-                "Super Sprinkler",
-                toolModel,
-                1
-            )
+            local ok, err = pcall(function()
+                Net.Place.PlaceSprinkler:Fire(
+                    pos,
+                    "Super Sprinkler",
+                    toolModel,
+                    1
+                )
+            end)
+
+            --print("PLACE RESULT:", ok, err)
 
             NextSprinklerCheck = tick() + 1.5
             return
         end
     end
 
+    --print("ALL AREAS HAVE SPRINKLER")
     NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
 end
 
