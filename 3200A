@@ -716,29 +716,84 @@ local function PlaceSuperSprinklers()
 
     for _, pos in ipairs(positions) do
         if not IsSuperSprinklerNear(pos) then
-            local toolModel = GetSuperSprinklerToolModel()
+            PlaceOneSprinklerConfirmed(pos)
 
-            if not toolModel then
-                NextSprinklerCheck = tick() + 1
-                return
-            end
-
-            pcall(function()
-                Net.Place.PlaceSprinkler:Fire(
-                    pos,
-                    "Super Sprinkler",
-                    toolModel,
-                    1
-                )
-            end)
-
-            -- Đặt từng cái một để server kịp consume tool và replicate model.
             NextSprinklerCheck = tick() + 2
             return
         end
     end
 
     NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
+end
+
+local function WaitForSuperSprinklerModel(timeout)
+    timeout = timeout or 2
+    local started = tick()
+
+    while tick() - started < timeout do
+        RefreshCharacter()
+
+        local PlayerFolder = workspace:FindFirstChild(Player.Name)
+        if PlayerFolder then
+            for _, obj in ipairs(PlayerFolder:GetChildren()) do
+                local n = obj.Name:lower()
+                if n:find("super") and n:find("sprinkler") then
+                    return obj
+                end
+            end
+        end
+
+        for _, tool in ipairs(Character:GetChildren()) do
+            local n = tool.Name:lower()
+            if tool:IsA("Tool") and n:find("super") and n:find("sprinkler") then
+                return tool
+            end
+        end
+
+        local Backpack = Player:FindFirstChild("Backpack")
+        if Backpack then
+            for _, tool in ipairs(Backpack:GetChildren()) do
+                local n = tool.Name:lower()
+                if tool:IsA("Tool") and n:find("super") and n:find("sprinkler") then
+                    Humanoid:EquipTool(tool)
+                    task.wait(0.25)
+                    break
+                end
+            end
+        end
+
+        task.wait(0.15)
+    end
+
+    return nil
+end
+
+local function PlaceOneSprinklerConfirmed(pos)
+    for attempt = 1, 3 do
+        local toolModel = WaitForSuperSprinklerModel(2)
+
+        if not toolModel then
+            task.wait(0.5)
+            continue
+        end
+
+        pcall(function()
+            Net.Place.PlaceSprinkler:Fire(
+                pos,
+                "Super Sprinkler",
+                toolModel,
+                1
+            )
+        end)
+
+        task.wait(0.8)
+
+        if IsSuperSprinklerNear(pos) then
+            return true
+        end
+    end
+
+    return false
 end
 
 local function IsNearGarden()
