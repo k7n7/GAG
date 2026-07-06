@@ -86,6 +86,9 @@ local SprinklerController = require(Controllers:WaitForChild("SprinklerControlle
 
 local Net = debug.getupvalues(SprinklerController.TryPlace)[5]
 
+local PlantNet = debug.getupvalues(PlantController.TryPlantWithRay)[2]
+local PlantSeedRemote = PlantNet.Plant.PlantSeed
+
 local BUY_TIMES = 10
 local BUY_COOLDOWN = 65
 local NextBuyTime = 0
@@ -103,10 +106,10 @@ local DEBUG_HARVEST_LIMIT = 25
 local DEBUG_PLANT_AREAS = false
 local DEBUG_PLANTING = false
 local DEBUG_SPRINKLER = false
-local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
-local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
-local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
-local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
+local PLANT_BURST_SIZE = 180 -- remote plant mỗi burst
+local PLANT_BURST_WAIT = 0.006 -- nghỉ cực ngắn giữa mỗi burst
+local PLANT_BURST_SIZE = 180 -- remote plant mỗi burst
+local PLANT_BURST_WAIT = 0.006 -- nghỉ cực ngắn giữa mỗi burst
 
 
 local LOOP_DELAY = 0.12 -- thời gian chờ mỗi vòng farm
@@ -513,31 +516,6 @@ local function GetPlantAreas()
     return areas
 end
 
-
-local function GetExactPlantAreas()
-    local Plot = GetPlot()
-    local areas = {}
-
-    for _, obj in ipairs(Plot.Visual:GetDescendants()) do
-        if obj:IsA("BasePart") and obj.Name:lower():find("plantareacolumn") then
-            table.insert(areas, obj)
-        end
-    end
-
-    table.sort(areas, function(a, b)
-        local na = tonumber(a.Name:match("(%d+)$")) or 9999
-        local nb = tonumber(b.Name:match("(%d+)$")) or 9999
-
-        if na == nb then
-            return a.Name < b.Name
-        end
-
-        return na < nb
-    end)
-
-    return areas
-end
-
 local function GetEmptyPlantPositions()
     local Plot = GetPlot()
     local Plants = Plot:WaitForChild("Plants")
@@ -559,8 +537,6 @@ local function GetEmptyPlantPositions()
     local function key(pos)
         return tostring(math.floor(pos.X + 0.5)) .. ":" .. tostring(math.floor(pos.Z + 0.5))
     end
-
-    local spacingSq = PLANT_SPACING * PLANT_SPACING
 
     local function free(pos)
         local flat = Vector3.new(pos.X, 0, pos.Z)
@@ -605,21 +581,17 @@ local function GetEmptyPlantPositions()
 end
 
 local function PlantAt(pos)
-    local origin = pos + Vector3.new(0, 80, 0)
-    local direction = Vector3.new(0, -200, 0)
-    local ray = Ray.new(origin, direction)
-
-    local ok, err = pcall(function()
-        PlantController:TryPlantWithRay(ray)
+    pcall(function()
+        -- Remote đã test thành công:
+        -- PlantSeed:Fire(Vector3 position, "Carrot")
+        PlantSeedRemote:Fire(pos, "Carrot")
     end)
-
-    --print("PLANT AT:", pos, ok, err)
 end
 
 local function PlantAllCarrot(alreadyAtGarden)
     if not alreadyAtGarden then
         Net.TeleportButton.Request:Fire("Garden")
-        task.wait(0.5)
+        task.wait(0.4)
     end
 
     local seedCount = CountCarrotSeeds()
@@ -634,28 +606,22 @@ local function PlantAllCarrot(alreadyAtGarden)
 
     local beforePlants = CountCarrots()
     local plantAmount = math.min(#positions, seedCount)
-    local i = 1
 
-    while i <= plantAmount do
-        local CarrotTool = GetCarrotTool()
-        if not CarrotTool then
-            warn("Không tìm thấy Carrot để trồng tiếp.")
-            break
-        end
-
+    -- Không cần EquipTool nữa.
+    -- Remote trực tiếp: PlantSeedRemote:Fire(pos, "Carrot")
+    for i = 1, plantAmount, PLANT_BURST_SIZE do
         local burstEnd = math.min(i + PLANT_BURST_SIZE - 1, plantAmount)
 
         for j = i, burstEnd do
             task.spawn(PlantAt, positions[j])
         end
 
-        i = burstEnd + 1
         task.wait(PLANT_BURST_WAIT)
     end
 
     if DEBUG_PLANTING then
         task.wait(0.25)
-        print("PLANT RESULT: before =", beforePlants, "after =", CountCarrots(), "targets =", plantAmount)
+        print("REMOTE PLANT RESULT: before =", beforePlants, "after =", CountCarrots(), "targets =", plantAmount)
     end
 end
 
