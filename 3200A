@@ -98,9 +98,11 @@ local NextSprinklerCheck = 0
 local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
 local DEBUG_DIRECT_PLANT = false
-local DIRECT_PLANT_BURST_SIZE = 35 -- cân bằng tốc độ/ổn định
-local DIRECT_PLANT_BURST_WAIT = 0.001 -- gần như không chờ
+local DIRECT_PLANT_BURST_SIZE = 250 -- tốc độ cao, spam nhiều vị trí mỗi lượt
+local DIRECT_PLANT_BURST_WAIT = 0 -- không chờ giữa burst
 local DIRECT_REEQUIP_EVERY_BURST = false
+local DIRECT_PLANT_REPEAT_PASSES = 2 -- quét grid 2 lượt để server nhận nhiều hơn
+local DIRECT_PLANT_POST_WAIT = 0.08 -- chờ rất ngắn sau khi spam plant
 local DEBUG_PLANT_AREAS = false
 local DEBUG_PLANTING = false
 local DEBUG_SPRINKLER = false
@@ -110,7 +112,7 @@ local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
 local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
 
 
-local LOOP_DELAY = 0.06 -- thời gian chờ mỗi vòng farm
+local LOOP_DELAY = 0.03 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
 local RUN_FOREVER = true
 
@@ -354,7 +356,7 @@ local function HarvestAndSellUnder20kg()
             print("HARVEST CHECK:", SeedName, "KG =", Kg, "Plant =", Plant.Name)
         end
 
-        -- >=20kg giữ lại, không đọc được KG thì bỏ qua.
+        -- Giữ lại carrot >= 20kg. Không đọc được KG thì không harvest bừa.
         if not Kg or Kg >= MIN_KEEP_KG then
             continue
         end
@@ -371,17 +373,16 @@ local function HarvestAndSellUnder20kg()
         return
     end
 
-    for i, Prompt in ipairs(prompts) do
-        pcall(function()
-            fireproximityprompt(Prompt)
+    -- Max speed harvest: fire gần như cùng lúc.
+    for _, Prompt in ipairs(prompts) do
+        task.spawn(function()
+            pcall(function()
+                fireproximityprompt(Prompt)
+            end)
         end)
-
-        if i % 70 == 0 then
-            task.wait()
-        end
     end
 
-    task.wait(0.02)
+    task.wait(0.015)
     Net.NPCS.SellAll:Fire()
 end
 
@@ -619,15 +620,15 @@ local function GetEmptyPlantPositions()
 end
 
 local function PlantAt(pos)
-    pcall(function()
-        PlantSeedRemote:Fire(pos, "Carrot")
-    end)
+    -- Max speed: bỏ pcall để giảm overhead.
+    -- Remote đã test: PlantSeedRemote:Fire(Vector3, "Carrot")
+    PlantSeedRemote:Fire(pos, "Carrot")
 end
 
 local function PlantAllCarrot(alreadyAtGarden)
     if not alreadyAtGarden then
         Net.TeleportButton.Request:Fire("Garden")
-        task.wait(0.2)
+        task.wait(0.15)
     end
 
     local seedCount = CountCarrotSeeds()
@@ -640,8 +641,7 @@ local function PlantAllCarrot(alreadyAtGarden)
         return
     end
 
-    -- Equip 1 lần trước khi spam remote.
-    -- Re-equip mỗi burst quá chậm, nên chỉ re-equip khi tool biến mất.
+    -- Remote vẫn cần tool Carrot đang equip để server accept.
     if not GetCarrotTool() then
         warn("Không tìm thấy Carrot để equip trước khi direct plant.")
         return
@@ -649,37 +649,46 @@ local function PlantAllCarrot(alreadyAtGarden)
 
     local beforePlants = CountCarrots()
     local limit = math.min(#grid, seedCount)
-    local i = 1
 
-    while i <= limit do
-        local currentTool = nil
-        for _, tool in ipairs(Character:GetChildren()) do
-            if IsValidCarrotTool(tool) then
-                currentTool = tool
-                break
+    -- Không có remote "plant 1000 cây bằng 1 lệnh" đã xác nhận.
+    -- Cách nhanh nhất hiện tại: spam PlantSeedRemote vào grid hợp lệ.
+    for pass = 1, DIRECT_PLANT_REPEAT_PASSES do
+        local i = 1
+
+        while i <= limit do
+            local currentTool = nil
+
+            for _, tool in ipairs(Character:GetChildren()) do
+                if IsValidCarrotTool(tool) then
+                    currentTool = tool
+                    break
+                end
             end
-        end
 
-        if not currentTool and not GetCarrotTool() then
-            break
-        end
+            if not currentTool then
+                if not GetCarrotTool() then
+                    break
+                end
+            end
 
-        local burstEnd = math.min(i + DIRECT_PLANT_BURST_SIZE - 1, limit)
+            local burstEnd = math.min(i + DIRECT_PLANT_BURST_SIZE - 1, limit)
 
-        for j = i, burstEnd do
-            PlantAt(grid[j])
-        end
+            for j = i, burstEnd do
+                PlantAt(grid[j])
+            end
 
-        i = burstEnd + 1
+            i = burstEnd + 1
 
-        if DIRECT_PLANT_BURST_WAIT > 0 then
-            task.wait(DIRECT_PLANT_BURST_WAIT)
+            if DIRECT_PLANT_BURST_WAIT > 0 then
+                task.wait(DIRECT_PLANT_BURST_WAIT)
+            end
         end
     end
 
+    task.wait(DIRECT_PLANT_POST_WAIT)
+
     if DEBUG_DIRECT_PLANT then
-        task.wait(0.25)
-        print("DIRECT FAST PLANT:", "before =", beforePlants, "after =", CountCarrots(), "grid =", #grid, "seed =", seedCount)
+        print("DIRECT MAX PLANT:", "before =", beforePlants, "after =", CountCarrots(), "grid =", #grid, "seed =", seedCount)
     end
 end
 
@@ -784,7 +793,7 @@ local function UpdateUI()
 end
 
 task.spawn(function()
-    while task.wait(1.5) do
+    while task.wait(2) do
         UpdateUI()
     end
 end)
@@ -945,7 +954,7 @@ end
 -- SPRINKLER BACKGROUND LOOP
 -- Chạy độc lập để không phải chờ plant/harvest xong mới đặt bên thứ 2.
 task.spawn(function()
-    while task.wait(1.5) do
+    while task.wait(2) do
         pcall(function()
             PlaceSuperSprinklers()
         end)
@@ -968,7 +977,7 @@ local function FarmCycle()
     if seedCount <= 0 then
         SetStatus("Buying Carrot")
         BuyCarrotAll()
-        task.wait(0.25)
+        task.wait(0.12)
         seedCount = CountCarrotSeeds()
     end
 
