@@ -1,7 +1,7 @@
 task.wait(2)
 
 pcall(function()
-    setfpscap(10)
+    setfpscap(60)
 end)
 
 local Players = game:GetService("Players")
@@ -468,8 +468,8 @@ local function GetPlantAreas()
     local Plot = GetPlot()
     local areas = {}
 
-    for _, obj in ipairs(Plot.Visual:GetChildren()) do
-        if obj:IsA("BasePart") and obj.Name:lower():find("plantareacolumn") then
+    for _, obj in ipairs(Plot.Visual:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Name:lower():find("plantarea") then
             table.insert(areas, obj)
         end
     end
@@ -478,7 +478,6 @@ local function GetPlantAreas()
         return a.Name < b.Name
     end)
 
-    --print("PLANT AREAS:", #areas)
     return areas
 end
 
