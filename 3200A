@@ -93,7 +93,7 @@ local MIN_KEEP_KG = 20
 local PLANT_SPACING = 5
 local HIDE_UI = true
 local MAX_EXPAND_LEVEL = 5
-local PLANT_DELAY = 0.01
+local PLANT_DELAY = 0.003
 local BUY_DELAY = 0.05
 local BUY_MAX_ATTEMPTS = 60
 local SPRINKLER_CHECK_COOLDOWN = 1
@@ -102,7 +102,7 @@ local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
 
 
-local LOOP_DELAY = 0.5 -- thời gian chờ mỗi vòng farm
+local LOOP_DELAY = 0.25 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
 local RUN_FOREVER = true
 
@@ -417,28 +417,26 @@ end
 local function GetCarrotTool()
     RefreshCharacter()
 
-    -- Nếu đang cầm Carrot sẵn
+    local function isCarrotTool(tool)
+        return tool:IsA("Tool") and tool.Name:lower():find("carrot")
+    end
+
+    -- Nếu đang cầm Carrot sẵn thì dùng luôn, không chờ.
     for _, tool in ipairs(Character:GetChildren()) do
-        if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-            --print("CARROT ALREADY EQUIPPED:", tool.Name)
+        if isCarrotTool(tool) then
             return tool
         end
     end
 
-    -- Nếu Carrot nằm trong Backpack
     local Backpack = Player:WaitForChild("Backpack")
 
-    for t = 1, 30 do
-        for _, tool in ipairs(Backpack:GetChildren()) do
-            if tool:IsA("Tool") and tool.Name:lower():find("carrot") then
-                Humanoid:EquipTool(tool)
-                --print("EQUIP CARROT:", tool.Name)
-                task.wait(0.7)
-                return tool
-            end
+    -- Equip stack carrot tiếp theo thật nhanh.
+    for _, tool in ipairs(Backpack:GetChildren()) do
+        if isCarrotTool(tool) then
+            Humanoid:EquipTool(tool)
+            task.wait(0.08)
+            return tool
         end
-
-        task.wait(0.2)
     end
 
     return nil
@@ -468,14 +466,14 @@ local function GetPlantAreas()
     local Plot = GetPlot()
     local areas = {}
 
-    -- Quét sâu toàn bộ Plot.Visual để bắt cả các mảnh đất mới sau khi expand.
+    -- Quét sâu toàn bộ Plot.Visual để bắt cả mảnh đất mới sau khi expand.
     for _, obj in ipairs(Plot.Visual:GetDescendants()) do
         if obj:IsA("BasePart") and obj.Name:lower():find("plantarea") then
             table.insert(areas, obj)
         end
     end
 
-    -- Sort theo số cuối tên, tránh lỗi thứ tự kiểu 1,10,11,2.
+    -- Sort theo số cuối tên để tránh thứ tự 1,10,11,2.
     table.sort(areas, function(a, b)
         local na = tonumber(a.Name:match("(%d+)$")) or 9999
         local nb = tonumber(b.Name:match("(%d+)$")) or 9999
@@ -486,12 +484,6 @@ local function GetPlantAreas()
 
         return na < nb
     end)
-
-    print("TOTAL PLANT AREAS =", #areas)
-
-    for i, area in ipairs(areas) do
-        print("PLANT AREA", i, area.Name, area:GetFullName(), "POS =", area.Position, "SIZE =", area.Size)
-    end
 
     return areas
 end
@@ -541,16 +533,11 @@ end
 local function PlantAllCarrot(alreadyAtGarden)
     if not alreadyAtGarden then
         Net.TeleportButton.Request:Fire("Garden")
-        task.wait(1.5)
+        task.wait(1.0)
     end
 
-    if CountCarrotSeeds() <= 0 then
-        return
-    end
-
-    local CarrotTool = GetCarrotTool()
-    if not CarrotTool then
-        warn("Không tìm thấy Carrot trong Backpack hoặc Character.")
+    local seedCount = CountCarrotSeeds()
+    if seedCount <= 0 then
         return
     end
 
@@ -560,12 +547,29 @@ local function PlantAllCarrot(alreadyAtGarden)
         return
     end
 
-    local seedCount = CountCarrotSeeds()
     local plantAmount = math.min(#positions, seedCount)
 
     for i = 1, plantAmount do
+        -- Quan trọng: nhiều acc có nhiều stack Carrot Seed.
+        -- Nếu stack đang cầm hết, tự equip stack tiếp theo để không dừng ở 4 mảnh giữa.
+        local CarrotTool = GetCarrotTool()
+        if not CarrotTool then
+            warn("Không tìm thấy Carrot để trồng tiếp.")
+            break
+        end
+
         PlantAt(positions[i])
-        task.wait(PLANT_DELAY)
+
+        if i % 25 == 0 then
+            -- Nhường một nhịp nhỏ cho server cập nhật khi plant rất nhanh.
+            task.wait(0.03)
+
+            if CountCarrotSeeds() <= 0 then
+                break
+            end
+        else
+            task.wait(PLANT_DELAY)
+        end
     end
 end
 
