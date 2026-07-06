@@ -567,7 +567,7 @@ local function ExpandPlotToMax5()
 end
 
 local MAX_SUPER_SPRINKLER = 5
-local SPRINKLER_CHECK_RADIUS = 5
+local SPRINKLER_CHECK_RADIUS = 8
 
 local function GetSprinklerTargetPositions()
     local positions = {}
