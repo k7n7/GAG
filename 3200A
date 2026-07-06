@@ -86,6 +86,8 @@ local SprinklerController = require(Controllers:WaitForChild("SprinklerControlle
 
 local Net = debug.getupvalues(SprinklerController.TryPlace)[5]
 
+-- Direct plant remote đã reverse:
+-- PlantSeedRemote:Fire(Vector3 position, "Carrot")
 local PlantNet = debug.getupvalues(PlantController.TryPlantWithRay)[2]
 local PlantSeedRemote = PlantNet.Plant.PlantSeed
 
@@ -103,13 +105,16 @@ local SPRINKLER_CHECK_COOLDOWN = 1
 local NextSprinklerCheck = 0
 local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
+local DEBUG_DIRECT_PLANT = false
+local DIRECT_PLANT_BURST_SIZE = 60 -- số remote plant mỗi nhịp
+local DIRECT_PLANT_BURST_WAIT = 0.015 -- nghỉ cực ngắn giữa mỗi burst
 local DEBUG_PLANT_AREAS = false
 local DEBUG_PLANTING = false
 local DEBUG_SPRINKLER = false
-local PLANT_BURST_SIZE = 180 -- remote plant mỗi burst
-local PLANT_BURST_WAIT = 0.006 -- nghỉ cực ngắn giữa mỗi burst
-local PLANT_BURST_SIZE = 180 -- remote plant mỗi burst
-local PLANT_BURST_WAIT = 0.006 -- nghỉ cực ngắn giữa mỗi burst
+local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
+local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
+local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
+local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
 
 
 local LOOP_DELAY = 0.12 -- thời gian chờ mỗi vòng farm
@@ -476,114 +481,93 @@ end
 local function GetPlantAreas()
     local Plot = GetPlot()
     local areas = {}
-    local seen = {}
 
-    local function addArea(obj)
-        if obj and obj:IsA("BasePart") and not seen[obj] then
-            seen[obj] = true
+    -- Chỉ lấy PlantArea thật của game để không trồng lệch ra ngoài vườn.
+    for _, obj in ipairs(Plot.Visual:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Name:lower():find("plantarea") then
             table.insert(areas, obj)
         end
     end
 
-    for _, obj in ipairs(Plot.Visual:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            local n = obj.Name:lower()
-            local sx, sy, sz = obj.Size.X, obj.Size.Y, obj.Size.Z
-
-            if n:find("plantarea") then
-                addArea(obj)
-            elseif sy <= 2 and sx >= 18 and sz >= 18 then
-                addArea(obj)
-            end
-        end
-    end
-
     table.sort(areas, function(a, b)
-        if math.abs(a.Position.X - b.Position.X) > 2 then
-            return a.Position.X < b.Position.X
+        local na = tonumber(a.Name:match("(%d+)$")) or 9999
+        local nb = tonumber(b.Name:match("(%d+)$")) or 9999
+
+        if na == nb then
+            if math.abs(a.Position.X - b.Position.X) > 2 then
+                return a.Position.X < b.Position.X
+            end
+            return a.Position.Z < b.Position.Z
         end
 
-        return a.Position.Z < b.Position.Z
+        return na < nb
     end)
-
-    if DEBUG_PLANT_AREAS then
-        print("TOTAL PLANT AREAS =", #areas)
-        for i, area in ipairs(areas) do
-            print("AREA", i, area.Name, area:GetFullName(), "POS =", area.Position, "SIZE =", area.Size)
-        end
-    end
 
     return areas
 end
 
-local function GetEmptyPlantPositions()
-    local Plot = GetPlot()
-    local Plants = Plot:WaitForChild("Plants")
-    local positions = {}
+local CachedPlantGrid = nil
+local CachedPlantGridAreaCount = 0
+
+local function BuildPlantGrid()
+    local Workspace = game:GetService("Workspace")
+    local params = PlantController:CreatePlantAreaParams()
+    local grid = {}
     local used = {}
-    local occupied = {}
-
-    for _, Plant in ipairs(Plants:GetChildren()) do
-        local part =
-            Plant:FindFirstChild("HarvestPart")
-            or Plant.PrimaryPart
-            or Plant:FindFirstChildWhichIsA("BasePart")
-
-        if part then
-            table.insert(occupied, Vector3.new(part.Position.X, 0, part.Position.Z))
-        end
-    end
 
     local function key(pos)
         return tostring(math.floor(pos.X + 0.5)) .. ":" .. tostring(math.floor(pos.Z + 0.5))
     end
 
-    local function free(pos)
-        local flat = Vector3.new(pos.X, 0, pos.Z)
+    local areas = GetPlantAreas()
 
-        for _, p in ipairs(occupied) do
-            if (flat - p).Magnitude < PLANT_SPACING then
-                return false
-            end
-        end
+    for _, area in ipairs(areas) do
+        local c, s = area.Position, area.Size
 
-        return true
-    end
+        for x = c.X - s.X/2 + PLANT_SPACING, c.X + s.X/2 - PLANT_SPACING, PLANT_SPACING do
+            for z = c.Z - s.Z/2 + PLANT_SPACING, c.Z + s.Z/2 - PLANT_SPACING, PLANT_SPACING do
+                local result = Workspace:Raycast(
+                    Vector3.new(x, c.Y + 80, z),
+                    Vector3.new(0, -200, 0),
+                    params
+                )
 
-    for _, area in ipairs(GetPlantAreas()) do
-        local center = area.Position
-        local size = area.Size
+                if result then
+                    local pos = result.Position
+                    local k = key(pos)
 
-        local minX = center.X - size.X / 2
-        local maxX = center.X + size.X / 2
-        local minZ = center.Z - size.Z / 2
-        local maxZ = center.Z + size.Z / 2
-        local y = center.Y
-
-        for x = minX + PLANT_SPACING, maxX - PLANT_SPACING, PLANT_SPACING do
-            for z = minZ + PLANT_SPACING, maxZ - PLANT_SPACING, PLANT_SPACING do
-                local pos = Vector3.new(x, y, z)
-                local k = key(pos)
-
-                if not used[k] and free(pos) then
-                    used[k] = true
-                    table.insert(positions, pos)
+                    if not used[k] then
+                        used[k] = true
+                        table.insert(grid, pos)
+                    end
                 end
             end
         end
     end
 
-    if DEBUG_PLANTING then
-        print("EMPTY POSITIONS =", #positions, "OCCUPIED =", #occupied)
+    CachedPlantGrid = grid
+    CachedPlantGridAreaCount = #areas
+
+    if DEBUG_DIRECT_PLANT then
+        print("BUILD GRID:", #grid, "AREAS:", #areas)
     end
 
-    return positions
+    return grid
+end
+
+local function GetEmptyPlantPositions()
+    local areas = GetPlantAreas()
+
+    -- Rebuild khi chưa có cache hoặc số mảnh đất thay đổi sau expand.
+    if not CachedPlantGrid or CachedPlantGridAreaCount ~= #areas then
+        return BuildPlantGrid()
+    end
+
+    return CachedPlantGrid
 end
 
 local function PlantAt(pos)
     pcall(function()
-        -- Remote đã test thành công:
-        -- PlantSeed:Fire(Vector3 position, "Carrot")
         PlantSeedRemote:Fire(pos, "Carrot")
     end)
 end
@@ -599,29 +583,39 @@ local function PlantAllCarrot(alreadyAtGarden)
         return
     end
 
-    local positions = GetEmptyPlantPositions()
-    if #positions <= 0 then
+    -- Remote PlantSeed vẫn cần carrot đang equip để server chấp nhận.
+    local CarrotTool = GetCarrotTool()
+    if not CarrotTool then
+        warn("Không tìm thấy Carrot để equip trước khi direct plant.")
+        return
+    end
+
+    local grid = GetEmptyPlantPositions()
+    if #grid <= 0 then
         return
     end
 
     local beforePlants = CountCarrots()
-    local plantAmount = math.min(#positions, seedCount)
+    local plantLimit = math.min(#grid, seedCount)
 
-    -- Không cần EquipTool nữa.
-    -- Remote trực tiếp: PlantSeedRemote:Fire(pos, "Carrot")
-    for i = 1, plantAmount, PLANT_BURST_SIZE do
-        local burstEnd = math.min(i + PLANT_BURST_SIZE - 1, plantAmount)
+    for i = 1, plantLimit, DIRECT_PLANT_BURST_SIZE do
+        local burstEnd = math.min(i + DIRECT_PLANT_BURST_SIZE - 1, plantLimit)
 
         for j = i, burstEnd do
-            task.spawn(PlantAt, positions[j])
+            PlantAt(grid[j])
         end
 
-        task.wait(PLANT_BURST_WAIT)
+        task.wait(DIRECT_PLANT_BURST_WAIT)
+
+        -- Nếu stack hiện tại hết, equip stack tiếp theo.
+        if not GetCarrotTool() then
+            break
+        end
     end
 
-    if DEBUG_PLANTING then
-        task.wait(0.25)
-        print("REMOTE PLANT RESULT: before =", beforePlants, "after =", CountCarrots(), "targets =", plantAmount)
+    if DEBUG_DIRECT_PLANT then
+        task.wait(0.5)
+        print("DIRECT PLANT:", "before =", beforePlants, "after =", CountCarrots(), "grid =", #grid, "seed =", seedCount)
     end
 end
 
@@ -636,6 +630,7 @@ local function ExpandPlotToMax5()
 
     -- Sau khi mở rộng vườn, ép check lại sprinkler ngay vì số PlantArea đã thay đổi.
     NextSprinklerCheck = 0
+    CachedPlantGrid = nil
 end
 
 local MAX_SUPER_SPRINKLER = 12
