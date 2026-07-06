@@ -567,7 +567,7 @@ local function ExpandPlotToMax5()
 end
 
 local MAX_SUPER_SPRINKLER = 5
-local SPRINKLER_CHECK_RADIUS = 10
+local SPRINKLER_CHECK_RADIUS = 5
 
 local function GetSprinklerTargetPositions()
     local positions = {}
@@ -702,27 +702,20 @@ local function PlaceSuperSprinklers()
     for _, pos in ipairs(positions) do
         if not IsSuperSprinklerNear(pos) then
             local toolModel = GetSuperSprinklerToolModel()
-
             if not toolModel then
-                break
+                NextSprinklerCheck = tick() + 1
+                return
             end
 
-            local ok = pcall(function()
-                Net.Place.PlaceSprinkler:Fire(
-                    pos,
-                    "Super Sprinkler",
-                    toolModel,
-                    1
-                )
-            end)
+            Net.Place.PlaceSprinkler:Fire(
+                pos,
+                "Super Sprinkler",
+                toolModel,
+                1
+            )
 
-            if not ok then
-                pcall(function()
-                    SprinklerController:TryPlace(pos, "Super Sprinkler", toolModel, 1)
-                end)
-            end
-
-            task.wait(0.45)
+            NextSprinklerCheck = tick() + 1.5
+            return
         end
     end
 
