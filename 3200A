@@ -96,12 +96,17 @@ local MAX_EXPAND_LEVEL = 5
 local PLANT_DELAY = 0
 local BUY_DELAY = 0.05
 local BUY_MAX_ATTEMPTS = 60
-local SPRINKLER_CHECK_COOLDOWN = 1
+local SPRINKLER_CHECK_COOLDOWN = 0.5
 local NextSprinklerCheck = 0
 local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
-local PLANT_BURST_SIZE = 35 -- số vị trí bắn plant mỗi nhịp
-local PLANT_BURST_WAIT = 0.04 -- nghỉ cực ngắn giữa mỗi burst để server kịp nhận
+local DEBUG_PLANT_AREAS = false
+local DEBUG_PLANTING = false
+local DEBUG_SPRINKLER = false
+local PLANT_BURST_SIZE = 80 -- số vị trí bắn plant mỗi nhịp
+local PLANT_BURST_WAIT = 0.015 -- nghỉ cực ngắn giữa mỗi burst để server kịp nhận
+local PLANT_BURST_SIZE = 80 -- số vị trí bắn plant mỗi nhịp
+local PLANT_BURST_WAIT = 0.015 -- nghỉ cực ngắn giữa mỗi burst để server kịp nhận
 
 
 local LOOP_DELAY = 0.2 -- thời gian chờ mỗi vòng farm
@@ -481,25 +486,27 @@ local function GetPlantAreas()
             local n = obj.Name:lower()
             local sx, sy, sz = obj.Size.X, obj.Size.Y, obj.Size.Z
 
-            -- Cách 1: tên chuẩn của game.
             if n:find("plantarea") then
                 addArea(obj)
-
-            -- Cách 2: fallback sau expand, có vài mảnh đất không còn tên PlantAreaColumn.
-            -- Chỉ lấy các part phẳng/lớn giống ô đất, tránh fence/sign nhỏ.
             elseif sy <= 2 and sx >= 18 and sz >= 18 then
                 addArea(obj)
             end
         end
     end
 
-    -- Sort theo vị trí để plant từ trái qua phải, trước ra sau.
     table.sort(areas, function(a, b)
         if math.abs(a.Position.X - b.Position.X) > 2 then
             return a.Position.X < b.Position.X
         end
         return a.Position.Z < b.Position.Z
     end)
+
+    if DEBUG_PLANT_AREAS then
+        print("TOTAL PLANT AREAS =", #areas)
+        for i, area in ipairs(areas) do
+            print("AREA", i, area.Name, area:GetFullName(), "POS =", area.Position, "SIZE =", area.Size)
+        end
+    end
 
     return areas
 end
@@ -524,7 +531,6 @@ local function GetEmptyPlantPositions()
         local maxZ = center.Z + size.Z / 2
         local y = center.Y
 
-        -- Điền kín từng mảnh đất theo grid.
         for x = minX + PLANT_SPACING, maxX - PLANT_SPACING, PLANT_SPACING do
             for z = minZ + PLANT_SPACING, maxZ - PLANT_SPACING, PLANT_SPACING do
                 local pos = Vector3.new(x, y, z)
@@ -536,6 +542,10 @@ local function GetEmptyPlantPositions()
                 end
             end
         end
+    end
+
+    if DEBUG_PLANTING then
+        print("EMPTY POSITIONS =", #positions)
     end
 
     return positions
@@ -556,7 +566,7 @@ end
 local function PlantAllCarrot(alreadyAtGarden)
     if not alreadyAtGarden then
         Net.TeleportButton.Request:Fire("Garden")
-        task.wait(1.0)
+        task.wait(0.8)
     end
 
     local seedCount = CountCarrotSeeds()
@@ -565,13 +575,12 @@ local function PlantAllCarrot(alreadyAtGarden)
     end
 
     local positions = GetEmptyPlantPositions()
-
     if #positions <= 0 then
         return
     end
 
+    local beforePlants = CountCarrots()
     local plantAmount = math.min(#positions, seedCount)
-
     local i = 1
 
     while i <= plantAmount do
@@ -581,23 +590,24 @@ local function PlantAllCarrot(alreadyAtGarden)
             break
         end
 
-        -- Burst planting: bắn nhiều vị trí gần như cùng lúc.
-        -- Không thể trồng "1 lệnh full map" nếu game chỉ có TryPlantWithRay,
-        -- nhưng cách này nhanh hơn nhiều so với đặt tuần tự từng cây.
         local burstEnd = math.min(i + PLANT_BURST_SIZE - 1, plantAmount)
 
         for j = i, burstEnd do
-            task.spawn(function()
-                PlantAt(positions[j])
-            end)
+            PlantAt(positions[j])
         end
 
         i = burstEnd + 1
         task.wait(PLANT_BURST_WAIT)
 
+        -- Nếu stack đang cầm vừa hết, vòng sau sẽ auto equip stack khác.
         if CountCarrotSeeds() <= 0 then
             break
         end
+    end
+
+    if DEBUG_PLANTING then
+        task.wait(0.4)
+        print("PLANT RESULT: before =", beforePlants, "after =", CountCarrots(), "targets =", plantAmount)
     end
 end
 
@@ -614,8 +624,8 @@ local function ExpandPlotToMax5()
     NextSprinklerCheck = 0
 end
 
-local MAX_SUPER_SPRINKLER = 5
-local SPRINKLER_CHECK_RADIUS = 8
+local MAX_SUPER_SPRINKLER = 12
+local SPRINKLER_CHECK_RADIUS = 14
 
 local function GetSprinklerTargetPositions()
     local positions = {}
@@ -636,6 +646,8 @@ local function IsSuperSprinklerNear(pos)
     local Plot = GetPlot()
     local Sprinklers = Plot:WaitForChild("Sprinklers")
 
+    local nearest = math.huge
+
     for _, sprinkler in ipairs(Sprinklers:GetChildren()) do
         local part =
             sprinkler.PrimaryPart
@@ -648,10 +660,18 @@ local function IsSuperSprinklerNear(pos)
                 Vector3.new(part.Position.X, 0, part.Position.Z)
             ).Magnitude
 
+            if distance < nearest then
+                nearest = distance
+            end
+
             if distance <= SPRINKLER_CHECK_RADIUS then
                 return true
             end
         end
+    end
+
+    if DEBUG_SPRINKLER then
+        print("NO SPRINKLER NEAR:", pos, "nearest =", nearest, "count =", #Sprinklers:GetChildren())
     end
 
     return false
