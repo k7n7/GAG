@@ -25,11 +25,15 @@ local function OptimizeGame()
     Lighting.EnvironmentSpecularScale = 0
     Lighting.ClockTime = 12
 
-    -- Không xóa Decal/Texture/SurfaceAppearance nữa vì có thể làm map bị xám.
-    -- Chỉ tắt hiệu ứng nặng để nhẹ máy mà không phá màu đất/vườn.
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") then
+            obj.Material = Enum.Material.SmoothPlastic
+            obj.Reflectance = 0
             obj.CastShadow = false
+
+            if obj:IsA("MeshPart") then
+                obj.TextureID = ""
+            end
         elseif obj:IsA("ParticleEmitter")
             or obj:IsA("Trail")
             or obj:IsA("Beam")
@@ -41,10 +45,14 @@ local function OptimizeGame()
             or obj:IsA("SpotLight")
             or obj:IsA("SurfaceLight") then
             obj.Enabled = false
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            obj.Transparency = 1
+        elseif obj:IsA("SurfaceAppearance") then
+            obj:Destroy()
         end
     end
 
-    print("OPTIMIZE SAFE DONE")
+    print("OPTIMIZE DONE")
 end
 
 pcall(OptimizeGame)
@@ -78,10 +86,6 @@ local SprinklerController = require(Controllers:WaitForChild("SprinklerControlle
 
 local Net = debug.getupvalues(SprinklerController.TryPlace)[5]
 
--- Direct plant remote đã reverse:
--- PlantSeedRemote:Fire(Vector3 position, "Carrot")
-local PlantNet = debug.getupvalues(PlantController.TryPlantWithRay)[2]
-local PlantSeedRemote = PlantNet.Plant.PlantSeed
 
 local BUY_TIMES = 10
 local BUY_COOLDOWN = 65
@@ -90,19 +94,20 @@ local MIN_KEEP_KG = 20
 local PLANT_SPACING = 5
 local HIDE_UI = true
 local MAX_EXPAND_LEVEL = 5
-local PLANT_DELAY = 0
+local PLANT_DELAY = 0.001
 local BUY_DELAY = 0.05
 local BUY_MAX_ATTEMPTS = 60
 local SPRINKLER_CHECK_COOLDOWN = 1
 local NextSprinklerCheck = 0
 local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
+local DEBUG_PLANTING = false
+local DEBUG_SPRINKLER = false
+local RAY_PLANT_BURST_SIZE = 45
+local RAY_PLANT_BURST_WAIT = 0.015
 local DEBUG_DIRECT_PLANT = false
-local DIRECT_PLANT_BURST_SIZE = 250 -- tốc độ cao, spam nhiều vị trí mỗi lượt
-local DIRECT_PLANT_BURST_WAIT = 0 -- không chờ giữa burst
-local DIRECT_REEQUIP_EVERY_BURST = false
-local DIRECT_PLANT_REPEAT_PASSES = 2 -- quét grid 2 lượt để server nhận nhiều hơn
-local DIRECT_PLANT_POST_WAIT = 0.08 -- chờ rất ngắn sau khi spam plant
+local DIRECT_PLANT_BURST_SIZE = 60 -- số remote plant mỗi nhịp
+local DIRECT_PLANT_BURST_WAIT = 0.015 -- nghỉ cực ngắn giữa mỗi burst
 local DEBUG_PLANT_AREAS = false
 local DEBUG_PLANTING = false
 local DEBUG_SPRINKLER = false
@@ -112,7 +117,7 @@ local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
 local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
 
 
-local LOOP_DELAY = 0.03 -- thời gian chờ mỗi vòng farm
+local LOOP_DELAY = 0.18 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
 local RUN_FOREVER = true
 
@@ -356,7 +361,6 @@ local function HarvestAndSellUnder20kg()
             print("HARVEST CHECK:", SeedName, "KG =", Kg, "Plant =", Plant.Name)
         end
 
-        -- Giữ lại carrot >= 20kg. Không đọc được KG thì không harvest bừa.
         if not Kg or Kg >= MIN_KEEP_KG then
             continue
         end
@@ -373,16 +377,17 @@ local function HarvestAndSellUnder20kg()
         return
     end
 
-    -- Max speed harvest: fire gần như cùng lúc.
-    for _, Prompt in ipairs(prompts) do
-        task.spawn(function()
-            pcall(function()
-                fireproximityprompt(Prompt)
-            end)
+    for i, Prompt in ipairs(prompts) do
+        pcall(function()
+            fireproximityprompt(Prompt)
         end)
+
+        if i % 45 == 0 then
+            task.wait()
+        end
     end
 
-    task.wait(0.015)
+    task.wait(0.04)
     Net.NPCS.SellAll:Fire()
 end
 
@@ -423,43 +428,31 @@ local function BuyCarrotAll()
     return false
 end
 
-local CachedCarrotTool = nil
-
-local function IsValidCarrotTool(tool)
-    return tool
-        and tool.Parent
-        and tool:IsA("Tool")
-        and tool.Name:lower():find("carrot")
-end
-
 local function GetCarrotTool()
     RefreshCharacter()
 
+    local function isCarrotTool(tool)
+        return tool:IsA("Tool") and tool.Name:lower():find("carrot")
+    end
+
+    -- Nếu đang cầm Carrot sẵn thì dùng luôn, không chờ.
     for _, tool in ipairs(Character:GetChildren()) do
-        if IsValidCarrotTool(tool) then
-            CachedCarrotTool = tool
+        if isCarrotTool(tool) then
             return tool
         end
     end
 
     local Backpack = Player:WaitForChild("Backpack")
 
-    if IsValidCarrotTool(CachedCarrotTool) and CachedCarrotTool.Parent == Backpack then
-        Humanoid:EquipTool(CachedCarrotTool)
-        task.wait(0.015)
-        return CachedCarrotTool
-    end
-
+    -- Equip stack carrot tiếp theo thật nhanh.
     for _, tool in ipairs(Backpack:GetChildren()) do
-        if IsValidCarrotTool(tool) then
-            CachedCarrotTool = tool
+        if isCarrotTool(tool) then
             Humanoid:EquipTool(tool)
-            task.wait(0.015)
+            task.wait(0.03)
             return tool
         end
     end
 
-    CachedCarrotTool = nil
     return nil
 end
 
@@ -487,7 +480,6 @@ local function GetPlantAreas()
     local Plot = GetPlot()
     local areas = {}
 
-    -- Chỉ lấy PlantArea thật để tránh direct remote plant ra ngoài vườn.
     for _, obj in ipairs(Plot.Visual:GetDescendants()) do
         if obj:IsA("BasePart") and obj.Name:lower():find("plantarea") then
             table.insert(areas, obj)
@@ -561,74 +553,84 @@ local function BuildPlantGrid()
     return grid
 end
 
-local CachedPlantGrid = nil
-local CachedPlantGridAreaCount = 0
-
-local function BuildPlantGrid()
-    local Workspace = game:GetService("Workspace")
-    local params = PlantController:CreatePlantAreaParams()
-    local grid = {}
+local function GetEmptyPlantPositions()
+    local Plot = GetPlot()
+    local Plants = Plot:WaitForChild("Plants")
+    local positions = {}
     local used = {}
-    local areas = GetPlantAreas()
+    local occupied = {}
+
+    for _, Plant in ipairs(Plants:GetChildren()) do
+        local part =
+            Plant:FindFirstChild("HarvestPart")
+            or Plant.PrimaryPart
+            or Plant:FindFirstChildWhichIsA("BasePart")
+
+        if part then
+            table.insert(occupied, Vector3.new(part.Position.X, 0, part.Position.Z))
+        end
+    end
 
     local function key(pos)
         return tostring(math.floor(pos.X + 0.5)) .. ":" .. tostring(math.floor(pos.Z + 0.5))
     end
 
-    for _, area in ipairs(areas) do
-        local c, s = area.Position, area.Size
+    local function free(pos)
+        local flat = Vector3.new(pos.X, 0, pos.Z)
 
-        for x = c.X - s.X/2 + PLANT_SPACING, c.X + s.X/2 - PLANT_SPACING, PLANT_SPACING do
-            for z = c.Z - s.Z/2 + PLANT_SPACING, c.Z + s.Z/2 - PLANT_SPACING, PLANT_SPACING do
-                local result = Workspace:Raycast(
-                    Vector3.new(x, c.Y + 80, z),
-                    Vector3.new(0, -200, 0),
-                    params
-                )
+        for _, p in ipairs(occupied) do
+            if (flat - p).Magnitude < PLANT_SPACING then
+                return false
+            end
+        end
 
-                if result then
-                    local pos = result.Position
-                    local k = key(pos)
+        return true
+    end
 
-                    if not used[k] then
-                        used[k] = true
-                        table.insert(grid, pos)
-                    end
+    for _, area in ipairs(GetPlantAreas()) do
+        local center = area.Position
+        local size = area.Size
+
+        local minX = center.X - size.X / 2
+        local maxX = center.X + size.X / 2
+        local minZ = center.Z - size.Z / 2
+        local maxZ = center.Z + size.Z / 2
+        local y = center.Y
+
+        for x = minX + PLANT_SPACING, maxX - PLANT_SPACING, PLANT_SPACING do
+            for z = minZ + PLANT_SPACING, maxZ - PLANT_SPACING, PLANT_SPACING do
+                local pos = Vector3.new(x, y, z)
+                local k = key(pos)
+
+                if not used[k] and free(pos) then
+                    used[k] = true
+                    table.insert(positions, pos)
                 end
             end
         end
     end
 
-    CachedPlantGrid = grid
-    CachedPlantGridAreaCount = #areas
-
-    if DEBUG_DIRECT_PLANT then
-        print("BUILD DIRECT GRID:", #grid, "AREAS:", #areas)
+    if DEBUG_PLANTING then
+        print("EMPTY POSITIONS =", #positions, "OCCUPIED =", #occupied)
     end
 
-    return grid
-end
-
-local function GetEmptyPlantPositions()
-    local areas = GetPlantAreas()
-
-    if not CachedPlantGrid or CachedPlantGridAreaCount ~= #areas then
-        return BuildPlantGrid()
-    end
-
-    return CachedPlantGrid
+    return positions
 end
 
 local function PlantAt(pos)
-    -- Max speed: bỏ pcall để giảm overhead.
-    -- Remote đã test: PlantSeedRemote:Fire(Vector3, "Carrot")
-    PlantSeedRemote:Fire(pos, "Carrot")
+    local origin = pos + Vector3.new(0, 80, 0)
+    local direction = Vector3.new(0, -200, 0)
+    local ray = Ray.new(origin, direction)
+
+    pcall(function()
+        PlantController:TryPlantWithRay(ray)
+    end)
 end
 
 local function PlantAllCarrot(alreadyAtGarden)
     if not alreadyAtGarden then
         Net.TeleportButton.Request:Fire("Garden")
-        task.wait(0.15)
+        task.wait(0.8)
     end
 
     local seedCount = CountCarrotSeeds()
@@ -636,59 +638,33 @@ local function PlantAllCarrot(alreadyAtGarden)
         return
     end
 
-    local grid = GetEmptyPlantPositions()
-    if #grid <= 0 then
+    local positions = GetEmptyPlantPositions()
+    if #positions <= 0 then
         return
     end
 
-    -- Remote vẫn cần tool Carrot đang equip để server accept.
-    if not GetCarrotTool() then
-        warn("Không tìm thấy Carrot để equip trước khi direct plant.")
-        return
-    end
+    local plantAmount = math.min(#positions, seedCount)
+    local i = 1
 
-    local beforePlants = CountCarrots()
-    local limit = math.min(#grid, seedCount)
-
-    -- Không có remote "plant 1000 cây bằng 1 lệnh" đã xác nhận.
-    -- Cách nhanh nhất hiện tại: spam PlantSeedRemote vào grid hợp lệ.
-    for pass = 1, DIRECT_PLANT_REPEAT_PASSES do
-        local i = 1
-
-        while i <= limit do
-            local currentTool = nil
-
-            for _, tool in ipairs(Character:GetChildren()) do
-                if IsValidCarrotTool(tool) then
-                    currentTool = tool
-                    break
-                end
-            end
-
-            if not currentTool then
-                if not GetCarrotTool() then
-                    break
-                end
-            end
-
-            local burstEnd = math.min(i + DIRECT_PLANT_BURST_SIZE - 1, limit)
-
-            for j = i, burstEnd do
-                PlantAt(grid[j])
-            end
-
-            i = burstEnd + 1
-
-            if DIRECT_PLANT_BURST_WAIT > 0 then
-                task.wait(DIRECT_PLANT_BURST_WAIT)
-            end
+    while i <= plantAmount do
+        local CarrotTool = GetCarrotTool()
+        if not CarrotTool then
+            warn("Không tìm thấy Carrot để trồng tiếp.")
+            break
         end
-    end
 
-    task.wait(DIRECT_PLANT_POST_WAIT)
+        local burstEnd = math.min(i + RAY_PLANT_BURST_SIZE - 1, plantAmount)
 
-    if DEBUG_DIRECT_PLANT then
-        print("DIRECT MAX PLANT:", "before =", beforePlants, "after =", CountCarrots(), "grid =", #grid, "seed =", seedCount)
+        for j = i, burstEnd do
+            task.spawn(PlantAt, positions[j])
+        end
+
+        i = burstEnd + 1
+        task.wait(RAY_PLANT_BURST_WAIT)
+
+        if CountCarrotSeeds() <= 0 then
+            break
+        end
     end
 end
 
@@ -793,7 +769,7 @@ local function UpdateUI()
 end
 
 task.spawn(function()
-    while task.wait(2) do
+    while task.wait(1) do
         UpdateUI()
     end
 end)
@@ -859,6 +835,8 @@ local function WaitForSuperSprinklerModel(timeout)
     local started = tick()
 
     while tick() - started < timeout do
+        RefreshCharacter()
+
         local model = GetSuperSprinklerToolModel()
         if model then
             return model
@@ -954,7 +932,7 @@ end
 -- SPRINKLER BACKGROUND LOOP
 -- Chạy độc lập để không phải chờ plant/harvest xong mới đặt bên thứ 2.
 task.spawn(function()
-    while task.wait(2) do
+    while task.wait(1) do
         pcall(function()
             PlaceSuperSprinklers()
         end)
@@ -967,6 +945,9 @@ local cycle = 0
 local function FarmCycle()
     cycle += 1
 
+    SetStatus("Harvesting & Selling")
+    HarvestAndSellUnder20kg()
+
     if cycle % EXPAND_EVERY_CYCLES == 0 then
         SetStatus("Expanding Plot")
         ExpandPlotToMax5()
@@ -977,27 +958,22 @@ local function FarmCycle()
     if seedCount <= 0 then
         SetStatus("Buying Carrot")
         BuyCarrotAll()
-        task.wait(0.12)
+        task.wait(0.35)
         seedCount = CountCarrotSeeds()
     end
 
     SetStatus("Going Garden")
     TeleportGardenIfNeeded()
 
-    -- Sprinkler không bỏ nữa: vừa chạy nền, vừa gọi chủ động trong cycle.
     SetStatus("Placing Sprinkler")
     PlaceSuperSprinklers()
 
-    -- Vẫn giữ bài học direct remote plant, không quay về bản cũ.
     if seedCount > 0 then
-        SetStatus("Direct Remote Plant")
+        SetStatus("Ray Planting")
         PlantAllCarrot(true)
     else
         SetStatus("Waiting Carrot Stock")
     end
-
-    SetStatus("Harvesting & Selling")
-    HarvestAndSellUnder20kg()
 
     SetStatus("Cycle Done")
 end
