@@ -25,15 +25,11 @@ local function OptimizeGame()
     Lighting.EnvironmentSpecularScale = 0
     Lighting.ClockTime = 12
 
+    -- Không xóa Decal/Texture/SurfaceAppearance nữa vì có thể làm map bị xám.
+    -- Chỉ tắt hiệu ứng nặng để nhẹ máy mà không phá màu đất/vườn.
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") then
-            obj.Material = Enum.Material.SmoothPlastic
-            obj.Reflectance = 0
             obj.CastShadow = false
-
-            if obj:IsA("MeshPart") then
-                obj.TextureID = ""
-            end
         elseif obj:IsA("ParticleEmitter")
             or obj:IsA("Trail")
             or obj:IsA("Beam")
@@ -45,14 +41,10 @@ local function OptimizeGame()
             or obj:IsA("SpotLight")
             or obj:IsA("SurfaceLight") then
             obj.Enabled = false
-        elseif obj:IsA("Decal") or obj:IsA("Texture") then
-            obj.Transparency = 1
-        elseif obj:IsA("SurfaceAppearance") then
-            obj:Destroy()
         end
     end
 
-    print("OPTIMIZE DONE")
+    print("OPTIMIZE SAFE DONE")
 end
 
 pcall(OptimizeGame)
@@ -106,9 +98,9 @@ local NextSprinklerCheck = 0
 local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
 local DEBUG_DIRECT_PLANT = false
-local DIRECT_PLANT_BURST_SIZE = 12 -- nhỏ hơn nhưng ổn định hơn cho tool/stack state
-local DIRECT_PLANT_BURST_WAIT = 0.004 -- nghỉ cực ngắn giữa burst
-local DIRECT_REEQUIP_EVERY_BURST = true
+local DIRECT_PLANT_BURST_SIZE = 35 -- cân bằng tốc độ/ổn định
+local DIRECT_PLANT_BURST_WAIT = 0.001 -- gần như không chờ
+local DIRECT_REEQUIP_EVERY_BURST = false
 local DEBUG_PLANT_AREAS = false
 local DEBUG_PLANTING = false
 local DEBUG_SPRINKLER = false
@@ -118,7 +110,7 @@ local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
 local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
 
 
-local LOOP_DELAY = 0.08 -- thời gian chờ mỗi vòng farm
+local LOOP_DELAY = 0.06 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
 local RUN_FOREVER = true
 
@@ -384,12 +376,12 @@ local function HarvestAndSellUnder20kg()
             fireproximityprompt(Prompt)
         end)
 
-        if i % 45 == 0 then
+        if i % 70 == 0 then
             task.wait()
         end
     end
 
-    task.wait(0.035)
+    task.wait(0.02)
     Net.NPCS.SellAll:Fire()
 end
 
@@ -430,31 +422,43 @@ local function BuyCarrotAll()
     return false
 end
 
+local CachedCarrotTool = nil
+
+local function IsValidCarrotTool(tool)
+    return tool
+        and tool.Parent
+        and tool:IsA("Tool")
+        and tool.Name:lower():find("carrot")
+end
+
 local function GetCarrotTool()
     RefreshCharacter()
 
-    local function isCarrotTool(tool)
-        return tool:IsA("Tool") and tool.Name:lower():find("carrot")
-    end
-
-    -- Nếu đang cầm Carrot sẵn thì dùng luôn, không chờ.
     for _, tool in ipairs(Character:GetChildren()) do
-        if isCarrotTool(tool) then
+        if IsValidCarrotTool(tool) then
+            CachedCarrotTool = tool
             return tool
         end
     end
 
     local Backpack = Player:WaitForChild("Backpack")
 
-    -- Equip stack carrot tiếp theo thật nhanh.
+    if IsValidCarrotTool(CachedCarrotTool) and CachedCarrotTool.Parent == Backpack then
+        Humanoid:EquipTool(CachedCarrotTool)
+        task.wait(0.015)
+        return CachedCarrotTool
+    end
+
     for _, tool in ipairs(Backpack:GetChildren()) do
-        if isCarrotTool(tool) then
+        if IsValidCarrotTool(tool) then
+            CachedCarrotTool = tool
             Humanoid:EquipTool(tool)
-            task.wait(0.03)
+            task.wait(0.015)
             return tool
         end
     end
 
+    CachedCarrotTool = nil
     return nil
 end
 
@@ -623,7 +627,7 @@ end
 local function PlantAllCarrot(alreadyAtGarden)
     if not alreadyAtGarden then
         Net.TeleportButton.Request:Fire("Garden")
-        task.wait(0.25)
+        task.wait(0.2)
     end
 
     local seedCount = CountCarrotSeeds()
@@ -636,21 +640,28 @@ local function PlantAllCarrot(alreadyAtGarden)
         return
     end
 
+    -- Equip 1 lần trước khi spam remote.
+    -- Re-equip mỗi burst quá chậm, nên chỉ re-equip khi tool biến mất.
+    if not GetCarrotTool() then
+        warn("Không tìm thấy Carrot để equip trước khi direct plant.")
+        return
+    end
+
     local beforePlants = CountCarrots()
     local limit = math.min(#grid, seedCount)
     local i = 1
 
     while i <= limit do
-        -- Remote PlantSeed vẫn cần carrot đang equip.
-        -- Re-equip theo từng burst để tránh lỗi stack/tool state làm plant chậm hoặc đứng.
-        if DIRECT_REEQUIP_EVERY_BURST then
-            if not GetCarrotTool() then
+        local currentTool = nil
+        for _, tool in ipairs(Character:GetChildren()) do
+            if IsValidCarrotTool(tool) then
+                currentTool = tool
                 break
             end
-        elseif i == 1 then
-            if not GetCarrotTool() then
-                break
-            end
+        end
+
+        if not currentTool and not GetCarrotTool() then
+            break
         end
 
         local burstEnd = math.min(i + DIRECT_PLANT_BURST_SIZE - 1, limit)
@@ -660,12 +671,15 @@ local function PlantAllCarrot(alreadyAtGarden)
         end
 
         i = burstEnd + 1
-        task.wait(DIRECT_PLANT_BURST_WAIT)
+
+        if DIRECT_PLANT_BURST_WAIT > 0 then
+            task.wait(DIRECT_PLANT_BURST_WAIT)
+        end
     end
 
     if DEBUG_DIRECT_PLANT then
-        task.wait(0.3)
-        print("DIRECT PLANT:", "before =", beforePlants, "after =", CountCarrots(), "grid =", #grid, "seed =", seedCount)
+        task.wait(0.25)
+        print("DIRECT FAST PLANT:", "before =", beforePlants, "after =", CountCarrots(), "grid =", #grid, "seed =", seedCount)
     end
 end
 
@@ -770,7 +784,7 @@ local function UpdateUI()
 end
 
 task.spawn(function()
-    while task.wait(1) do
+    while task.wait(1.5) do
         UpdateUI()
     end
 end)
@@ -931,7 +945,7 @@ end
 -- SPRINKLER BACKGROUND LOOP
 -- Chạy độc lập để không phải chờ plant/harvest xong mới đặt bên thứ 2.
 task.spawn(function()
-    while task.wait(1) do
+    while task.wait(1.5) do
         pcall(function()
             PlaceSuperSprinklers()
         end)
