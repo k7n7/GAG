@@ -93,16 +93,18 @@ local MIN_KEEP_KG = 20
 local PLANT_SPACING = 5
 local HIDE_UI = true
 local MAX_EXPAND_LEVEL = 5
-local PLANT_DELAY = 0.003
+local PLANT_DELAY = 0
 local BUY_DELAY = 0.05
 local BUY_MAX_ATTEMPTS = 60
 local SPRINKLER_CHECK_COOLDOWN = 1
 local NextSprinklerCheck = 0
 local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
+local PLANT_BURST_SIZE = 35 -- số vị trí bắn plant mỗi nhịp
+local PLANT_BURST_WAIT = 0.04 -- nghỉ cực ngắn giữa mỗi burst để server kịp nhận
 
 
-local LOOP_DELAY = 0.25 -- thời gian chờ mỗi vòng farm
+local LOOP_DELAY = 0.2 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
 local RUN_FOREVER = true
 
@@ -465,24 +467,38 @@ end
 local function GetPlantAreas()
     local Plot = GetPlot()
     local areas = {}
+    local seen = {}
 
-    -- Quét sâu toàn bộ Plot.Visual để bắt cả mảnh đất mới sau khi expand.
-    for _, obj in ipairs(Plot.Visual:GetDescendants()) do
-        if obj:IsA("BasePart") and obj.Name:lower():find("plantarea") then
+    local function addArea(obj)
+        if obj and obj:IsA("BasePart") and not seen[obj] then
+            seen[obj] = true
             table.insert(areas, obj)
         end
     end
 
-    -- Sort theo số cuối tên để tránh thứ tự 1,10,11,2.
-    table.sort(areas, function(a, b)
-        local na = tonumber(a.Name:match("(%d+)$")) or 9999
-        local nb = tonumber(b.Name:match("(%d+)$")) or 9999
+    for _, obj in ipairs(Plot.Visual:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local n = obj.Name:lower()
+            local sx, sy, sz = obj.Size.X, obj.Size.Y, obj.Size.Z
 
-        if na == nb then
-            return a.Name < b.Name
+            -- Cách 1: tên chuẩn của game.
+            if n:find("plantarea") then
+                addArea(obj)
+
+            -- Cách 2: fallback sau expand, có vài mảnh đất không còn tên PlantAreaColumn.
+            -- Chỉ lấy các part phẳng/lớn giống ô đất, tránh fence/sign nhỏ.
+            elseif sy <= 2 and sx >= 18 and sz >= 18 then
+                addArea(obj)
+            end
         end
+    end
 
-        return na < nb
+    -- Sort theo vị trí để plant từ trái qua phải, trước ra sau.
+    table.sort(areas, function(a, b)
+        if math.abs(a.Position.X - b.Position.X) > 2 then
+            return a.Position.X < b.Position.X
+        end
+        return a.Position.Z < b.Position.Z
     end)
 
     return areas
@@ -492,6 +508,11 @@ local function GetEmptyPlantPositions()
     local Plot = GetPlot()
     local Plants = Plot:WaitForChild("Plants")
     local positions = {}
+    local used = {}
+
+    local function key(pos)
+        return tostring(math.floor(pos.X + 0.5)) .. ":" .. tostring(math.floor(pos.Z + 0.5))
+    end
 
     for _, area in ipairs(GetPlantAreas()) do
         local center = area.Position
@@ -503,18 +524,20 @@ local function GetEmptyPlantPositions()
         local maxZ = center.Z + size.Z / 2
         local y = center.Y
 
+        -- Điền kín từng mảnh đất theo grid.
         for x = minX + PLANT_SPACING, maxX - PLANT_SPACING, PLANT_SPACING do
             for z = minZ + PLANT_SPACING, maxZ - PLANT_SPACING, PLANT_SPACING do
                 local pos = Vector3.new(x, y, z)
+                local k = key(pos)
 
-                if not IsNearExistingPlant(pos, Plants) then
+                if not used[k] and not IsNearExistingPlant(pos, Plants) then
+                    used[k] = true
                     table.insert(positions, pos)
                 end
             end
         end
     end
 
-    --print("EMPTY POSITIONS:", #positions)
     return positions
 end
 
@@ -549,26 +572,31 @@ local function PlantAllCarrot(alreadyAtGarden)
 
     local plantAmount = math.min(#positions, seedCount)
 
-    for i = 1, plantAmount do
-        -- Quan trọng: nhiều acc có nhiều stack Carrot Seed.
-        -- Nếu stack đang cầm hết, tự equip stack tiếp theo để không dừng ở 4 mảnh giữa.
+    local i = 1
+
+    while i <= plantAmount do
         local CarrotTool = GetCarrotTool()
         if not CarrotTool then
             warn("Không tìm thấy Carrot để trồng tiếp.")
             break
         end
 
-        PlantAt(positions[i])
+        -- Burst planting: bắn nhiều vị trí gần như cùng lúc.
+        -- Không thể trồng "1 lệnh full map" nếu game chỉ có TryPlantWithRay,
+        -- nhưng cách này nhanh hơn nhiều so với đặt tuần tự từng cây.
+        local burstEnd = math.min(i + PLANT_BURST_SIZE - 1, plantAmount)
 
-        if i % 25 == 0 then
-            -- Nhường một nhịp nhỏ cho server cập nhật khi plant rất nhanh.
-            task.wait(0.03)
+        for j = i, burstEnd do
+            task.spawn(function()
+                PlantAt(positions[j])
+            end)
+        end
 
-            if CountCarrotSeeds() <= 0 then
-                break
-            end
-        else
-            task.wait(PLANT_DELAY)
+        i = burstEnd + 1
+        task.wait(PLANT_BURST_WAIT)
+
+        if CountCarrotSeeds() <= 0 then
+            break
         end
     end
 end
