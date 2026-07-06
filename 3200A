@@ -707,25 +707,6 @@ local function GetSuperSprinklerToolModel()
     return nil
 end
 
-local function PlaceSuperSprinklers()
-    if tick() < NextSprinklerCheck then
-        return
-    end
-
-    local positions = GetSprinklerTargetPositions()
-
-    for _, pos in ipairs(positions) do
-        if not IsSuperSprinklerNear(pos) then
-            PlaceOneSprinklerConfirmed(pos)
-
-            NextSprinklerCheck = tick() + 2
-            return
-        end
-    end
-
-    NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
-end
-
 local function WaitForSuperSprinklerModel(timeout)
     timeout = timeout or 2
     local started = tick()
@@ -795,6 +776,26 @@ local function PlaceOneSprinklerConfirmed(pos)
 
     return false
 end
+
+local function PlaceSuperSprinklers()
+    if tick() < NextSprinklerCheck then
+        return
+    end
+
+    local positions = GetSprinklerTargetPositions()
+
+    for _, pos in ipairs(positions) do
+        if not IsSuperSprinklerNear(pos) then
+            PlaceOneSprinklerConfirmed(pos)
+
+            NextSprinklerCheck = tick() + 2
+            return
+        end
+    end
+
+    NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
+end
+
 
 local function IsNearGarden()
     local Character = Player.Character or Player.CharacterAdded:Wait()
