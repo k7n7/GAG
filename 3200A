@@ -468,15 +468,30 @@ local function GetPlantAreas()
     local Plot = GetPlot()
     local areas = {}
 
+    -- Quét sâu toàn bộ Plot.Visual để bắt cả các mảnh đất mới sau khi expand.
     for _, obj in ipairs(Plot.Visual:GetDescendants()) do
         if obj:IsA("BasePart") and obj.Name:lower():find("plantarea") then
             table.insert(areas, obj)
         end
     end
 
+    -- Sort theo số cuối tên, tránh lỗi thứ tự kiểu 1,10,11,2.
     table.sort(areas, function(a, b)
-        return a.Name < b.Name
+        local na = tonumber(a.Name:match("(%d+)$")) or 9999
+        local nb = tonumber(b.Name:match("(%d+)$")) or 9999
+
+        if na == nb then
+            return a.Name < b.Name
+        end
+
+        return na < nb
     end)
+
+    print("TOTAL PLANT AREAS =", #areas)
+
+    for i, area in ipairs(areas) do
+        print("PLANT AREA", i, area.Name, area:GetFullName(), "POS =", area.Position, "SIZE =", area.Size)
+    end
 
     return areas
 end
