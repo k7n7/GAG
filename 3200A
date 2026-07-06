@@ -96,20 +96,20 @@ local MAX_EXPAND_LEVEL = 5
 local PLANT_DELAY = 0
 local BUY_DELAY = 0.05
 local BUY_MAX_ATTEMPTS = 60
-local SPRINKLER_CHECK_COOLDOWN = 0.4
+local SPRINKLER_CHECK_COOLDOWN = 1
 local NextSprinklerCheck = 0
 local DEBUG_HARVEST = false
 local DEBUG_HARVEST_LIMIT = 25
 local DEBUG_PLANT_AREAS = false
 local DEBUG_PLANTING = false
 local DEBUG_SPRINKLER = false
-local PLANT_BURST_SIZE = 70 -- số vị trí bắn plant mỗi nhịp
-local PLANT_BURST_WAIT = 0.012 -- nghỉ cực ngắn giữa mỗi burst
-local PLANT_BURST_SIZE = 70 -- số vị trí bắn plant mỗi nhịp
-local PLANT_BURST_WAIT = 0.012 -- nghỉ cực ngắn giữa mỗi burst
+local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
+local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
+local PLANT_BURST_SIZE = 120 -- số vị trí plant mỗi burst
+local PLANT_BURST_WAIT = 0.008 -- nghỉ cực ngắn giữa mỗi burst
 
 
-local LOOP_DELAY = 0.15 -- thời gian chờ mỗi vòng farm
+local LOOP_DELAY = 0.12 -- thời gian chờ mỗi vòng farm
 local EXPAND_EVERY_CYCLES = 3 -- cứ 3 vòng thử expand 1 lần
 local RUN_FOREVER = true
 
@@ -336,18 +336,13 @@ local function HarvestAndSellUnder20kg()
     local Plot = GetPlot()
     local Plants = Plot:WaitForChild("Plants")
 
-    local harvested = 0
+    local prompts = {}
     local checked = 0
 
     for _, Plant in ipairs(Plants:GetChildren()) do
         local SeedName = Plant:GetAttribute("SeedName")
 
         if not SeedName or not tostring(SeedName):lower():find("carrot") then
-            continue
-        end
-
-        local Prompt = GetHarvestPrompt(Plant)
-        if not Prompt then
             continue
         end
 
@@ -359,29 +354,35 @@ local function HarvestAndSellUnder20kg()
         end
 
         -- Không đọc được KG thì bỏ qua, không harvest bừa.
-        if not Kg then
+        if not Kg or Kg >= MIN_KEEP_KG then
             continue
         end
 
-        -- Luật chính: >= 20kg giữ lại trong vườn.
-        if Kg >= MIN_KEEP_KG then
-            continue
+        local Prompt = GetHarvestPrompt(Plant)
+        if Prompt then
+            Prompt.MaxActivationDistance = 999999
+            Prompt.RequiresLineOfSight = false
+            table.insert(prompts, Prompt)
         end
-
-        -- Chỉ carrot < 20kg mới harvest.
-        Prompt.MaxActivationDistance = 999999
-        Prompt.RequiresLineOfSight = false
-
-        fireproximityprompt(Prompt)
-        harvested += 1
-
-        task.wait(0.015)
     end
 
-    if harvested > 0 then
-        task.wait(0.05)
-        Net.NPCS.SellAll:Fire()
+    if #prompts <= 0 then
+        return
     end
+
+    -- Fire prompt theo burst, nhanh hơn nhiều so với chờ từng cây.
+    for i, Prompt in ipairs(prompts) do
+        pcall(function()
+            fireproximityprompt(Prompt)
+        end)
+
+        if i % 40 == 0 then
+            task.wait()
+        end
+    end
+
+    task.wait(0.04)
+    Net.NPCS.SellAll:Fire()
 end
 
 local function BuyCarrotAll()
@@ -441,7 +442,7 @@ local function GetCarrotTool()
     for _, tool in ipairs(Backpack:GetChildren()) do
         if isCarrotTool(tool) then
             Humanoid:EquipTool(tool)
-            task.wait(0.08)
+            task.wait(0.03)
             return tool
         end
     end
@@ -542,9 +543,35 @@ local function GetEmptyPlantPositions()
     local Plants = Plot:WaitForChild("Plants")
     local positions = {}
     local used = {}
+    local occupied = {}
+
+    for _, Plant in ipairs(Plants:GetChildren()) do
+        local part =
+            Plant:FindFirstChild("HarvestPart")
+            or Plant.PrimaryPart
+            or Plant:FindFirstChildWhichIsA("BasePart")
+
+        if part then
+            table.insert(occupied, Vector3.new(part.Position.X, 0, part.Position.Z))
+        end
+    end
 
     local function key(pos)
         return tostring(math.floor(pos.X + 0.5)) .. ":" .. tostring(math.floor(pos.Z + 0.5))
+    end
+
+    local spacingSq = PLANT_SPACING * PLANT_SPACING
+
+    local function free(pos)
+        local flat = Vector3.new(pos.X, 0, pos.Z)
+
+        for _, p in ipairs(occupied) do
+            if (flat - p).Magnitude < PLANT_SPACING then
+                return false
+            end
+        end
+
+        return true
     end
 
     for _, area in ipairs(GetPlantAreas()) do
@@ -562,7 +589,7 @@ local function GetEmptyPlantPositions()
                 local pos = Vector3.new(x, y, z)
                 local k = key(pos)
 
-                if not used[k] and not IsNearExistingPlant(pos, Plants) then
+                if not used[k] and free(pos) then
                     used[k] = true
                     table.insert(positions, pos)
                 end
@@ -571,7 +598,7 @@ local function GetEmptyPlantPositions()
     end
 
     if DEBUG_PLANTING then
-        print("EMPTY POSITIONS =", #positions)
+        print("EMPTY POSITIONS =", #positions, "OCCUPIED =", #occupied)
     end
 
     return positions
@@ -592,7 +619,7 @@ end
 local function PlantAllCarrot(alreadyAtGarden)
     if not alreadyAtGarden then
         Net.TeleportButton.Request:Fire("Garden")
-        task.wait(0.6)
+        task.wait(0.5)
     end
 
     local seedCount = CountCarrotSeeds()
@@ -619,9 +646,7 @@ local function PlantAllCarrot(alreadyAtGarden)
         local burstEnd = math.min(i + PLANT_BURST_SIZE - 1, plantAmount)
 
         for j = i, burstEnd do
-            task.spawn(function()
-                PlantAt(positions[j])
-            end)
+            task.spawn(PlantAt, positions[j])
         end
 
         i = burstEnd + 1
@@ -629,7 +654,7 @@ local function PlantAllCarrot(alreadyAtGarden)
     end
 
     if DEBUG_PLANTING then
-        task.wait(0.35)
+        task.wait(0.25)
         print("PLANT RESULT: before =", beforePlants, "after =", CountCarrots(), "targets =", plantAmount)
     end
 end
@@ -925,7 +950,7 @@ end
 -- SPRINKLER BACKGROUND LOOP
 -- Chạy độc lập để không phải chờ plant/harvest xong mới đặt bên thứ 2.
 task.spawn(function()
-    while task.wait(0.45) do
+    while task.wait(1) do
         pcall(function()
             PlaceSuperSprinklers()
         end)
@@ -958,9 +983,6 @@ local function FarmCycle()
 
     SetStatus("Going Garden")
     TeleportGardenIfNeeded()
-
-    SetStatus("Placing Sprinkler")
-    PlaceSuperSprinklers()
 
     if seedCount > 0 then
         SetStatus("Planting Carrot")
