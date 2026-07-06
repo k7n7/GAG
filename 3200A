@@ -29,6 +29,7 @@ local PLANT_RESCAN_WAIT = 0.12       -- chờ ngắn cho Plants replicate rồi 
 local LOOP_DELAY = 0.05              -- vòng farm chính
 local HARVEST_POLL_INTERVAL = 0.020  -- mỗi cây có worker riêng; prompt sẵn sàng là harvest ngay
 local HARVEST_RETRY_WAIT = 0.045     -- retry nếu server chưa xóa cây sau prompt đầu
+local HARVEST_DOUBLE_CHECK = true    -- đọc kg lại ở frame kế tiếp trước khi fire prompt
 local SELL_INTERVAL = 0.18           -- gom toàn bộ harvest trong cửa sổ này rồi SellAll một lần
 local SPRINKLER_BACKGROUND_WAIT = 1
 local SPRINKLER_RADIUS = 11
@@ -384,7 +385,57 @@ end
 -- Mỗi plant chỉ có một watcher. Các watcher chạy song song, nên 30 cây cùng chín
 -- sẽ được bắn prompt trong cùng khung thời gian, không chờ FarmCycle quét tuần tự.
 local HarvestWatchers = setmetatable({}, {__mode = "k"})
-local HarvestWeightCache = setmetatable({}, {__mode = "k"})
+
+local function ValidKg(value)
+    return type(value) == "number" and value == value and value >= 0
+end
+
+-- Nếu UI label tồn tại, dùng nó làm lớp kiểm tra thứ hai độc lập với FruitAPI.
+-- Trả về: kg, labelExists. Label có nhưng chưa parse được => fail-closed.
+local function GetPlantLabelKg(plant)
+    local labelRoot = plant:FindFirstChild("HarvestPromptLabel", true)
+    if not labelRoot then return nil, false end
+
+    for _, obj in ipairs(labelRoot:GetDescendants()) do
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+            local text = tostring(obj.Text or ""):lower()
+            local parsed = text:match("([%d%.]+)%s*kg")
+            local kg = parsed and tonumber(parsed) or nil
+            if ValidKg(kg) then
+                return kg, true
+            end
+        end
+    end
+
+    return nil, true
+end
+
+local function IsDefinitelySafeToHarvest(plant)
+    -- Không cache. Luôn lấy giá trị mới ngay trước thời điểm harvest.
+    local kg1 = GetPlantKg(plant)
+    local labelKg1, labelExists1 = GetPlantLabelKg(plant)
+
+    if not ValidKg(kg1) then return false, false end
+    if labelExists1 and not ValidKg(labelKg1) then return false, false end
+    if kg1 >= MIN_KEEP_KG or (labelKg1 and labelKg1 >= MIN_KEEP_KG) then
+        return false, true
+    end
+
+    if HARVEST_DOUBLE_CHECK then
+        RunService.Heartbeat:Wait()
+        if not plant.Parent then return false, false end
+
+        local kg2 = GetPlantKg(plant)
+        local labelKg2, labelExists2 = GetPlantLabelKg(plant)
+        if not ValidKg(kg2) then return false, false end
+        if labelExists2 and not ValidKg(labelKg2) then return false, false end
+        if kg2 >= MIN_KEEP_KG or (labelKg2 and labelKg2 >= MIN_KEEP_KG) then
+            return false, true
+        end
+    end
+
+    return true, false
+end
 
 local function WatchHarvestPlant(plant)
     if HarvestWatchers[plant] then return end
@@ -394,27 +445,22 @@ local function WatchHarvestPlant(plant)
         while plant and plant.Parent do
             local seed = plant:GetAttribute("SeedName")
             if seed and tostring(seed):lower():find("carrot") then
-                local kg = HarvestWeightCache[plant]
-                if not kg then
-                    kg = GetPlantKg(plant)
-                    if type(kg) == "number" then
-                        HarvestWeightCache[plant] = kg
-                    end
-                end
-
-                -- Trọng lượng của plant cố định: cây >= 20kg được giữ và watcher dừng hẳn.
-                if kg and kg >= MIN_KEEP_KG then
-                    break
-                end
-
                 local prompt = GetHarvestPrompt(plant)
-                if kg and prompt and prompt.Enabled then
-                    pcall(function()
-                        prompt.MaxActivationDistance = 999999
-                        prompt.RequiresLineOfSight = false
-                        fireproximityprompt(prompt)
-                    end)
-                    HarvestAttemptsSinceSell += 1
+                if prompt and prompt.Enabled then
+                    local safe, protected = IsDefinitelySafeToHarvest(plant)
+                    if protected then
+                        -- Chỉ cần một trong hai nguồn/đợt đọc thấy >=20kg: khóa cây này vĩnh viễn.
+                        break
+                    end
+
+                    if safe and plant.Parent and prompt.Parent and prompt.Enabled then
+                        pcall(function()
+                            prompt.MaxActivationDistance = 999999
+                            prompt.RequiresLineOfSight = false
+                            fireproximityprompt(prompt)
+                        end)
+                        HarvestAttemptsSinceSell += 1
+                    end
 
                     -- Nếu prompt đầu bị scheduler nuốt, retry nhanh; plant biến mất thì loop tự dừng.
                     task.wait(HARVEST_RETRY_WAIT)
@@ -428,7 +474,6 @@ local function WatchHarvestPlant(plant)
         end
 
         HarvestWatchers[plant] = nil
-        HarvestWeightCache[plant] = nil
     end)
 end
 
@@ -457,7 +502,7 @@ pcall(StartInstantHarvestEngine)
 -- Sell là worker độc lập: harvest không bao giờ chờ sell.
 -- Mỗi nhịp chỉ SellAll khi có harvest mới, như vậy nhiều cây được gom thành một batch.
 task.spawn(function()
-    SellAllNow()
+    -- Không SellAll ngay khi script khởi động: tránh bán nhầm vật phẩm đã có sẵn trong inventory.
     while task.wait(SELL_INTERVAL) do
         if HarvestAttemptsSinceSell > 0 then
             HarvestAttemptsSinceSell = 0
