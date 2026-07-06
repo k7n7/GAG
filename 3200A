@@ -557,13 +557,15 @@ end
 
 local function ExpandPlotToMax5()
     for i = 1, MAX_EXPAND_LEVEL do
-        local ok, err = pcall(function()
+        pcall(function()
             Net.Actions.ExpandGarden:Fire()
         end)
 
-        --print("EXPAND TRY:", i, ok, err)
         task.wait(0.6)
     end
+
+    -- Sau khi mở rộng vườn, ép check lại sprinkler ngay vì số PlantArea đã thay đổi.
+    NextSprinklerCheck = 0
 end
 
 local MAX_SUPER_SPRINKLER = 5
@@ -571,8 +573,13 @@ local SPRINKLER_CHECK_RADIUS = 8
 
 local function GetSprinklerTargetPositions()
     local positions = {}
+    local areas = GetPlantAreas()
 
-    for _, area in ipairs(GetPlantAreas()) do
+    for i, area in ipairs(areas) do
+        if i > MAX_SUPER_SPRINKLER then
+            break
+        end
+
         table.insert(positions, area.Position + Vector3.new(0, 0.2, 0))
     end
 
@@ -580,59 +587,35 @@ local function GetSprinklerTargetPositions()
 end
 
 local function IsSuperSprinklerNear(pos)
-
     local Plot = GetPlot()
+    local Sprinklers = Plot:WaitForChild("Sprinklers")
 
-    local folder = Plot:WaitForChild("Sprinklers")
-
-    print("SPRINKLER COUNT =", #folder:GetChildren())
-
-    for _,sprinkler in ipairs(folder:GetChildren()) do
-
-        print("MODEL =", sprinkler.Name)
-
+    for _, sprinkler in ipairs(Sprinklers:GetChildren()) do
         local part =
             sprinkler.PrimaryPart
             or sprinkler:FindFirstChildWhichIsA("BasePart", true)
 
-        print("PART =", part)
-
         if part then
+            local distance = (
+                Vector3.new(pos.X, 0, pos.Z)
+                -
+                Vector3.new(part.Position.X, 0, part.Position.Z)
+            ).Magnitude
 
-            local d =
-            (Vector3.new(part.Position.X,0,part.Position.Z)
-            -
-            Vector3.new(pos.X,0,pos.Z)).Magnitude
-
-            print("DIST =", d)
-
-            if d < SPRINKLER_CHECK_RADIUS then
-
+            if distance <= SPRINKLER_CHECK_RADIUS then
                 return true
-
             end
-
         end
-
     end
 
     return false
-
 end
 
 local function CountSuperSprinklers()
     local Plot = GetPlot()
     local Sprinklers = Plot:WaitForChild("Sprinklers")
 
-    local count = 0
-
-    for _, sprinkler in ipairs(Sprinklers:GetChildren()) do
-        if sprinkler.Name:lower():find("super") then
-            count += 1
-        end
-    end
-
-    return count
+    return #Sprinklers:GetChildren()
 end
 
 local function SafeSet(label, text)
@@ -707,31 +690,22 @@ local function GetSuperSprinklerToolModel()
 end
 
 local function PlaceSuperSprinklers()
-    --print("SPRINKLER CHECK START", tick(), "NEXT =", NextSprinklerCheck)
-
     if tick() < NextSprinklerCheck then
-        --print("SPRINKLER WAIT COOLDOWN")
         return
     end
 
     local positions = GetSprinklerTargetPositions()
-    --print("SPRINKLER TARGET COUNT:", #positions)
 
-    for i, pos in ipairs(positions) do
-        local near = IsSuperSprinklerNear(pos)
-        --print("AREA", i, "POS =", pos, "NEAR =", near)
-
-        if not near then
+    for _, pos in ipairs(positions) do
+        if not IsSuperSprinklerNear(pos) then
             local toolModel = GetSuperSprinklerToolModel()
-            --print("TOOLMODEL =", toolModel)
 
             if not toolModel then
-                --print("NO SUPER SPRINKLER TOOL")
                 NextSprinklerCheck = tick() + 1
                 return
             end
 
-            local ok, err = pcall(function()
+            pcall(function()
                 Net.Place.PlaceSprinkler:Fire(
                     pos,
                     "Super Sprinkler",
@@ -740,28 +714,34 @@ local function PlaceSuperSprinklers()
                 )
             end)
 
-            --print("PLACE RESULT:", ok, err)
-
-            NextSprinklerCheck = tick() + 1.5
+            -- Đặt từng cái một để server kịp consume tool và replicate model.
+            NextSprinklerCheck = tick() + 2
             return
         end
     end
 
-    --print("ALL AREAS HAVE SPRINKLER")
     NextSprinklerCheck = tick() + SPRINKLER_CHECK_COOLDOWN
 end
 
 local function IsNearGarden()
-    local Plot = GetPlot()
     local Character = Player.Character or Player.CharacterAdded:Wait()
     local HRP = Character:FindFirstChild("HumanoidRootPart")
     if not HRP then return false end
 
-    local Area1 = Plot.Visual:WaitForChild("PlantAreaColumn1")
-    local Area2 = Plot.Visual:WaitForChild("PlantAreaColumn2")
-    local Center = (Area1.Position + Area2.Position) / 2
+    local areas = GetPlantAreas()
+    if #areas <= 0 then
+        return false
+    end
 
-    return (HRP.Position - Center).Magnitude < 120
+    local center = Vector3.new(0, 0, 0)
+
+    for _, area in ipairs(areas) do
+        center += area.Position
+    end
+
+    center /= #areas
+
+    return (HRP.Position - center).Magnitude < 160
 end
 
 local function TeleportGardenIfNeeded()
