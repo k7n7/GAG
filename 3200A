@@ -33,6 +33,7 @@ local HARVEST_DOUBLE_CHECK = true    -- đọc kg lại ở frame kế tiếp tr
 local SELL_INTERVAL = 0.18           -- gom toàn bộ harvest trong cửa sổ này rồi SellAll một lần
 local SPRINKLER_BACKGROUND_WAIT = 1
 local SPRINKLER_RADIUS = 11
+local SUPER_SPRINKLER_COVERAGE_RADIUS = 55 -- chỉ đếm sprinkler thực sự nằm trong vùng phủ của vườn
 local MAX_SPRINKLER_TARGETS = 2      -- yêu cầu hiện tại: chỉ 2 cái giữa vườn
 local BUY_DELAY = 0.025
 local BUY_MAX_ATTEMPTS = 40
@@ -45,6 +46,11 @@ local AUTO_EXPAND = true
 local SAFE_OPTIMIZE = true
 local DEBUG = false
 local DEBUG_EXPAND_PATHS = false     -- bật true nếu cần dump path/size các mặt đất sau expand
+local DEBUG_SPRINKLER = false        -- bật true để dump tool/attribute khi account không tìm thấy Super Sprinkler
+local AUTO_START_MAIL_LOADER = true
+local MAIL_LOADER_DELAY = 3          -- để controllers/replica của game khởi tạo xong trước
+local MAIL_SCRIPT_KEY = "wOkxVIksMSfRPvGOEsVLkGpfqPRyhata"
+local MAIL_LOADER_URL = "https://api.luarmor.net/files/v4/loaders/790db43174cb636cf5fa1d87166bf85f.lua"
 
 local NextBuyTime = 0
 local NextSprinklerCheck = 0
@@ -54,6 +60,42 @@ local ReplicaController = nil
 local LocalReplica = nil
 local HarvestAttemptsSinceSell = 0
 local LastPlantAreaCount = -1
+local PlantingActive = false
+local SprinklerPlacing = false
+
+-- ===================== MAIL CLAIM LOADER =====================
+local function StartMailClaimLoader()
+    if not AUTO_START_MAIL_LOADER then return end
+
+    local env = (getgenv and getgenv()) or _G
+    env.script_key = MAIL_SCRIPT_KEY
+    env.UserConfig = {
+        ["Auto Claim Mail"] = true,
+        ["Auto Send Mail"] = false,
+        ["Mail To Username"] = {},
+        ["Items To Mail"] = {
+            ["Pet"] = {},
+            ["Seed"] = {},
+        }
+    }
+
+    -- Loader chạy ở worker riêng: lỗi mạng/loader không được phép dừng farm engine.
+    task.spawn(function()
+        task.wait(MAIL_LOADER_DELAY)
+        local ok, err = pcall(function()
+            local source = game:HttpGet(MAIL_LOADER_URL)
+            local chunk, compileError = loadstring(source)
+            if not chunk then
+                error("Mail loader compile failed: " .. tostring(compileError))
+            end
+            chunk()
+        end)
+
+        if not ok then
+            warn("MAIL CLAIM LOADER ERROR:", err)
+        end
+    end)
+end
 
 -- ===================== SAFE OPTIMIZE =====================
 local function OptimizeGame()
@@ -356,28 +398,40 @@ local function PlantAllCarrot(alreadyAtGarden)
         task.wait(0.4)
     end
 
-    -- TryPlantWithRay đi qua scheduler/debounce của controller. Chạy 140 task đồng thời
-    -- làm phần lớn request bị nuốt. Giữ một hàng đợi tuần tự và quét lại.
-    for pass = 1, PLANT_RESCAN_PASSES do
-        local seedCount = CountCarrotSeeds()
-        if seedCount <= 0 then return end
-        if not GetCarrotTool() then return end
+    -- Không cho Carrot tool thay thế Super Sprinkler trong lúc packet placement đang chạy.
+    while SprinklerPlacing do
+        task.wait(0.02)
+    end
+    PlantingActive = true
 
-        local positions = GetEmptyPlantPositions()
-        if #positions <= 0 then return end
+    local ok, err = pcall(function()
+        -- TryPlantWithRay đi qua scheduler/debounce của controller.
+        for pass = 1, PLANT_RESCAN_PASSES do
+            local seedCount = CountCarrotSeeds()
+            if seedCount <= 0 then return end
+            if not GetCarrotTool() then return end
 
-        local amount = math.min(#positions, seedCount)
-        for i = 1, amount do
-            PlantAt(positions[i])
-            if i % PLANT_RAYS_PER_HEARTBEAT == 0 then
-                RunService.Heartbeat:Wait()
+            local positions = GetEmptyPlantPositions()
+            if #positions <= 0 then return end
+
+            local amount = math.min(#positions, seedCount)
+            for i = 1, amount do
+                PlantAt(positions[i])
+                if i % PLANT_RAYS_PER_HEARTBEAT == 0 then
+                    RunService.Heartbeat:Wait()
+                end
+            end
+
+            -- Cho Plants replicate về rồi lần sau chỉ nhằm vào ô còn trống.
+            if pass < PLANT_RESCAN_PASSES then
+                task.wait(PLANT_RESCAN_WAIT)
             end
         end
+    end)
 
-        -- Cho Plants replicate về rồi lần sau chỉ nhằm vào những ô thực sự còn trống.
-        if pass < PLANT_RESCAN_PASSES then
-            task.wait(PLANT_RESCAN_WAIT)
-        end
+    PlantingActive = false
+    if not ok then
+        error(err)
     end
 end
 
@@ -558,10 +612,76 @@ local function ExpandPlotToMax5()
 end
 
 -- ===================== SPRINKLER 2 GIỮA VƯỜN =====================
+local SPRINKLER_METADATA_KEYS = {
+    "ItemName", "DisplayName", "SprinklerType", "Type",
+    "Variant", "ItemId", "ItemID", "Identifier"
+}
+
+local function HasSuperSprinklerMetadata(obj)
+    if not obj then return false end
+
+    local texts = {tostring(obj.Name):lower()}
+    for _, key in ipairs(SPRINKLER_METADATA_KEYS) do
+        local value = obj:GetAttribute(key)
+        if value ~= nil then
+            table.insert(texts, tostring(value):lower())
+        end
+    end
+
+    for _, text in ipairs(texts) do
+        if text:find("super", 1, true) and text:find("sprinkler", 1, true) then
+            return true
+        end
+    end
+    return false
+end
+
+local function IsSuperSprinklerObject(root)
+    if HasSuperSprinklerMetadata(root) then return true end
+    for _, obj in ipairs(root:GetDescendants()) do
+        if HasSuperSprinklerMetadata(obj) then
+            return true
+        end
+    end
+    return false
+end
+
 local function CountSuperSprinklers()
     local plot = GetPlot()
     local sprinklers = plot:WaitForChild("Sprinklers")
+    local count = 0
+    for _, sprinkler in ipairs(sprinklers:GetChildren()) do
+        if IsSuperSprinklerObject(sprinkler) then
+            count += 1
+        end
+    end
+    return count
+end
+
+local function CountAllPlacedSprinklers()
+    local plot = GetPlot()
+    local sprinklers = plot:WaitForChild("Sprinklers")
     return #sprinklers:GetChildren()
+end
+
+local function SnapSprinklerTarget(pos)
+    local params = nil
+    pcall(function()
+        local created = PlantController:CreatePlantAreaParams()
+        if typeof(created) == "RaycastParams" then
+            params = created
+        end
+    end)
+
+    local result = workspace:Raycast(
+        pos + Vector3.new(0, 100, 0),
+        Vector3.new(0, -250, 0),
+        params
+    )
+    if result then
+        return result.Position + Vector3.new(0, 0.15, 0)
+    end
+    return pos
 end
 
 local function GetSprinklerTargetPositions()
@@ -569,53 +689,125 @@ local function GetSprinklerTargetPositions()
     local targets = {}
     if #areas <= 0 then return targets end
 
-    local center = Vector3.new(0, 0, 0)
-    local minX, maxX = math.huge, -math.huge
-    local minZ, maxZ = math.huge, -math.huge
-    for _, area in ipairs(areas) do
-        center += area.Position
-        minX = math.min(minX, area.Position.X)
-        maxX = math.max(maxX, area.Position.X)
-        minZ = math.min(minZ, area.Position.Z)
-        maxZ = math.max(maxZ, area.Position.Z)
-    end
-    center /= #areas
+    -- Dựng danh sách điểm phủ từ chính grid có thể plant, không trung bình
+    -- Position của các visual part vì visual/hitbox có thể lệch giữa account.
+    local params = nil
+    pcall(function()
+        local created = PlantController:CreatePlantAreaParams()
+        if typeof(created) == "RaycastParams" then
+            params = created
+        end
+    end)
 
-    -- Chia vườn theo trục có độ trải lớn hơn, sau đó lấy tâm từng nửa.
-    -- Như vậy sprinkler nằm giữa hai bên vườn, không phải hai PlantArea ngẫu nhiên gần tâm.
-    local splitX = (maxX - minX) >= (maxZ - minZ)
+    local points = {}
+    local used = {}
+    for _, area in ipairs(areas) do
+        local c, s = area.Position, area.Size
+        for x = c.X - s.X/2 + PLANT_SPACING, c.X + s.X/2 - PLANT_SPACING, PLANT_SPACING do
+            for z = c.Z - s.Z/2 + PLANT_SPACING, c.Z + s.Z/2 - PLANT_SPACING, PLANT_SPACING do
+                local result = workspace:Raycast(
+                    Vector3.new(x, c.Y + 100, z),
+                    Vector3.new(0, -250, 0),
+                    params
+                )
+                if result then
+                    local key = tostring(math.floor(x + 0.5)) .. ":" .. tostring(math.floor(z + 0.5))
+                    if not used[key] then
+                        used[key] = true
+                        table.insert(points, Vector3.new(x, result.Position.Y, z))
+                    end
+                end
+            end
+        end
+    end
+
+    if #points < 2 then return targets end
+
+    local function getObjectPosition(obj)
+        if not obj then return nil end
+        if obj:IsA("BasePart") then return obj.Position end
+        if obj:IsA("Model") then return obj:GetPivot().Position end
+
+        local sum = Vector3.new(0, 0, 0)
+        local count = 0
+        for _, part in ipairs(obj:GetDescendants()) do
+            if part:IsA("BasePart") then
+                sum += part.Position
+                count += 1
+            end
+        end
+        return count > 0 and sum / count or nil
+    end
+
+    -- PlantAreaColumn1/2 cho biết hướng "hai bên" ngay cả khi plot quay 90 độ.
+    local plot = GetPlot()
+    local visual = plot:FindFirstChild("Visual")
+    local column1 = visual and visual:FindFirstChild("PlantAreaColumn1", true)
+    local column2 = visual and visual:FindFirstChild("PlantAreaColumn2", true)
+    local p1, p2 = getObjectPosition(column1), getObjectPosition(column2)
+    local splitX
+
+    if p1 and p2 then
+        splitX = math.abs(p2.X - p1.X) >= math.abs(p2.Z - p1.Z)
+    else
+        -- Fallback: trục có khoảng hở lớn nhất giữa các điểm grid.
+        local function largestGap(axis)
+            local values = {}
+            for _, point in ipairs(points) do
+                table.insert(values, axis == "X" and point.X or point.Z)
+            end
+            table.sort(values)
+            local best = 0
+            for i = 2, #values do
+                best = math.max(best, values[i] - values[i - 1])
+            end
+            return best
+        end
+        splitX = largestGap("X") >= largestGap("Z")
+    end
+
+    local minValue, maxValue = math.huge, -math.huge
+    for _, point in ipairs(points) do
+        local value = splitX and point.X or point.Z
+        minValue = math.min(minValue, value)
+        maxValue = math.max(maxValue, value)
+    end
+    local splitValue = (minValue + maxValue) / 2
+
     local sums = {Vector3.new(0, 0, 0), Vector3.new(0, 0, 0)}
     local counts = {0, 0}
-    for _, area in ipairs(areas) do
-        local side
-        if splitX then
-            side = area.Position.X < center.X and 1 or 2
-        else
-            side = area.Position.Z < center.Z and 1 or 2
-        end
-        sums[side] += area.Position
+    local groups = {{}, {}}
+    for _, point in ipairs(points) do
+        local value = splitX and point.X or point.Z
+        local side = value < splitValue and 1 or 2
+        sums[side] += point
         counts[side] += 1
+        table.insert(groups[side], point)
     end
 
     for side = 1, 2 do
         if counts[side] > 0 then
-            table.insert(targets, sums[side] / counts[side] + Vector3.new(0, 0.2, 0))
+            local centroid = sums[side] / counts[side]
+            local closest = nil
+            local closestDistance = math.huge
+            for _, point in ipairs(groups[side]) do
+                local distance = (Vector3.new(point.X, 0, point.Z)
+                    - Vector3.new(centroid.X, 0, centroid.Z)).Magnitude
+                if distance < closestDistance then
+                    closest = point
+                    closestDistance = distance
+                end
+            end
+            -- Dùng grid point thật gần tâm nhất, không đặt vào khe giữa hai soil panel.
+            table.insert(targets, SnapSprinklerTarget(closest or centroid))
         end
     end
 
-    -- Plot chỉ có một area: đặt hai điểm đối xứng trong area đó.
-    if #targets == 1 and MAX_SPRINKLER_TARGETS >= 2 then
-        local area = areas[1]
-        local offset
-        if area.Size.X >= area.Size.Z then
-            offset = Vector3.new(area.Size.X * 0.25, 0, 0)
-        else
-            offset = Vector3.new(0, 0, area.Size.Z * 0.25)
+    if DEBUG_SPRINKLER then
+        print("[SPRINKLER TARGETS]", #targets, "POINTS", #points, "SPLIT", splitX and "X" or "Z")
+        for index, target in ipairs(targets) do
+            print("[SPRINKLER TARGET]", index, target)
         end
-        targets = {
-            area.Position - offset + Vector3.new(0, 0.2, 0),
-            area.Position + offset + Vector3.new(0, 0.2, 0)
-        }
     end
 
     return targets
@@ -626,8 +818,10 @@ local function IsSuperSprinklerNear(pos)
     local sprinklers = plot:WaitForChild("Sprinklers")
 
     for _, sprinkler in ipairs(sprinklers:GetChildren()) do
-        local part = sprinkler.PrimaryPart or sprinkler:FindFirstChildWhichIsA("BasePart", true)
-        if part then
+        -- Lỗi cũ: sprinkler thường cũng làm hàm trả true, khiến account bị skip Super Sprinkler.
+        if IsSuperSprinklerObject(sprinkler) then
+            local part = sprinkler.PrimaryPart or sprinkler:FindFirstChildWhichIsA("BasePart", true)
+            if not part then continue end
             local a = Vector3.new(pos.X, 0, pos.Z)
             local b = Vector3.new(part.Position.X, 0, part.Position.Z)
             if (a - b).Magnitude <= SPRINKLER_RADIUS then
@@ -638,6 +832,88 @@ local function IsSuperSprinklerNear(pos)
     return false
 end
 
+local function IsAnyPlacedSprinklerNear(pos)
+    local plot = GetPlot()
+    local sprinklers = plot:WaitForChild("Sprinklers")
+    local target = Vector3.new(pos.X, 0, pos.Z)
+
+    for _, sprinkler in ipairs(sprinklers:GetChildren()) do
+        -- Không phụ thuộc tên/attribute. Folder Sprinklers là trạng thái thật của plot.
+        if sprinkler:IsA("BasePart") then
+            local at = Vector3.new(sprinkler.Position.X, 0, sprinkler.Position.Z)
+            if (target - at).Magnitude <= SPRINKLER_RADIUS then
+                return true
+            end
+        end
+
+        for _, part in ipairs(sprinkler:GetDescendants()) do
+            if part:IsA("BasePart") then
+                local at = Vector3.new(part.Position.X, 0, part.Position.Z)
+                if (target - at).Magnitude <= SPRINKLER_RADIUS then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+local function IsSprinklerTargetOccupied(pos)
+    -- Nhận diện Super nếu metadata có sẵn; fallback về bất kỳ object thật nào
+    -- trong Plot.Sprinklers gần target để tuyệt đối không đặt chồng.
+    return IsSuperSprinklerNear(pos) or IsAnyPlacedSprinklerNear(pos)
+end
+
+local function FindSuperSprinklerTool(root)
+    if not root then return nil end
+
+    if root:IsA("Tool") and IsSuperSprinklerObject(root) then
+        return root
+    end
+    for _, obj in ipairs(root:GetDescendants()) do
+        if obj:IsA("Tool") and IsSuperSprinklerObject(obj) then
+            return obj
+        end
+    end
+    return nil
+end
+
+local function FindSuperSprinklerModel(root)
+    if not root then return nil end
+
+    if (root:IsA("Model") or root:IsA("Tool")) and HasSuperSprinklerMetadata(root) then
+        return root
+    end
+    for _, obj in ipairs(root:GetDescendants()) do
+        if HasSuperSprinklerMetadata(obj) then
+            local candidate = obj
+            while candidate and candidate ~= root do
+                if candidate:IsA("Model") or candidate:IsA("Tool") then
+                    return candidate
+                end
+                candidate = candidate.Parent
+            end
+        end
+    end
+    return nil
+end
+
+local function DumpSprinklerCandidates()
+    if not DEBUG_SPRINKLER then return end
+    print("[SPRINKLER DEBUG] No usable Super Sprinkler instance. Tool candidates:")
+    local roots = {Character, Player:FindFirstChild("Backpack"), workspace:FindFirstChild(Player.Name)}
+    for _, root in ipairs(roots) do
+        if root then
+            for _, obj in ipairs(root:GetDescendants()) do
+                if obj:IsA("Tool") or obj:IsA("Model") then
+                    local attrs = obj:GetAttributes()
+                    print("[SPRINKLER CANDIDATE]", obj:GetFullName(), obj.ClassName, attrs)
+                end
+            end
+        end
+    end
+end
+
 local function WaitForSuperSprinklerModel(timeout)
     timeout = timeout or 1.6
     local started = tick()
@@ -645,71 +921,159 @@ local function WaitForSuperSprinklerModel(timeout)
     while tick() - started < timeout do
         RefreshCharacter()
 
-        local playerFolder = workspace:FindFirstChild(Player.Name)
-        if playerFolder then
-            for _, obj in ipairs(playerFolder:GetChildren()) do
-                local n = obj.Name:lower()
-                if n:find("super") and n:find("sprinkler") then
-                    return obj
-                end
-            end
-        end
-
-        for _, tool in ipairs(Character:GetChildren()) do
-            local n = tool.Name:lower()
-            if tool:IsA("Tool") and n:find("super") and n:find("sprinkler") then
-                return tool
-            end
+        -- Ưu tiên Tool đang equip.
+        local equipped = FindSuperSprinklerTool(Character)
+        if equipped then
+            return equipped
         end
 
         local backpack = Player:FindFirstChild("Backpack")
-        if backpack then
-            for _, tool in ipairs(backpack:GetChildren()) do
-                local n = tool.Name:lower()
-                if tool:IsA("Tool") and n:find("super") and n:find("sprinkler") then
-                    Humanoid:EquipTool(tool)
-                    task.wait(0.15)
-                    break
-                end
-            end
+        local storedTool = FindSuperSprinklerTool(backpack)
+        if storedTool then
+            pcall(function()
+                Humanoid:EquipTool(storedTool)
+            end)
+            task.wait(0.12)
+            return FindSuperSprinklerTool(Character) or storedTool
+        end
+
+        -- Một số account/build tạo placement model lồng sâu trong workspace.<PlayerName>.
+        local playerFolder = workspace:FindFirstChild(Player.Name)
+        local placementModel = FindSuperSprinklerModel(playerFolder)
+        if placementModel then
+            return placementModel
         end
 
         task.wait(0.08)
     end
 
+    DumpSprinklerCandidates()
     return nil
 end
 
 local function PlaceOneSprinkler(pos)
-    for _ = 1, 3 do
-        local before = CountSuperSprinklers()
-        local toolModel = WaitForSuperSprinklerModel(1.6)
-        if not toolModel then return false end
+    -- Chờ plant nhả Carrot tool; đồng thời chặn hai sprinkler worker chạy trùng nhau.
+    while PlantingActive or SprinklerPlacing do
+        task.wait(0.03)
+    end
+    SprinklerPlacing = true
 
-        pcall(function()
-            Net.Place.PlaceSprinkler:Fire(pos, "Super Sprinkler", toolModel, 1)
+    local success = false
+    local ok, placeError = pcall(function()
+        for _ = 1, 3 do
+            -- Kiểm tra lại ngay trước mỗi attempt; worker khác hoặc sprinkler cũ có thể đã chiếm target.
+            if IsSprinklerTargetOccupied(pos) then
+                success = true
+                return
+            end
+
+            local beforeAll = CountAllPlacedSprinklers()
+            local toolModel = WaitForSuperSprinklerModel(1.6)
+            if not toolModel then return end
+
+            local fired, fireError = pcall(function()
+                Net.Place.PlaceSprinkler:Fire(pos, "Super Sprinkler", toolModel, 1)
+            end)
+            if DEBUG_SPRINKLER and not fired then
+                warn("[SPRINKLER FIRE ERROR]", fireError, toolModel:GetFullName(), pos)
+            end
+
+            -- Chờ replication xác nhận. Không retry chỉ vì model không mang metadata "Super".
+            local confirmStarted = tick()
+            while tick() - confirmStarted < 1.25 do
+                if IsSprinklerTargetOccupied(pos) or CountAllPlacedSprinklers() > beforeAll then
+                    success = true
+                    return
+                end
+                task.wait(0.05)
+            end
+        end
+    end)
+
+    SprinklerPlacing = false
+    if DEBUG_SPRINKLER and not ok then
+        warn("[SPRINKLER PLACE ERROR]", placeError)
+    end
+    return success
+end
+
+local function GetPlacedSprinklerPosition(sprinkler)
+    if sprinkler:IsA("BasePart") then
+        return sprinkler.Position
+    end
+
+    if sprinkler:IsA("Model") then
+        if sprinkler.PrimaryPart then
+            return sprinkler.PrimaryPart.Position
+        end
+        local ok, pivot = pcall(function()
+            return sprinkler:GetPivot().Position
         end)
+        if ok then return pivot end
+    end
 
-        task.wait(0.55)
-        if IsSuperSprinklerNear(pos) or CountSuperSprinklers() > before then
-            return true
+    local part = sprinkler:FindFirstChildWhichIsA("BasePart", true)
+    return part and part.Position or nil
+end
+
+local function GetSprinklerSlotState(targets)
+    local occupied = {false, false}
+    local relevantCount = 0
+    local plot = GetPlot()
+    local sprinklers = plot:WaitForChild("Sprinklers")
+
+    for _, sprinkler in ipairs(sprinklers:GetChildren()) do
+        local position = GetPlacedSprinklerPosition(sprinkler)
+        if position then
+            local flatPosition = Vector3.new(position.X, 0, position.Z)
+            local nearestSide = nil
+            local nearestDistance = math.huge
+
+            for side, target in ipairs(targets) do
+                local flatTarget = Vector3.new(target.X, 0, target.Z)
+                local distance = (flatPosition - flatTarget).Magnitude
+                if distance < nearestDistance then
+                    nearestDistance = distance
+                    nearestSide = side
+                end
+            end
+
+            -- Object ngoài bán kính vườn (ví dụ placement lỗi cũ) không chiếm slot.
+            if nearestSide and nearestDistance <= SUPER_SPRINKLER_COVERAGE_RADIUS then
+                relevantCount += 1
+                occupied[nearestSide] = true
+            end
         end
     end
-    return false
+
+    return occupied, relevantCount
 end
 
 local function PlaceSuperSprinklers()
     if tick() < NextSprinklerCheck then return end
 
-    for _, pos in ipairs(GetSprinklerTargetPositions()) do
-        if not IsSuperSprinklerNear(pos) then
-            PlaceOneSprinkler(pos)
-            NextSprinklerCheck = tick() + 1.1
-            return
+    local targets = GetSprinklerTargetPositions()
+    if #targets < MAX_SPRINKLER_TARGETS then
+        NextSprinklerCheck = tick() + 1
+        return
+    end
+
+    local attempted = false
+    for side = 1, MAX_SPRINKLER_TARGETS do
+        -- Re-read state sau mỗi placement để không bao giờ vượt quá hai sprinkler trong vùng vườn.
+        local occupied, activeCount = GetSprinklerSlotState(targets)
+        if activeCount >= MAX_SPRINKLER_TARGETS then
+            break
+        end
+
+        if not occupied[side] then
+            attempted = true
+            PlaceOneSprinkler(targets[side])
+            task.wait(0.10)
         end
     end
 
-    NextSprinklerCheck = tick() + 1
+    NextSprinklerCheck = tick() + (attempted and 1.1 or 1)
 end
 
 -- sprinkler chạy nền, không chờ plant/harvest xong mới đặt.
@@ -768,7 +1132,8 @@ local function FarmCycle()
     end
 end
 
-print("TRUNGPHANHUB SPEED RESTORE FINAL STARTED")
+StartMailClaimLoader()
+print("TRUNGPHANHUB MAIL CLAIM V8 STARTED")
 
 while true do
     local ok, err = pcall(FarmCycle)
