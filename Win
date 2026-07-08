@@ -1,315 +1,2411 @@
-script_key="qwhIjrnQcSQLjUUOrAZHQCVQCmflwHDc";
-setfpscap(3)
+-- TrungPhanHub RANGE BATCH V22
+-- Worker độc lập + khóa Tool chung; Plant/Watering tự gom vùng để vượt kiểm tra khoảng cách server.
 
-getgenv().gagConfig = {
-    -- Event:
-    CRAFT_EVENT = { "Enchanted Chest", "Fairy Net", "Anti Bee Egg", "Mutation Spray Glimmering" },
-    BUY_TRAVELING_MERCHANT = { "Bee Egg", "Paradise Egg", "Loquat", "Feijoa", "Pitcher Plant" },
-    BUY_EVENT_SHOP = {"Enchanted Chest", "Luminous Sprite", "Drake" },
-    MAX_EVENT_RESTOCK_SHECKLES = 480000000,
-    
-    CLAIM_FAIRY_REWARD = { "Mutation Spray Glimmering", "Enchanted Egg", "Enchanted Seed Pack", "FairyPoints" },
-    PLANT_EVENT_TREES = true,  -- This config will replace most plant related config
-    PLACE_COSMETIC = { "Cooking Kit" },
-    
-    -- General:
-    AUTO_UPDATE_RESTART = true,
-    REDEEM_CODES = {},
-    EXTRA_PET_SLOTS = 5,
-    EXTRA_EGG_SLOTS = 5,
-    ADD_FRIEND = true,
-    OPEN_ALL_SEED_PACK = true,
-    
-    BUY_EGGS = { "Bug Egg", "Bee Egg", "Paradise Egg", "Mythical Egg", "Rare Summer Egg", "Common Summer Egg", "Rare Egg", "Uncommon Egg" },
-    PLANT_EGGS = { "Enchanted Egg", "Sprout Egg", "Gourmet Egg", "Corrupted Zen Egg", "Zen Egg", "Dinosaur Egg", "Primal Egg", "Anti Bee Egg", "Bee Egg", "Night Egg", "Bug Egg", "Paradise Egg", "Mythical Egg", "Common Summer Egg", "Rare Egg", "Uncommon Egg" },
-    
-    BUY_SEED_SHOP = { "Romanesco", "Elder Strawberry", "Giant Pinecone", "Burning Bud", "Sugar Apple", "Ember Lily", "Beanstalk", "Cacao", "Pepper", "Mushroom", "Grape", "Mango", "Dragon Fruit", "Cactus", ["Coconut"] = 50, ["Bamboo"] = 50, ["Apple"] = 50, ["Pumpkin"] = 50, ["Watermelon"] = 50, ["Daffodil"] = 50, ["Corn"] = 50, ["Tomato"] = 50, ["Orange Tulip"] = 50, ["Blueberry"] = 50, ["Strawberry"] = 50, ["Carrot"] = 50 },
-    KEEP_SEEDS = { "Grand Tomato", "King Cabbage", "Bone Blossom" },
-    KEEP_SEEDS_AFTER_MAX_PLANTS = {},
-    
-    FAVOURITE_FRUIT_MUTATIONS = { "Glimmering" },
-    SKIP_HARVEST_MUTATIONS = { "Glimmering" },
+task.wait(2)
+pcall(function() setfpscap(60) end)
 
-    KEEP_PETS = { "Phoenix", "Drake", "Luminous Sprite", ["Glimmering Sprite"] = 8, "Cockatrice", "Gnome", "Green Bean", "Apple Gazelle", "Lemon Lion", "Peach Wasp", "Griffin", ["Spriggan"] = 5, "Golden Goose", ["Gorilla Chef"] = 5, "Junkbot", "Hotdog Daschund" , "Sunny-Side Chicken", "Lobster Thermidor",  "French Fry Ferret", ["Starfish"] = 3, "Raiju", "Corrupted Kodama", "Rooster", "Capybara", ["Koi"] = 2, ["Tanchozuru"] = 3, "Kitsune", "Corrupted Kitsune", "Kappa", "Dilophosaurus", "Spinosaurus", "Brontosaurus", "T-Rex", "Fennec Fox", "Blood Kiwi", ["Peacock"] = 2, ["Hamster"] = 2, "Disco Bee", "Raccoon", "Queen Bee", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox", "Chicken Zombie" },
-    KEEP_PETS_WEIGHT = 5,
+repeat task.wait() until game:IsLoaded()
 
-    EQUIP_PETS = { ["Glimmering Sprite"] = 4, ["Sunny-Side Chicken"] = 4, ["Hotdog Daschund"] = 4, "Blood Kiwi", "Rooster" },
+-- ===================== USER CONFIG =====================
+local GlobalEnv = (getgenv and getgenv()) or _G
+-- Namespace riêng: Luarmor mail loader đọc UserConfig, không được phép chạy trùng farm engine.
+GlobalEnv.TrungPhanHubConfig = {
+    ["Auto Buy Seed"] = true,
+    ["Auto Plant Seed"] = true,
+    ["Direct Plant Without Equip"] = true, -- direct parent không animation; Ray chỉ fallback tạm thời
+    ["Auto Buy Gear"] = true,
+    ["Auto Use Common Watering Can"] = true,
+    ["Max Total Seed Inventory"] = 55, -- chừa slot cho crop/gear, tránh "Inventory is full"
+    ["Super Gear Mail Username"] = "", -- ĐIỀN username nhận Super gear; để trống = chưa gửi
+    -- 999 = mua hết stock trong mỗi restock. Super chỉ mua + gửi mail, tuyệt đối không sử dụng.
+    ["Limit Buy Gear"] = {
+        ["Common Watering Can"] = 999,
+        ["Common Sprinkler"] = 999,
+        ["Uncommon Sprinkler"] = 999,
+        ["Rare Sprinkler"] = 999,
+        ["Legendary Sprinkler"] = 999,
+        ["Super Watering Can"] = 999,
+        ["Super Sprinkler"] = 999,
+    },
+    -- Chỉ dùng sprinkler thường; không được thêm Super Sprinkler vào danh sách này.
+    ["Gears To Use"] = {
+        "Legendary Sprinkler",
+        "Rare Sprinkler",
+        "Uncommon Sprinkler",
+        "Common Sprinkler",
+    },
+    ["Protect Plant By KG"] = false, -- false = harvest mọi prompt, không giữ cây >=20kg
 
-    BUY_GEAR_SHOP = { "Grandmaster Sprinkler", "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Basic Sprinkler", "Trading Ticket", ["Harvest Tool"] = 10 },
-    USE_SPRINKLER = { "Basic Sprinkler", "Master Sprinkler", "Godly Sprinkler", "Advanced Sprinkler", "Grandmaster Sprinkler" },
+    -- Bố cục: cây lâu năm đi từ hàng sau vào; cây thu một lần đi từ hàng trước vào.
+    -- Hai tâm luống được chừa trống để đặt sprinkler/gear mà không phải đào cây.
+    ["Garden Layout"] = {
+        ["Reserve Gear Centers"] = true,
+        ["Gear Reserve Radius"] = 4.5,
+        ["Persistent Plant Spacing"] = 5.0, -- dùng đủ grid; server vẫn giữ khoảng cách hợp lệ
+        ["Persistent Seeds"] = {
+            ["Strawberry"] = true,
+            ["Blueberry"] = true,
+            ["Tomato"] = true,
+            ["Apple"] = true,
+            ["Cactus"] = true,
+            ["Pineapple"] = true,
+            ["Green Bean"] = true,
+            ["Banana"] = true,
+            ["Grape"] = true,
+            ["Coconut"] = true,
+            ["Mango"] = true,
+            ["Dragon Fruit"] = true,
+            ["Poison Apple"] = true,
+        },
+    },
 
-    PET_WEBHOOK_URL = "https://discord.com/api/webhooks/1391995482888212570/oRy4bRdngebqz4veeL7ta_UCkwtFivu7kkuz1JQ1bYR80Or6qzHLQjTsvPD4Uj1XAaAG",
-    SEED_WEBHOOK_URL = "", 
-    NOTIFY_PETS = { "Phoenix", "Cockatrice", "Gnome", "Griffin", "Golden Goose", "Corrupted Kitsune", "Raiju", "Mizuchi", "Kitsune", "Fennec Fox", "Disco Bee", "Raccoon", "Queen Bee", "Night Owl", "Dragonfly", "Butterfly", "Mimic Octopus", "Red Fox" },
-    NOTIFY_PETS_WEIGHT = 5,
-    DISCORD_ID = "473755357274046464",
-    WEBHOOK_NOTE = "Dew",
-    SHOW_WEBHOOK_USERNAME = true,
-    SHOW_WEBHOOK_JOBID = true,
+    -- Target inventory: mua cho đến khi inventory đạt amount. 0 = tắt mua.
+    ["Limit Buy Seed"] = {
+        ["Carrot"] = 500,
+        ["Strawberry"] = 20,
+        ["Blueberry"] = 20,
+        ["Tulip"] = 50,
+        ["Tomato"] = 20,
+        ["Apple"] = 20,
+        ["Bamboo"] = 50,
+        ["Corn"] = 20,
+        ["Cactus"] = 20,
+        ["Pineapple"] = 20,
+        ["Mushroom"] = 50,
+        ["Green Bean"] = 10,
+        ["Banana"] = 20,
+        ["Grape"] = 20,
+        ["Coconut"] = 20,
+        ["Mango"] = 20,
+        ["Dragon Fruit"] = 30,
+        ["Acorn"] = 20,
+        ["Cherry"] = 20,
+        ["Sunflower"] = 20,
+        ["Venom Spitter"] = 2,
+        ["Venus Fly Trap"] = 2,
+        ["Pomegranate"] = 2,
+        ["Poison Apple"] = 2,
+        ["Moon Bloom"] = 2,
+        ["Dragon's Breath"] = 50000,
+        ["Hypno Bloom"] = 2,
+        ["Briar Rose"] = 50000,
+        ["Romanesco"] = 50000,
+        ["Fire Fern"] = 50,
+        ["Rocket Pop"] = 50,
+    },
 
-    KICK_AFTER_GIFT_PET = false,
-    GIFT_USERNAME = {},
-    GIFT_PET = {},
+    -- Số cây tối đa đang tồn tại trong vườn. Cây thu hoạch xong biến mất sẽ tự mở quota để trồng tiếp.
+    ["Limit Plant Seed"] = {
+        ["Carrot"] = 500,
+        ["Strawberry"] = 20,
+        ["Blueberry"] = 20,
+        ["Tulip"] = 300,
+        ["Tomato"] = 20,
+        ["Apple"] = 20,
+        ["Bamboo"] = 300,
+        ["Corn"] = 20,
+        ["Cactus"] = 20,
+        ["Pineapple"] = 20,
+        ["Mushroom"] = 300,
+        ["Green Bean"] = 20,
+        ["Banana"] = 20,
+        ["Grape"] = 50,
+        ["Coconut"] = 50,
+        ["Mango"] = 50,
+        ["Dragon Fruit"] = 150,
+        ["Acorn"] = 100,
+        ["Cherry"] = 100,
+        ["Sunflower"] = 150,
+        ["Rainbow"] = 500,
+        ["Gold"] = 500,
+        ["Venom Spitter"] = 100,
+        ["Venus Fly Trap"] = 100,
+        ["Pomegranate"] = 300,
+        ["Poison Apple"] = 100,
+        ["Moon Bloom"] = 2,
+        ["Hypno Bloom"] = 2,
+        ["Fire Fern"] = 250,
+        ["Rocket Pop"] = 100,
+    },
 }
+local UserConfig = GlobalEnv.TrungPhanHubConfig
 
-loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/c916e5b90dc37c71ecf1ec00dfce3d5d.lua"))()
--- 🌟 Auto Fairy Event Script (Modified)
-local Players = game:GetService('Players')
-local Rep = game:GetService('ReplicatedStorage')
-local CollectionService = game:GetService('CollectionService')
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Player = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
-local localPlayer = Players.LocalPlayer
-local DataService = require(Rep.Modules.DataService)
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 
-local CollectRemote = Rep.GameEvents.Crops.Collect
-local SubmitFairy = Rep.GameEvents.FairyService.SubmitFairyFountainAllPlants
-local CraftRemote = Rep.GameEvents.CraftingGlobalObjectService
-local FairyNetEvent = Rep.GameEvents.FairyNetActivated
+local Controllers = Player:WaitForChild("PlayerScripts"):WaitForChild("Controllers")
+local PlantController = require(Controllers:WaitForChild("PlantController"))
+local SprinklerController = require(Controllers:WaitForChild("SprinklerController"))
+local Net = debug.getupvalues(SprinklerController.TryPlace)[5]
 
-local benchFairy =
-    workspace.Interaction.UpdateItems.FairyGenius.FairyGeniusEventCraftingWorkBench
+-- ===================== CONFIG =====================
+local MIN_KEEP_KG = 20
+local PLANT_SPACING = 5
+local PLANT_RAY_INTERVAL = 0.052     -- TryPlantWithRay có debounce 0.05s; thấp hơn sẽ bị nuốt ray
+local DIRECT_PLANT_CALLS_PER_HEARTBEAT = 3 -- packet trực tiếp, tối đa khoảng 180 call/s
+local DIRECT_PLANT_CONFIRM_TIMEOUT = 0.30
+local PLANT_WORKER_DELAY = 0.018
+local PLANT_RESCAN_PASSES = 2
+local PLANT_RESCAN_WAIT = 0.055      -- chờ replication ngắn giữa các batch
+local PLANT_PER_SEED_PER_PASS = 250  -- xả hết một loại trước khi đổi Tool
+local LOOP_DELAY = 0.20              -- việc nhanh đã có worker riêng; main chỉ expand/teleport
+local HARVEST_POLL_INTERVAL = 0.010  -- chỉ dùng khi SeedName chưa replicate; prompt disabled dùng event
+local HARVEST_RETRY_WAIT = 0.020     -- retry prompt nhanh
+local HARVEST_FAST_RETRIES = 2       -- tránh hàng chục cây spam prompt 50 lần/giây
+local HARVEST_IDLE_RETRY = 0.35
+local HARVEST_DOUBLE_CHECK = true    -- đọc kg lại ở frame kế tiếp trước khi fire prompt
+local SELL_INTERVAL = 0.10           -- SellAll đều nhịp để inventory không nghẽn
+local SELL_RETRY_DELAY = 0.16        -- bán bù sau khi item harvest đã replicate vào inventory
+local SPRINKLER_BACKGROUND_WAIT = 1
+local SPRINKLER_RADIUS = 3.2         -- chỉ coi đúng target đã có vòi, cho phép vùng phủ chồng nhẹ
+local CHEAP_SPRINKLER_TARGET_SPACING = 7 -- lưới rất dày: có nhiều vòi thường thì dùng nhiều
+local MAX_CHEAP_SPRINKLER_TARGETS = 128 -- chỉ là chặn lag cực đoan, không còn giới hạn 2/32
+local PLANT_SERVER_RANGE = 12       -- vùng an toàn; vẫn gom được nhiều ô cho mỗi lần teleport
+local WATER_SERVER_RANGE = 8        -- Watering Can kiểm tra khoảng cách chặt hơn Plant
+local ACTION_TELEPORT_SETTLE = 0.08 -- chờ vị trí nhân vật replicate lên server
+local BUY_MAX_ATTEMPTS = 40          -- emergency Carrot refill khi inventory về 0
+local AUTO_BUY_SEEDS = UserConfig["Auto Buy Seed"] ~= false
+local AUTO_PLANT_SEEDS = UserConfig["Auto Plant Seed"] ~= false
+local AUTO_DIRECT_PLANT = UserConfig["Direct Plant Without Equip"] ~= false
+local AUTO_BUY_GEARS = UserConfig["Auto Buy Gear"] ~= false
+local AUTO_USE_COMMON_WATERING = UserConfig["Auto Use Common Watering Can"] ~= false
+local MAX_TOTAL_SEED_INVENTORY = math.max(10, tonumber(UserConfig["Max Total Seed Inventory"]) or 55)
+local PROTECT_PLANT_BY_KG = UserConfig["Protect Plant By KG"] == true
+local SEED_BUY_CHECK_INTERVAL = 0.75
+local SEED_BUY_CONFIRM_TIMEOUT = 0.65
+local SEED_BUY_MAX_PER_PASS = 20
 
--- ⚙️ Config
-local HARVEST_INTERVAL = 50
-local CRAFT_INTERVAL = 5
-local FAIRY_SUBMIT_INTERVAL = 10
-local LIMIT = 20
-local FIRE_DELAY = 2
-local SUBMIT_DELAY = 1
-local USE_FARM_ONLY = true
+local SEED_BUY_TARGETS = UserConfig["Limit Buy Seed"] or {}
+local SEED_PLANT_LIMITS = UserConfig["Limit Plant Seed"] or {}
+local GEAR_BUY_TARGETS = UserConfig["Limit Buy Gear"] or {}
+local GEARS_TO_USE = UserConfig["Gears To Use"] or {}
+local GARDEN_LAYOUT = UserConfig["Garden Layout"] or {}
+local RESERVE_GEAR_CENTERS = GARDEN_LAYOUT["Reserve Gear Centers"] ~= false
+local GEAR_RESERVE_RADIUS = tonumber(GARDEN_LAYOUT["Gear Reserve Radius"]) or 6.0
+local PERSISTENT_PLANT_SPACING = tonumber(GARDEN_LAYOUT["Persistent Plant Spacing"]) or 8.0
+local PERSISTENT_SEEDS = GARDEN_LAYOUT["Persistent Seeds"] or {}
+local EXPAND_EVERY_CYCLES = 4
+local MAX_EXPAND_LEVEL = 5
+local EXPAND_REPLICATION_WAIT = 0.40 -- chờ các tấm đất mới vào Plot.Visual trước khi lập grid
+local AUTO_EXPAND = true
+local SAFE_OPTIMIZE = true
+local DEBUG = false
+local DEBUG_PLANT = false
+local DEBUG_EXPAND_PATHS = false     -- bật true nếu cần dump path/size các mặt đất sau expand
+local DEBUG_SPRINKLER = false        -- bật true để dump tool/attribute khi account không tìm thấy Super Sprinkler
+local DEBUG_SEED_STOCK = false
+local AUTO_START_MAIL_LOADER = true
+local MAIL_LOADER_DELAY = 3          -- để controllers/replica của game khởi tạo xong trước
+local MAIL_SCRIPT_KEY = "wOkxVIksMSfRPvGOEsVLkGpfqPRyhata"
+local MAIL_LOADER_URL = "https://api.luarmor.net/files/v4/loaders/790db43174cb636cf5fa1d87166bf85f.lua"
 
--- Farm folder
-local farmFolder
-pcall(function()
-    if
-        workspace:FindFirstChild('Farm')
-        and workspace.Farm:FindFirstChild('Farm')
-    then
-        farmFolder = workspace.Farm.Farm
-    end
-end)
+local NextSprinklerCheck = 0
+local cycle = 0
+local FruitAPI = nil
+local ReplicaController = nil
+local LocalReplica = nil
+local HarvestAttemptsSinceSell = 0
+local LastHarvestAttemptAt = 0
+local LastPlantAreaCount = -1
+local PlantingActive = false
+local SprinklerPlacing = false
+local SprinklerRequested = false
+local WateringActive = false
+local WateringRequested = false
+local SeedPurchaseBusy = false
+local GearPurchaseBusy = false
+local SeedNextAttempt = {}
+local LastSeedRestockValue = nil
+local SeedShopStateTable = nil
+local DirectPlantFailureStreak = 0
+local DirectPlantBackoffUntil = 0
+local NextPlantWorkerAttemptAt = 0
+local PlantSeedNextAttempt = {}
+local GearNextAttempt = {}
+local GearPurchasedThisRun = {}
+local LastGearRestockValue = nil
+local GearShopStateTable = nil
+local SeedGlobalBackoffUntil = 0
+local GearGlobalBackoffUntil = 0
+local NextExpandAttemptAt = 0
+local CachedPlantAreas = nil
+local PlantAreasCacheUntil = 0
 
--- 🟢 Utility
-local function getUUID(itemName)
-    for _, item in ipairs(localPlayer.Backpack:GetChildren()) do
-        if string.find(item.Name, itemName) then
-            return item:GetAttribute('c')
+-- ===================== MAIL CLAIM LOADER =====================
+local function StartMailClaimLoader()
+    if not AUTO_START_MAIL_LOADER then return end
+
+    local env = GlobalEnv
+    local mailUsername = tostring(UserConfig["Super Gear Mail Username"] or ""):match("^%s*(.-)%s*$")
+    local sendSuperGear = mailUsername ~= ""
+    env.script_key = MAIL_SCRIPT_KEY
+    -- Mail loader chỉ claim và gửi hai Super gear; không nhận config farm engine.
+    env.UserConfig = {
+        ["Auto Claim Mail"] = true,
+        ["Auto Send Mail"] = sendSuperGear,
+        ["Mail To Username"] = sendSuperGear and {mailUsername} or {},
+        ["Items To Mail"] = {
+            ["Pet"] = {},
+            ["Seed"] = {},
+            ["Gear"] = {
+                ["Super Watering Can"] = 1,
+                ["Super Sprinkler"] = 1,
+            },
+        },
+    }
+
+    -- Loader chạy ở worker riêng: lỗi mạng/loader không được phép dừng farm engine.
+    task.spawn(function()
+        task.wait(MAIL_LOADER_DELAY)
+        local ok, err = pcall(function()
+            local source = game:HttpGet(MAIL_LOADER_URL)
+            local chunk, compileError = loadstring(source)
+            if not chunk then
+                error("Mail loader compile failed: " .. tostring(compileError))
+            end
+            chunk()
+        end)
+
+        if not ok then
+            warn("MAIL CLAIM LOADER ERROR:", err)
         end
-    end
-    for _, item in ipairs(localPlayer.Character:GetChildren()) do
-        if string.find(item.Name, itemName) then
-            return item:GetAttribute('c')
-        end
-    end
-    return nil
+    end)
 end
 
-local function countItem(itemName)
+-- ===================== SAFE OPTIMIZE =====================
+local function OptimizeGame()
+    if not SAFE_OPTIMIZE then return end
+    pcall(function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        Lighting.GlobalShadows = false
+    end)
+
+    -- Chỉ tắt hiệu ứng hạt nặng. Không đổi Lighting, texture hay local lights:
+    -- các thay đổi đó là nguyên nhân phổ biến khiến toàn map bị xám.
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        pcall(function()
+            if obj:IsA("BasePart") then
+                obj.CastShadow = false
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
+                or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                obj.Enabled = false
+            end
+        end)
+    end
+end
+pcall(OptimizeGame)
+
+-- ===================== BASIC HELPERS =====================
+local function RefreshCharacter()
+    Character = Player.Character or Player.CharacterAdded:Wait()
+    Humanoid = Character:WaitForChild("Humanoid")
+end
+
+local function EnsureNearActionPosition(position, allowedRange)
+    if typeof(position) ~= "Vector3" then return false end
+    RefreshCharacter()
+    local hrp = Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+
+    local a = Vector3.new(hrp.Position.X, 0, hrp.Position.Z)
+    local b = Vector3.new(position.X, 0, position.Z)
+    if (a - b).Magnitude <= allowedRange then return true end
+
+    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+    hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    hrp.CFrame = CFrame.new(position + Vector3.new(0, 5, 0))
+    task.wait(ACTION_TELEPORT_SETTLE)
+    return true
+end
+
+local function GetPlot()
+    for _ = 1, 30 do
+        local ok, plot = pcall(function()
+            return PlantController:GetPlayerPlot()
+        end)
+        if ok and plot then return plot end
+        task.wait(0.2)
+    end
+    error("Không tìm thấy plot.")
+end
+
+local function GetLocalReplica()
+    if LocalReplica then return LocalReplica end
+
+    local ok, PlotsController = pcall(function()
+        return require(Controllers:WaitForChild("PlotsController"))
+    end)
+    if not ok then return nil end
+
+    for _, up in ipairs(debug.getupvalues(PlotsController.Start)) do
+        if type(up) == "table"
+            and type(up.GetLocalReplica) == "function"
+            and type(up.WaitForLocalReplica) == "function" then
+            ReplicaController = up
+            break
+        end
+    end
+
+    if not ReplicaController then return nil end
+    LocalReplica = ReplicaController:GetLocalReplica() or ReplicaController:WaitForLocalReplica()
+    return LocalReplica
+end
+
+local function CountSeed(seedName)
+    local ok, amount = pcall(function()
+        local Replica = GetLocalReplica()
+        local inv = Replica and Replica.Data and Replica.Data.Inventory
+        local seeds = inv and inv.Seeds or {}
+        return tonumber(seeds[seedName] or 0) or 0
+    end)
+    return ok and amount or 0
+end
+
+local function CountAllSeeds()
+    local ok, amount = pcall(function()
+        local replica = GetLocalReplica()
+        local inv = replica and replica.Data and replica.Data.Inventory
+        local seeds = inv and inv.Seeds or {}
+        local total = 0
+        for _, count in pairs(seeds) do
+            total += math.max(0, tonumber(count) or 0)
+        end
+        return total
+    end)
+    return ok and amount or 0
+end
+
+local function CountCarrotSeeds()
+    return CountSeed("Carrot")
+end
+
+local function CountPurchasedSeedThisRestock(seedName)
+    local ok, amount = pcall(function()
+        local Replica = GetLocalReplica()
+        local purchased = Replica and Replica.Data and Replica.Data.PurchasedThisRestock
+        local seeds = purchased and purchased.Seeds or {}
+        return tonumber(seeds[seedName] or 0) or 0
+    end)
+    return ok and amount or 0
+end
+
+local function CountCarrots()
+    local plot = GetPlot()
+    local plants = plot:WaitForChild("Plants")
     local count = 0
-    for _, item in ipairs(localPlayer.Backpack:GetChildren()) do
-        if string.find(item.Name, itemName) then
+    for _, plant in ipairs(plants:GetChildren()) do
+        local seed = plant:GetAttribute("SeedName")
+        if seed and tostring(seed):lower():find("carrot") then
             count += 1
         end
     end
     return count
 end
 
-local function hasCollectTag(obj)
-    if type(obj.HasTag) == 'function' then
-        local ok, res = pcall(function()
-            return obj:HasTag('CollectPrompt')
-        end)
-        if ok then
-            return res
-        end
-    end
-    return CollectionService:HasTag(obj, 'CollectPrompt')
+local function CountPlotPlants()
+    local plot = GetPlot()
+    local plants = plot:FindFirstChild("Plants")
+    return plants and #plants:GetChildren() or 0
 end
 
--- 🛠 Harvest
-local function harvestItem(itemName, limit)
-    local collected = 0
-    local descendants = USE_FARM_ONLY and farmFolder:GetDescendants()
-        or workspace:GetDescendants()
+local function CountPlantedSeed(seedName)
+    local plot = GetPlot()
+    local plants = plot:FindFirstChild("Plants")
+    if not plants then return 0 end
 
-    for _, inst in ipairs(descendants) do
-        if inst:IsA('ProximityPrompt') and hasCollectTag(inst) then
-            local crop = inst.Parent and inst.Parent.Parent
-            if crop and crop.Name == itemName then
-                CollectRemote:FireServer({ crop })
-                task.wait(FIRE_DELAY)
-                SubmitFairy:FireServer()
-                task.wait(SUBMIT_DELAY)
-                SubmitFairy:FireServer()
+    local wanted = tostring(seedName)
+    local count = 0
+    for _, plant in ipairs(plants:GetChildren()) do
+        if tostring(plant:GetAttribute("SeedName") or "") == wanted then
+            count += 1
+        end
+    end
+    return count
+end
 
-                collected += 1
-                if collected >= limit then
-                    break
-                end
+local function GetFruitAPI()
+    if FruitAPI then return FruitAPI end
+
+    local ok, Module = pcall(function()
+        return require(Controllers:WaitForChild("PlantHoverTooltipController"))
+    end)
+    if not ok or type(Module) ~= "table" then return nil end
+
+    for _, up in ipairs(debug.getupvalues(Module.Start)) do
+        if type(up) == "table" and type(up.CalculatePlantWeight) == "function" then
+            FruitAPI = up
+            return FruitAPI
+        end
+    end
+    return nil
+end
+
+local function GetPlantKg(Plant)
+    local api = GetFruitAPI()
+    if not api then return nil end
+
+    local ok, kg = pcall(function()
+        return api.CalculatePlantWeight(Plant, Plant)
+    end)
+    if ok and type(kg) == "number" then return kg end
+    return nil
+end
+
+local function IsHarvestPrompt(prompt, plant)
+    if not prompt or not prompt:IsA("ProximityPrompt") then return false end
+    if prompt.Name:lower():find("harvest", 1, true) then return true end
+
+    local parent = prompt.Parent
+    while parent and parent ~= plant do
+        if parent.Name:lower():find("harvest", 1, true) then return true end
+        parent = parent.Parent
+    end
+    -- Fallback tương thích model cũ: plant chỉ có một prompt nhưng tên không chứa Harvest.
+    local promptCount = 0
+    for _, object in ipairs(plant:GetDescendants()) do
+        if object:IsA("ProximityPrompt") then promptCount += 1 end
+    end
+    return promptCount == 1
+end
+
+local function NormalizeItemName(value)
+    return tostring(value or ""):lower():gsub("[^%w]", "")
+end
+
+local function GetSeedTool(seedName, equipIfNeeded)
+    RefreshCharacter()
+    if equipIfNeeded == nil then equipIfNeeded = true end
+    local wanted = NormalizeItemName(seedName)
+    local function scoreTool(tool)
+        if not tool or not tool:IsA("Tool") then return -1 end
+        local normalized = NormalizeItemName(tool.Name)
+        if normalized:find(wanted, 1, true) == nil then return -1 end
+
+        local score = 10 -- fallback giống bản cũ: chỉ cần tên có "carrot"/seedName
+        if normalized:find("seed", 1, true) then score += 100 end
+
+        for _, key in ipairs({"SeedName", "ItemName", "DisplayName", "Type", "ItemType"}) do
+            local value = tool:GetAttribute(key)
+            if value ~= nil then
+                local normalizedValue = NormalizeItemName(value)
+                if normalizedValue == wanted then score += 200 end
+                if normalizedValue:find("seed", 1, true) then score += 100 end
+            end
+        end
+        return score
+    end
+
+    local bestEquipped, bestEquippedScore = nil, -1
+    for _, tool in ipairs(Character:GetChildren()) do
+        local score = scoreTool(tool)
+        if score > bestEquippedScore then
+            bestEquipped, bestEquippedScore = tool, score
+        end
+    end
+    if bestEquipped then return bestEquipped end
+
+    local Backpack = Player:WaitForChild("Backpack")
+    local bestStored, bestStoredScore = nil, -1
+    for _, tool in ipairs(Backpack:GetChildren()) do
+        local score = scoreTool(tool)
+        if score > bestStoredScore then
+            bestStored, bestStoredScore = tool, score
+        end
+    end
+
+    if bestStored and not equipIfNeeded then
+        return bestStored
+    end
+
+    if bestStored then
+        Humanoid:EquipTool(bestStored)
+        RunService.Heartbeat:Wait()
+        return bestStored
+    end
+
+    if DEBUG_PLANT then
+        warn("[PLANT TOOL NOT FOUND]", seedName, "inventory", CountSeed(seedName))
+        for _, tool in ipairs(Backpack:GetChildren()) do
+            if tool:IsA("Tool") then
+                print("[PLANT TOOL CANDIDATE]", tool.Name, tool:GetAttributes())
             end
         end
     end
+    return nil
 end
 
-local function harvestGlimmering(limit)
-    local tier = (DataService:GetData() or {}).FairyQuests
-            and DataService:GetData().FairyQuests.WishLevel
-        or 0
-    if tier >= 5 then
-        return
+-- Fallback nguyên bản đã benchmark thành công cho Carrot.
+local function GetCarrotToolLegacy()
+    RefreshCharacter()
+    local function isCarrot(tool)
+        return tool and tool:IsA("Tool") and tool.Name:lower():find("carrot")
     end
-    local collected = 0
-    local descendants = USE_FARM_ONLY and farmFolder:GetDescendants()
-        or workspace:GetDescendants()
 
-    for _, inst in ipairs(descendants) do
-        if inst:IsA('ProximityPrompt') and hasCollectTag(inst) then
-            local crop = inst.Parent and inst.Parent.Parent
-            if crop and crop:GetAttribute('Glimmering') then
-                CollectRemote:FireServer({ crop })
-                task.wait(FIRE_DELAY)
-                SubmitFairy:FireServer()
-                task.wait(SUBMIT_DELAY)
-                SubmitFairy:FireServer()
-
-                collected += 1
-                if collected >= limit then
-                    break
-                end
-            end
-        end
+    for _, tool in ipairs(Character:GetChildren()) do
+        if isCarrot(tool) then return tool end
     end
-end
 
--- 🧰 Craft
-local function craftItem(bench, benchType, recipe, items)
-    CraftRemote:FireServer('SetRecipe', bench, benchType, recipe)
-    for _, v in ipairs(items) do
-        local uuid = getUUID(v.Name)
-        if uuid then
-            CraftRemote:FireServer('InputItem', bench, benchType, v.slot, {
-                ItemType = v.Type,
-                ItemData = { UUID = uuid },
-            })
-        end
-    end
-    CraftRemote:FireServer('Craft', bench, benchType)
-    CraftRemote:FireServer('Claim', bench, benchType, 1)
-end
-
-local function craftFairyNet()
-    craftItem(benchFairy, 'FairyGeniusEventWorkbench', 'Fairy Net', {
-        { slot = 1, Name = 'Sunbulb', Type = 'Holdable' },
-        { slot = 2, Name = 'Strawberry Seed', Type = 'Seed' },
-        { slot = 3, Name = 'Harvest Tool', Type = 'Harvest Tool' },
-    })
-end
-
--- 🧪 Collect Fairy
-local player = localPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hrp = char:WaitForChild('HumanoidRootPart')
-local FairyEventVisuals = require(Rep.Modules.FairyEventVisualsController)
-
-local function equipItemContains(keyword)
-    for _, tool in ipairs(player.Character:GetChildren()) do
-        if tool:IsA('Tool') and string.find(tool.Name, keyword) then
-            return tool
-        end
-    end
-    for _, tool in ipairs(player.Backpack:GetChildren()) do
-        if tool:IsA('Tool') and string.find(tool.Name, keyword) then
-            tool.Parent = player.Character
+    local backpack = Player:WaitForChild("Backpack")
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if isCarrot(tool) then
+            Humanoid:EquipTool(tool)
+            task.wait(0.025)
             return tool
         end
     end
     return nil
 end
 
-local function collectNearbyFairies()
-    local fairies = FairyEventVisuals:GetAllFairies()
-    local nearby = {}
-    for _, fairy in ipairs(fairies) do
-        if (fairy.Position - hrp.Position).Magnitude <= 10 then
-            table.insert(nearby, fairy.Id)
+-- ===================== PLANT AREAS / GRID =====================
+local function GetPlantAreas()
+    if CachedPlantAreas and tick() < PlantAreasCacheUntil then return CachedPlantAreas end
+    local plot = GetPlot()
+    local areas = {}
+    local seen = {}
+    local positionKeys = {}
+    local plantsFolder = plot:FindFirstChild("Plants")
+    local sprinklersFolder = plot:FindFirstChild("Sprinklers")
+
+    -- Dùng chính RaycastParams của PlantController để xác nhận mặt có thể plant.
+    -- Params được tạo lại mỗi lần quét nên tự nhận các phần mở rộng trong tương lai.
+    local plantAreaParams = nil
+    pcall(function()
+        local params = PlantController:CreatePlantAreaParams()
+        if typeof(params) == "RaycastParams" then
+            plantAreaParams = params
         end
-        if #nearby >= 3 then
+    end)
+
+    local function rayHitsPlantArea(obj)
+        if not plantAreaParams then return true end
+        local result = workspace:Raycast(
+            obj.Position + Vector3.new(0, 100, 0),
+            Vector3.new(0, -250, 0),
+            plantAreaParams
+        )
+        return result ~= nil
+    end
+
+    local function add(obj, trustedPlantArea)
+        if not obj or not obj:IsA("BasePart") or seen[obj] then return end
+
+        if plantsFolder and obj:IsDescendantOf(plantsFolder) then return end
+        if sprinklersFolder and obj:IsDescendantOf(sprinklersFolder) then return end
+
+        -- Loại viền, cọc, particle part...; chỉ giữ mặt đất ngang đủ lớn để có grid.
+        if obj.Size.X < PLANT_SPACING * 1.5 or obj.Size.Z < PLANT_SPACING * 1.5 then return end
+        if math.abs(obj.CFrame.UpVector.Y) < 0.75 then return end
+        if not trustedPlantArea and not rayHitsPlantArea(obj) then return end
+
+        seen[obj] = true
+
+        -- Nhiều plot có cả soil visual và hitbox trùng tâm. Chỉ lập grid một lần.
+        local k = tostring(math.floor(obj.Position.X * 2 + 0.5))
+            .. ":" .. tostring(math.floor(obj.Position.Z * 2 + 0.5))
+        if positionKeys[k] then return end
+        positionKeys[k] = true
+        table.insert(areas, obj)
+    end
+
+    -- Nguồn chính: mọi descendant trong PlantAreaColumn1/2. Sau expand, các dải đất con
+    -- thường không mang tên PlantArea và ray params cũ có thể chưa nhận chúng.
+    local visual = plot:FindFirstChild("Visual")
+    if visual then
+        for _, container in ipairs(visual:GetDescendants()) do
+            if container.Name:lower():find("plantarea", 1, true) then
+                add(container, true)
+                for _, obj in ipairs(container:GetDescendants()) do
+                    if obj:IsA("BasePart") then add(obj, true) end
+                end
+            end
+        end
+    end
+
+    -- Fallback cho layout khác tên: kiểm tra các mặt ngang lớn bằng plant-area raycast.
+    for _, obj in ipairs(plot:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            add(obj, false)
+        end
+    end
+
+    table.sort(areas, function(a, b)
+        if math.abs(a.Position.X - b.Position.X) > 2 then
+            return a.Position.X < b.Position.X
+        end
+        return a.Position.Z < b.Position.Z
+    end)
+
+    if (DEBUG or DEBUG_EXPAND_PATHS) and #areas ~= LastPlantAreaCount then
+        LastPlantAreaCount = #areas
+        print("[GRID] Plant areas detected:", #areas)
+        if DEBUG_EXPAND_PATHS then
+            for index, area in ipairs(areas) do
+                print("[GRID AREA]", index, area:GetFullName(), "SIZE", area.Size, "POS", area.Position)
+            end
+        end
+    end
+
+    CachedPlantAreas = areas
+    PlantAreasCacheUntil = tick() + 0.50
+    return areas
+end
+
+local function IsPersistentSeed(seedName)
+    return seedName ~= nil and PERSISTENT_SEEDS[tostring(seedName)] == true
+end
+
+local function GetGearReserveCenters(positions)
+    if not RESERVE_GEAR_CENTERS or #positions < 2 then return {} end
+
+    local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
+    for _, pos in ipairs(positions) do
+        minX, maxX = math.min(minX, pos.X), math.max(maxX, pos.X)
+        minZ, maxZ = math.min(minZ, pos.Z), math.max(maxZ, pos.Z)
+    end
+
+    -- Chia vườn thành hai luống theo trục có biên độ lớn nhất rồi lấy tâm thật của từng luống.
+    local splitByX = (maxX - minX) >= (maxZ - minZ)
+    local middle = splitByX and ((minX + maxX) / 2) or ((minZ + maxZ) / 2)
+    local sums = {Vector3.new(0, 0, 0), Vector3.new(0, 0, 0)}
+    local counts = {0, 0}
+
+    for _, pos in ipairs(positions) do
+        local coordinate = splitByX and pos.X or pos.Z
+        local side = coordinate <= middle and 1 or 2
+        sums[side] += pos
+        counts[side] += 1
+    end
+
+    local centers = {}
+    for side = 1, 2 do
+        if counts[side] > 0 then
+            table.insert(centers, sums[side] / counts[side])
+        end
+    end
+    return centers
+end
+
+local function SortPlantPositions(positions, seedName)
+    local persistent = IsPersistentSeed(seedName)
+    table.sort(positions, function(a, b)
+        -- Hai nhóm đi từ hai đầu đối diện nhau để cây lâu năm không xen lẫn cây quay vòng nhanh.
+        if math.abs(a.Z - b.Z) > 0.25 then
+            if persistent then return a.Z > b.Z end
+            return a.Z < b.Z
+        end
+        if math.abs(a.X - b.X) > 0.25 then
+            return a.X < b.X
+        end
+        return a.Y < b.Y
+    end)
+end
+
+local function GetEmptyPlantPositions(seedName)
+    local plot = GetPlot()
+    local plants = plot:WaitForChild("Plants")
+    local positions = {}
+    local candidates = {}
+    local occupied = {}
+    local used = {}
+    local plantAreaParams = nil
+
+    pcall(function()
+        local params = PlantController:CreatePlantAreaParams()
+        if typeof(params) == "RaycastParams" then
+            plantAreaParams = params
+        end
+    end)
+
+    for _, plant in ipairs(plants:GetChildren()) do
+        -- HarvestPart có thể là trái nằm xa gốc; dùng pivot/root để không đánh dấu sai ô trống.
+        local position = nil
+        if plant:IsA("Model") then
+            local okPivot, pivot = pcall(function() return plant:GetPivot().Position end)
+            if okPivot then position = pivot end
+        elseif plant:IsA("BasePart") then
+            position = plant.Position
+        end
+        if not position then
+            local part = (plant:IsA("Model") and plant.PrimaryPart)
+                or plant:FindFirstChildWhichIsA("BasePart", true)
+            position = part and part.Position or nil
+        end
+        if position then
+            table.insert(occupied, Vector3.new(position.X, 0, position.Z))
+        end
+    end
+
+    local function key(pos)
+        return tostring(math.floor(pos.X + 0.5)) .. ":" .. tostring(math.floor(pos.Z + 0.5))
+    end
+
+    local requiredSpacing = IsPersistentSeed(seedName) and PERSISTENT_PLANT_SPACING or PLANT_SPACING
+    local function free(pos, accepted)
+        local flat = Vector3.new(pos.X, 0, pos.Z)
+        for _, p in ipairs(occupied) do
+            if (flat - p).Magnitude < requiredSpacing then
+                return false
+            end
+        end
+        for _, p in ipairs(accepted or {}) do
+            if (flat - p).Magnitude < requiredSpacing then return false end
+        end
+        return true
+    end
+
+    local function snapToPlantArea(pos, fallbackSurfaceY)
+        if not plantAreaParams then return pos end
+        local result = workspace:Raycast(
+            pos + Vector3.new(0, 100, 0),
+            Vector3.new(0, -250, 0),
+            plantAreaParams
+        )
+        -- Expanded strips can replicate before PlantController refreshes its cached params.
+        if not result then return Vector3.new(pos.X, fallbackSurfaceY or pos.Y, pos.Z) end
+        return Vector3.new(pos.X, result.Position.Y, pos.Z)
+    end
+
+    local plotPivot = plot:IsA("Model") and plot:GetPivot().Position or plot.Position
+    for _, area in ipairs(GetPlantAreas()) do
+        local c, s = area.Position, area.Size
+        -- Mọi tấm đất dùng chung một anchor của plot: expand thêm part vẫn thẳng hàng cũ.
+        local minX = c.X - s.X / 2 + PLANT_SPACING
+        local maxX = c.X + s.X / 2 - PLANT_SPACING
+        local minZ = c.Z - s.Z / 2 + PLANT_SPACING
+        local maxZ = c.Z + s.Z / 2 - PLANT_SPACING
+        local startX = plotPivot.X + math.ceil((minX - plotPivot.X) / PLANT_SPACING) * PLANT_SPACING
+        local startZ = plotPivot.Z + math.ceil((minZ - plotPivot.Z) / PLANT_SPACING) * PLANT_SPACING
+        for x = startX, maxX + 0.01, PLANT_SPACING do
+            for z = startZ, maxZ + 0.01, PLANT_SPACING do
+                local pos = snapToPlantArea(Vector3.new(x, c.Y, z), c.Y + s.Y / 2)
+                local k = pos and key(pos) or nil
+                if pos and not used[k] then
+                    used[k] = true
+                    table.insert(candidates, pos)
+                end
+            end
+        end
+    end
+
+    local reserveCenters = GetGearReserveCenters(candidates)
+    SortPlantPositions(candidates, seedName)
+    local acceptedFlat = {}
+    for _, pos in ipairs(candidates) do
+        local reserved = false
+        for _, center in ipairs(reserveCenters) do
+            local delta = Vector3.new(pos.X - center.X, 0, pos.Z - center.Z)
+            if delta.Magnitude < GEAR_RESERVE_RADIUS then
+                reserved = true
+                break
+            end
+        end
+
+        if not reserved and free(pos, acceptedFlat) then
+            table.insert(positions, pos)
+            table.insert(acceptedFlat, Vector3.new(pos.X, 0, pos.Z))
+        end
+    end
+
+    return positions
+end
+
+local function PlantAt(pos)
+    -- Fallback tương thích nếu server/account từ chối direct no-equip.
+    -- Bắn từ trên xuống để không cần xoay camera/tele từng cây.
+    EnsureNearActionPosition(pos, PLANT_SERVER_RANGE)
+    local ray = Ray.new(pos + Vector3.new(0, 80, 0), Vector3.new(0, -200, 0))
+    local ok = pcall(function()
+        PlantController:TryPlantWithRay(ray)
+    end)
+    return ok
+end
+
+local function WaitForPlantConfirmation(seedName, inventoryBefore, plantCountBefore, timeout)
+    local started = tick()
+    while tick() - started < timeout do
+        if CountSeed(seedName) < inventoryBefore or CountPlotPlants() > plantCountBefore then
+            return true
+        end
+        task.wait(0.015)
+    end
+    return false
+end
+
+local function TryDirectPlantBatch(seedName, positions, amount)
+    if not AUTO_DIRECT_PLANT or amount <= 0 or tick() < DirectPlantBackoffUntil then
+        return false
+    end
+
+    RefreshCharacter()
+    local backpack = Player:WaitForChild("Backpack")
+
+    -- Capture chứng minh server nhận Tool trong Character. Di chuyển parent trực tiếp
+    -- để bỏ animation/debounce Humanoid:EquipTool và không để nhiều seed Tool cùng equipped.
+    for _, equipped in ipairs(Character:GetChildren()) do
+        if equipped:IsA("Tool") then equipped.Parent = backpack end
+    end
+
+    local tool = GetSeedTool(seedName, false)
+    if not tool then return false end
+    tool.Parent = Character
+    RunService.Heartbeat:Wait() -- cho trạng thái Character replicate trước packet đầu
+
+    local firedAny = false
+    for index = 1, amount do
+        if not tool.Parent then
+            tool = GetSeedTool(seedName, false)
+            if not tool then break end
+            tool.Parent = Character
+            RunService.Heartbeat:Wait()
+        end
+
+        -- Các điểm đã sort liền nhau: chỉ teleport khi batch đi sang vùng ngoài bán kính an toàn.
+        EnsureNearActionPosition(positions[index], PLANT_SERVER_RANGE)
+        local fired = pcall(function()
+            Net.Plant.PlantSeed:Fire(positions[index], seedName, tool)
+        end)
+        firedAny = firedAny or fired
+        if not fired then break end
+        if index % DIRECT_PLANT_CALLS_PER_HEARTBEAT == 0 then
+            RunService.Heartbeat:Wait()
+        end
+    end
+    return firedAny
+end
+
+local function GetConfiguredPlantOrder()
+    local names = {}
+    local inventory = {}
+    for seedName, limit in pairs(SEED_PLANT_LIMITS) do
+        if (tonumber(limit) or 0) > 0 then
+            table.insert(names, seedName)
+            inventory[seedName] = CountSeed(seedName)
+        end
+    end
+
+    -- Xả seed đang có số lượng lớn trước để lấp nhiều ô bằng một Tool, giảm đổi equip.
+    -- Carrot vẫn là filler cuối cùng để không chiếm slot của seed khác.
+    table.sort(names, function(a, b)
+        if a == b then return false end
+        if a == "Carrot" then return false end
+        if b == "Carrot" then return true end
+        if inventory[a] ~= inventory[b] then return inventory[a] > inventory[b] end
+        return a < b
+    end)
+    return names
+end
+
+local function HasConfiguredSeedToPlant()
+    if not AUTO_PLANT_SEEDS then return false end
+    for seedName, limit in pairs(SEED_PLANT_LIMITS) do
+        -- Inventory replica rẻ hơn scan toàn bộ Plants; seed = 0 không được phép dựng grid/đếm plant.
+        if CountSeed(seedName) > 0 then
+            local remaining = (tonumber(limit) or 0) - CountPlantedSeed(seedName)
+            if remaining > 0 then return true end
+        end
+    end
+    return false
+end
+
+local function PlantConfiguredSeeds(alreadyAtGarden)
+    if not AUTO_PLANT_SEEDS then return false end
+    if not alreadyAtGarden then
+        pcall(function() Net.TeleportButton.Request:Fire("Garden") end)
+        task.wait(0.4)
+    end
+
+    -- Không cho seed tool thay thế Super Sprinkler trong lúc placement đang chạy.
+    while SprinklerPlacing or SprinklerRequested or WateringActive or WateringRequested do
+        task.wait(0.02)
+    end
+    PlantingActive = true
+    local anyConfirmed = false
+
+    local ok, err = pcall(function()
+        for pass = 1, PLANT_RESCAN_PASSES do
+            local madeProgress = false
+            for _, seedName in ipairs(GetConfiguredPlantOrder()) do
+                if tick() < (PlantSeedNextAttempt[seedName] or 0) then continue end
+
+                local limit = tonumber(SEED_PLANT_LIMITS[seedName]) or 0
+                local inventoryBefore = CountSeed(seedName)
+                if inventoryBefore <= 0 or limit <= 0 then continue end
+
+                local plantedBefore = CountPlantedSeed(seedName)
+                local quotaRemaining = math.max(0, limit - plantedBefore)
+                if quotaRemaining <= 0 then continue end
+
+                local positions = GetEmptyPlantPositions(seedName)
+                if #positions <= 0 then
+                    PlantSeedNextAttempt[seedName] = tick() + 0.40
+                    continue
+                end
+                local batchLimit = seedName == "Carrot" and #positions or PLANT_PER_SEED_PER_PASS
+                local amount = math.min(#positions, quotaRemaining, inventoryBefore, batchLimit)
+
+                if amount > 0 then
+                    local plantCountBefore = CountPlotPlants()
+                    local usedDirect = TryDirectPlantBatch(seedName, positions, amount)
+
+                    if not usedDirect then
+                        if not GetSeedTool(seedName) then continue end
+                        for i = 1, amount do
+                            PlantAt(positions[i])
+                            task.wait(PLANT_RAY_INTERVAL)
+                        end
+                    end
+
+                    task.wait(PLANT_RESCAN_WAIT)
+                    local inventoryAfter = CountSeed(seedName)
+                    local plantCountAfter = CountPlotPlants()
+                    local consumed = math.max(0, inventoryBefore - inventoryAfter)
+                    local created = math.max(0, plantCountAfter - plantCountBefore)
+                    local confirmed = math.min(amount, math.max(consumed, created))
+
+                    if confirmed > 0 then
+                        DirectPlantFailureStreak = 0
+                        PlantSeedNextAttempt[seedName] = nil
+                        madeProgress = true
+                        anyConfirmed = true
+                    else
+                        if usedDirect then
+                            DirectPlantFailureStreak += 1
+                            if DirectPlantFailureStreak >= 2 then
+                                -- Direct không tạo cây ở hai batch liên tiếp: cho Ray một cửa sổ ngắn,
+                                -- sau đó tự thử Direct lại; không bao giờ disable vĩnh viễn.
+                                DirectPlantBackoffUntil = tick() + 0.8
+                                DirectPlantFailureStreak = 0
+                            end
+                        end
+                        PlantSeedNextAttempt[seedName] = tick() + 0.18
+                    end
+                end
+            end
+
+            if not madeProgress then return end
+            if pass < PLANT_RESCAN_PASSES then task.wait(PLANT_RESCAN_WAIT) end
+        end
+    end)
+
+    PlantingActive = false
+    if not ok then
+        error(err)
+    end
+    return anyConfirmed
+end
+
+local function PlantCarrotLegacyFallback()
+    if CountCarrotSeeds() <= 0 then return false end
+
+    while SprinklerPlacing or WateringActive do task.wait(0.02) end
+    PlantingActive = true
+    local planted = false
+
+    local ok, err = pcall(function()
+        for pass = 1, PLANT_RESCAN_PASSES do
+            local seedCount = CountCarrotSeeds()
+            if seedCount <= 0 then return end
+            if not GetCarrotToolLegacy() then return end
+
+            local positions = GetEmptyPlantPositions("Carrot")
+            if #positions <= 0 then return end
+
+            local amount = math.min(#positions, seedCount)
+            for i = 1, amount do
+                PlantAt(positions[i])
+                task.wait(PLANT_RAY_INTERVAL)
+            end
+            planted = true
+            if pass < PLANT_RESCAN_PASSES then task.wait(PLANT_RESCAN_WAIT) end
+        end
+    end)
+
+    PlantingActive = false
+    if not ok then error(err) end
+    return planted
+end
+
+-- ===================== HARVEST + SELL =====================
+-- Mỗi plant chỉ có một watcher. Các watcher chạy song song, nên 30 cây cùng chín
+-- sẽ được bắn prompt trong cùng khung thời gian, không chờ FarmCycle quét tuần tự.
+local HarvestWatchers = setmetatable({}, {__mode = "k"})
+local HarvestPromptWatchers = setmetatable({}, {__mode = "k"})
+
+local function ValidKg(value)
+    return type(value) == "number" and value == value and value >= 0
+end
+
+-- Nếu UI label tồn tại, dùng nó làm lớp kiểm tra thứ hai độc lập với FruitAPI.
+-- Trả về: kg, labelExists. Label có nhưng chưa parse được => fail-closed.
+local function GetPlantLabelKg(plant)
+    local labelRoot = plant:FindFirstChild("HarvestPromptLabel", true)
+    if not labelRoot then return nil, false end
+
+    for _, obj in ipairs(labelRoot:GetDescendants()) do
+        if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+            local text = tostring(obj.Text or ""):lower()
+            local parsed = text:match("([%d%.]+)%s*kg")
+            local kg = parsed and tonumber(parsed) or nil
+            if ValidKg(kg) then
+                return kg, true
+            end
+        end
+    end
+
+    return nil, true
+end
+
+local function IsDefinitelySafeToHarvest(plant)
+    -- Không cache. Luôn lấy giá trị mới ngay trước thời điểm harvest.
+    local kg1 = GetPlantKg(plant)
+    local labelKg1, labelExists1 = GetPlantLabelKg(plant)
+
+    if not ValidKg(kg1) then return false, false end
+    if labelExists1 and not ValidKg(labelKg1) then return false, false end
+    if kg1 >= MIN_KEEP_KG or (labelKg1 and labelKg1 >= MIN_KEEP_KG) then
+        return false, true
+    end
+
+    if HARVEST_DOUBLE_CHECK then
+        RunService.Heartbeat:Wait()
+        if not plant.Parent then return false, false end
+
+        local kg2 = GetPlantKg(plant)
+        local labelKg2, labelExists2 = GetPlantLabelKg(plant)
+        if not ValidKg(kg2) then return false, false end
+        if labelExists2 and not ValidKg(labelKg2) then return false, false end
+        if kg2 >= MIN_KEEP_KG or (labelKg2 and labelKg2 >= MIN_KEEP_KG) then
+            return false, true
+        end
+    end
+
+    return true, false
+end
+
+local function WatchHarvestPrompt(plant, prompt)
+    if not IsHarvestPrompt(prompt, plant) or HarvestPromptWatchers[prompt] then return end
+
+    local state = {busy = false, connections = {}}
+    HarvestPromptWatchers[prompt] = state
+
+    local function stop()
+        for _, connection in ipairs(state.connections) do
+            pcall(function() connection:Disconnect() end)
+        end
+        state.connections = {}
+        HarvestPromptWatchers[prompt] = nil
+    end
+
+    local function runWhileEnabled()
+        if state.busy or not prompt.Parent or not prompt.Enabled then return end
+        state.busy = true
+
+        task.spawn(function()
+            local fastAttempts = 0
+            local sellQueued = false
+            while plant.Parent and prompt.Parent and prompt.Enabled do
+                local seed = plant:GetAttribute("SeedName")
+                local seedName = seed and tostring(seed) or nil
+                if seedName and (tonumber(SEED_PLANT_LIMITS[seedName]) or 0) > 0 then
+                    local safe, protected = true, false
+                    if PROTECT_PLANT_BY_KG then
+                        safe, protected = IsDefinitelySafeToHarvest(plant)
+                    end
+                    if protected then break end
+
+                    if safe and prompt.Parent and prompt.Enabled then
+                        local fired = pcall(function()
+                            prompt.MaxActivationDistance = 999999
+                            prompt.RequiresLineOfSight = false
+                            fireproximityprompt(prompt)
+                        end)
+                        if fired then
+                            LastHarvestAttemptAt = tick()
+                            if not sellQueued then
+                                HarvestAttemptsSinceSell += 1
+                                sellQueued = true
+                            end
+                        end
+                        fastAttempts += 1
+                        task.wait(fastAttempts < HARVEST_FAST_RETRIES
+                            and HARVEST_RETRY_WAIT or HARVEST_IDLE_RETRY)
+                    else
+                        task.wait(HARVEST_POLL_INTERVAL)
+                    end
+                else
+                    -- Attribute SeedName thường replicate ngay sau model/prompt.
+                    task.wait(HARVEST_POLL_INTERVAL)
+                end
+            end
+            state.busy = false
+        end)
+    end
+
+    table.insert(state.connections, prompt:GetPropertyChangedSignal("Enabled"):Connect(runWhileEnabled))
+    table.insert(state.connections, prompt.AncestryChanged:Connect(function()
+        if not prompt:IsDescendantOf(plant) then stop() end
+    end))
+    runWhileEnabled()
+end
+
+local function WatchHarvestPlant(plant)
+    if HarvestWatchers[plant] then return end
+    HarvestWatchers[plant] = true
+
+    for _, object in ipairs(plant:GetDescendants()) do
+        if object:IsA("ProximityPrompt") then
+            WatchHarvestPrompt(plant, object)
+        end
+    end
+
+    local descendantConnection = plant.DescendantAdded:Connect(function(object)
+        if object:IsA("ProximityPrompt") then
+            WatchHarvestPrompt(plant, object)
+        end
+    end)
+
+    task.spawn(function()
+        plant.AncestryChanged:Wait()
+        while plant.Parent do plant.AncestryChanged:Wait() end
+        pcall(function() descendantConnection:Disconnect() end)
+        HarvestWatchers[plant] = nil
+    end)
+end
+
+local function StartInstantHarvestEngine()
+    local plot = GetPlot()
+    local plants = plot:WaitForChild("Plants")
+
+    for _, plant in ipairs(plants:GetChildren()) do
+        WatchHarvestPlant(plant)
+    end
+
+    plants.ChildAdded:Connect(function(plant)
+        -- Watch ngay khi model vào Plants; watcher tự chờ attribute/prompt replicate.
+        WatchHarvestPlant(plant)
+    end)
+end
+
+local function SellAllNow()
+    pcall(function()
+        Net.NPCS.SellAll:Fire()
+    end)
+end
+
+pcall(StartInstantHarvestEngine)
+
+-- Sell là worker độc lập và đều nhịp: không phụ thuộc prompt có đổi Enabled hay không.
+-- Cách này giải phóng crop liên tục khi harvest dồn dập, tránh Inventory Full khóa cả farm.
+task.spawn(function()
+    while task.wait(SELL_INTERVAL) do
+        HarvestAttemptsSinceSell = 0
+        SellAllNow()
+    end
+end)
+
+-- ===================== BUY / EXPAND =====================
+local function ParseSeedStockText(value)
+    local text = tostring(value or ""):gsub("<.->", "")
+    local amount = text:lower():match("x%s*(%d+)%s*in%s*stock")
+    if amount then
+        return tonumber(amount)
+    end
+    if text:lower():find("no%s*stock") then
+        return 0
+    end
+    return nil
+end
+
+local function GetSeedStockFromUI(seedName)
+    local playerGui = Player:FindFirstChild("PlayerGui")
+    local seedShop = playerGui and playerGui:FindFirstChild("SeedShop")
+    local frame = seedShop and seedShop:FindFirstChild("Frame")
+    local normalShop = frame and frame:FindFirstChild("NormalShop")
+    local row = normalShop and normalShop:FindFirstChild(seedName)
+    if not row then return nil end
+
+    local candidates = { row }
+    for _, object in ipairs(row:GetDescendants()) do
+        table.insert(candidates, object)
+    end
+
+    local sawNoStock = false
+    for _, object in ipairs(candidates) do
+        if object:IsA("TextLabel") or object:IsA("TextButton") or object:IsA("TextBox") then
+            local stock = ParseSeedStockText(object.Text)
+            if stock ~= nil then
+                if stock > 0 then
+                    return stock
+                end
+                sawNoStock = true
+            end
+        end
+    end
+    return sawNoStock and 0 or nil
+end
+
+local function LooksLikeSeedShopState(value)
+    if type(value) ~= "table" then return false end
+    local carrot = rawget(value, "Carrot")
+    local secondSeed = rawget(value, "Strawberry") or rawget(value, "Bamboo")
+    return type(carrot) == "table"
+        and (rawget(carrot, "maxStock") ~= nil or rawget(carrot, "frame") ~= nil)
+        and type(secondSeed) == "table"
+end
+
+local function GetSeedShopStateTable()
+    if LooksLikeSeedShopState(SeedShopStateTable) then
+        return SeedShopStateTable
+    end
+    if type(getgc) ~= "function" then return nil end
+
+    local ok, objects = pcall(getgc, true)
+    if not ok or type(objects) ~= "table" then return nil end
+    for _, value in ipairs(objects) do
+        if LooksLikeSeedShopState(value) then
+            SeedShopStateTable = value
+            return value
+        end
+    end
+    return nil
+end
+
+local function GetSeedStock(seedName)
+    -- Nguồn chính: UI shop đã capture xác nhận có text "xN in Stock".
+    local stock = GetSeedStockFromUI(seedName)
+    if stock ~= nil then
+        if DEBUG_SEED_STOCK then print("[SEED STOCK UI]", seedName, stock) end
+        return math.max(0, math.floor(stock))
+    end
+
+    -- Fallback: bảng runtime capture được có entry[seedName].maxStock.
+    local state = GetSeedShopStateTable()
+    local entry = state and rawget(state, seedName)
+    stock = type(entry) == "table" and tonumber(rawget(entry, "maxStock")) or nil
+    if stock ~= nil then
+        if DEBUG_SEED_STOCK then print("[SEED STOCK RUNTIME]", seedName, stock) end
+        return math.max(0, math.floor(stock))
+    end
+
+    if DEBUG_SEED_STOCK then print("[SEED STOCK UNKNOWN]", seedName) end
+    return nil
+end
+
+local function GetSeedRestockValue()
+    local stockValues = ReplicatedStorage:FindFirstChild("StockValues")
+    local seedShop = stockValues and stockValues:FindFirstChild("SeedShop")
+    local lastRestock = seedShop and seedShop:FindFirstChild("UnixLastRestock")
+    return lastRestock and tonumber(lastRestock.Value) or nil
+end
+
+local function RefreshSeedRestockState()
+    local current = GetSeedRestockValue()
+    if current and current ~= LastSeedRestockValue then
+        LastSeedRestockValue = current
+        -- Restock mới: cho phép retry ngay các seed đã fail ở restock cũ.
+        SeedNextAttempt = {}
+        SeedShopStateTable = nil
+        SeedGlobalBackoffUntil = 0
+    end
+end
+
+local function TryPurchaseOneSeed(seedName)
+    while SeedPurchaseBusy do
+        task.wait(0.02)
+    end
+    SeedPurchaseBusy = true
+
+    -- Fail-closed: unknown stock or zero stock never sends a purchase request.
+    local stock = GetSeedStock(seedName)
+    if stock == nil or stock <= 0 then
+        SeedPurchaseBusy = false
+        return false, "no_stock"
+    end
+
+    local before = CountSeed(seedName)
+    local purchasedBefore = CountPurchasedSeedThisRestock(seedName)
+    local fired = pcall(function()
+        Net.SeedShop.PurchaseSeed:Fire(seedName)
+    end)
+
+    local increased = false
+    if fired then
+        local started = tick()
+        while tick() - started < SEED_BUY_CONFIRM_TIMEOUT do
+            if CountSeed(seedName) > before
+                or CountPurchasedSeedThisRestock(seedName) > purchasedBefore then
+                increased = true
+                break
+            end
+            task.wait(0.03)
+        end
+    end
+
+    SeedPurchaseBusy = false
+    return increased, increased and "purchased" or "purchase_failed"
+end
+
+local function BuySeedTowardTarget(seedName, targetAmount, maxAttempts)
+    targetAmount = math.max(0, tonumber(targetAmount) or 0)
+    if not AUTO_BUY_SEEDS or targetAmount <= 0 then return 0 end
+    if tick() < SeedGlobalBackoffUntil then return 0 end
+    if tick() < (SeedNextAttempt[seedName] or 0) then return 0 end
+    local bufferRemaining = math.max(0, MAX_TOTAL_SEED_INVENTORY - CountAllSeeds())
+    if bufferRemaining <= 0 then return 0 end
+
+    local bought = 0
+    local attempts = math.min(maxAttempts or 1, bufferRemaining, math.max(0, targetAmount - CountSeed(seedName)))
+    for _ = 1, attempts do
+        if CountAllSeeds() >= MAX_TOTAL_SEED_INVENTORY then break end
+        if CountSeed(seedName) >= targetAmount then break end
+
+        local stock = GetSeedStock(seedName)
+        if stock == nil or stock <= 0 then break end
+
+        local purchased, reason = TryPurchaseOneSeed(seedName)
+        if purchased then
+            bought += 1
+        elseif reason == "purchase_failed" then
+            -- Thường là thiếu tiền: ngừng toàn bộ buyer một nhịp, không spam từng seed.
+            SeedGlobalBackoffUntil = tick() + 6
+            SeedNextAttempt[seedName] = tick() + 6
+            break
+        else
             break
         end
     end
-    if #nearby > 0 then
-        local net = equipItemContains('Fairy Net')
-        if net then
-            FairyNetEvent:FireServer(nearby)
-            local sound = net:FindFirstChild('CollectSound')
-            if sound then
-                sound:Play()
+    return bought
+end
+
+local function GetConfiguredSeedOrder()
+    local names = {}
+    for seedName, targetAmount in pairs(SEED_BUY_TARGETS) do
+        if (tonumber(targetAmount) or 0) > 0 then
+            table.insert(names, seedName)
+        end
+    end
+
+    table.sort(names, function(a, b)
+        if a == b then return false end
+        -- Seed hiếm/non-Carrot mua trước; Carrot chỉ lấp buffer còn lại.
+        if a == "Carrot" then return false end
+        if b == "Carrot" then return true end
+        return a < b
+    end)
+    return names
+end
+
+local function RunSeedBuyerPass()
+    if not AUTO_BUY_SEEDS then return end
+    if tick() < SeedGlobalBackoffUntil then return end
+    RefreshSeedRestockState()
+
+    local remaining = SEED_BUY_MAX_PER_PASS
+    for _, seedName in ipairs(GetConfiguredSeedOrder()) do
+        if remaining <= 0 then break end
+        local bufferRemaining = math.max(0, MAX_TOTAL_SEED_INVENTORY - CountAllSeeds())
+        if bufferRemaining <= 0 then break end
+        local target = tonumber(SEED_BUY_TARGETS[seedName]) or 0
+        local need = math.max(0, target - CountSeed(seedName))
+        local stock = GetSeedStock(seedName)
+        if need > 0 and stock ~= nil and stock > 0 then
+            local allowance = math.min(need, remaining, stock, bufferRemaining)
+            local bought = BuySeedTowardTarget(seedName, target, allowance)
+            remaining -= bought
+
+            -- Một purchase fail không được phép chặn seed khác trong cùng pass.
+            if bought == 0 and tick() < (SeedNextAttempt[seedName] or 0) then
+                continue
             end
         end
     end
 end
 
--- 🔄 Main Loops
--- 1️⃣ Harvest + Craft
-task.spawn(function()
-    while task.wait(HARVEST_INTERVAL) do
-        harvestItem('Sunbulb', LIMIT)
-        harvestGlimmering(LIMIT)
+local function BuyCarrotAll()
+    local target = math.max(1, tonumber(SEED_BUY_TARGETS.Carrot) or 1)
+    return BuySeedTowardTarget("Carrot", target, BUY_MAX_ATTEMPTS) > 0
+end
 
-        craftFairyNet() -- chỉ còn craft Fairy Net
+local function StartSeedShopBuyer()
+    task.spawn(function()
+        while task.wait(SEED_BUY_CHECK_INTERVAL) do
+            pcall(RunSeedBuyerPass)
+        end
+    end)
+end
+
+-- ===================== STOCK-AWARE GEAR BUYER =====================
+local function GetGearStockFromUI(gearName)
+    local playerGui = Player:FindFirstChild("PlayerGui")
+    local gearShop = playerGui and playerGui:FindFirstChild("GearShop")
+    local frame = gearShop and gearShop:FindFirstChild("Frame")
+    local scrolling = frame and frame:FindFirstChild("ScrollingFrame")
+    local row = scrolling and scrolling:FindFirstChild(gearName)
+    if not row then return nil end
+
+    local sawNoStock = false
+    for _, object in ipairs(row:GetDescendants()) do
+        if object:IsA("TextLabel") or object:IsA("TextButton") or object:IsA("TextBox") then
+            local stock = ParseSeedStockText(object.Text)
+            if stock ~= nil then
+                if stock > 0 then return stock end
+                sawNoStock = true
+            end
+        end
     end
-end)
+    return sawNoStock and 0 or nil
+end
 
--- 2️⃣ Collect Fairy + Fake Teleport
-task.spawn(function()
-    while task.wait(1) do
-        if equipItemContains('Fairy Net') then
-            for i = 1, 10 do
-                local folder = workspace:FindFirstChild(tostring(i))
-                if folder then
-                    for _, obj in ipairs(folder:GetChildren()) do
-                        local objCF
-                        if obj:IsA('Model') and obj.PrimaryPart then
-                            objCF = obj:GetPivot()
-                        elseif obj:IsA('Part') then
-                            objCF = obj.CFrame
-                        end
-                        if objCF then
-                            local objPos = objCF.Position
-                            local forward = objCF.LookVector * 6
-                            local targetPos = objPos
-                                + forward
-                                + Vector3.new(0, 7, 0)
-                            hrp.CFrame = CFrame.new(targetPos, objPos)
-                            workspace.CurrentCamera.CFrame = CFrame.new(
-                                objPos + Vector3.new(0, 10, 15),
-                                objPos
-                            )
-                            collectNearbyFairies()
-                            task.wait(0.5)
-                        end
+local function LooksLikeGearShopState(value)
+    if type(value) ~= "table" then return false end
+    local trowel = rawget(value, "Trowel")
+    local sprinkler = rawget(value, "Common Sprinkler")
+    return type(trowel) == "table" and type(sprinkler) == "table"
+        and (rawget(sprinkler, "maxStock") ~= nil or rawget(sprinkler, "frame") ~= nil)
+end
+
+local function GetGearShopStateTable()
+    if LooksLikeGearShopState(GearShopStateTable) then return GearShopStateTable end
+    if type(getgc) ~= "function" then return nil end
+    local ok, objects = pcall(getgc, true)
+    if not ok or type(objects) ~= "table" then return nil end
+    for _, value in ipairs(objects) do
+        if LooksLikeGearShopState(value) then
+            GearShopStateTable = value
+            return value
+        end
+    end
+    return nil
+end
+
+local function GetGearStock(gearName)
+    local stock = GetGearStockFromUI(gearName)
+    if stock ~= nil then return math.max(0, math.floor(stock)) end
+    local state = GetGearShopStateTable()
+    local entry = state and rawget(state, gearName)
+    stock = type(entry) == "table" and tonumber(rawget(entry, "maxStock")) or nil
+    return stock ~= nil and math.max(0, math.floor(stock)) or nil
+end
+
+local function GetGearRestockValue()
+    local stockValues = ReplicatedStorage:FindFirstChild("StockValues")
+    local gearShop = stockValues and stockValues:FindFirstChild("GearShop")
+    local lastRestock = gearShop and gearShop:FindFirstChild("UnixLastRestock")
+    return lastRestock and tonumber(lastRestock.Value) or nil
+end
+
+local function RefreshGearRestockState()
+    local current = GetGearRestockValue()
+    if current and current ~= LastGearRestockValue then
+        LastGearRestockValue = current
+        GearNextAttempt = {}
+        GearPurchasedThisRun = {}
+        GearShopStateTable = nil
+        GearGlobalBackoffUntil = 0
+    end
+end
+
+local function CountPurchasedGearThisRestock(gearName)
+    local ok, amount = pcall(function()
+        local replica = GetLocalReplica()
+        local purchased = replica and replica.Data and replica.Data.PurchasedThisRestock
+        local gears = purchased and purchased.Gears or {}
+        return tonumber(gears[gearName] or 0) or 0
+    end)
+    return math.max(ok and amount or 0, GearPurchasedThisRun[gearName] or 0)
+end
+
+local function CountOwnedGearTools(gearName)
+    local wanted = NormalizeItemName(gearName)
+    local amount = 0
+    for _, root in ipairs({Character, Player:FindFirstChild("Backpack")}) do
+        if root then
+            for _, object in ipairs(root:GetChildren()) do
+                if object:IsA("Tool") and NormalizeItemName(object.Name):find(wanted, 1, true) then
+                    local stack = 1
+                    for _, key in ipairs({"Quantity", "Amount", "Count", "Uses", "Stock"}) do
+                        stack = math.max(stack, tonumber(object:GetAttribute(key)) or 0)
+                    end
+                    amount += stack
+                end
+            end
+        end
+    end
+    return amount
+end
+
+local function TryPurchaseOneGear(gearName)
+    while GearPurchaseBusy do task.wait(0.02) end
+    GearPurchaseBusy = true
+
+    local stock = GetGearStock(gearName)
+    if stock == nil or stock <= 0 then
+        GearPurchaseBusy = false
+        return false, "no_stock"
+    end
+
+    local purchasedBefore = CountPurchasedGearThisRestock(gearName)
+    local ownedBefore = CountOwnedGearTools(gearName)
+    local fired = pcall(function()
+        Net.GearShop.PurchaseGear:Fire(gearName)
+    end)
+
+    local confirmed = false
+    if fired then
+        local started = tick()
+        while tick() - started < SEED_BUY_CONFIRM_TIMEOUT do
+            if CountPurchasedGearThisRestock(gearName) > purchasedBefore
+                or CountOwnedGearTools(gearName) > ownedBefore then
+                confirmed = true
+                break
+            end
+            task.wait(0.03)
+        end
+    end
+
+    GearPurchaseBusy = false
+    if confirmed then
+        GearPurchasedThisRun[gearName] = (GearPurchasedThisRun[gearName] or 0) + 1
+    end
+    return confirmed, confirmed and "purchased" or "purchase_failed"
+end
+
+local function RunGearBuyerPass()
+    if not AUTO_BUY_GEARS then return end
+    if tick() < GearGlobalBackoffUntil then return end
+    RefreshGearRestockState()
+
+    local names = {}
+    for gearName, target in pairs(GEAR_BUY_TARGETS) do
+        if (tonumber(target) or 0) > 0 then table.insert(names, gearName) end
+    end
+    -- Mua hai Super gear trước để không tiêu hết tiền vào gear thường rồi bỏ lỡ stock hiếm.
+    local priority = {
+        ["Super Sprinkler"] = 1,
+        ["Super Watering Can"] = 2,
+    }
+    table.sort(names, function(a, b)
+        local pa, pb = priority[a] or 100, priority[b] or 100
+        if pa ~= pb then return pa < pb end
+        return a < b
+    end)
+
+    for _, gearName in ipairs(names) do
+        local target = math.max(0, tonumber(GEAR_BUY_TARGETS[gearName]) or 0)
+        local bought = CountPurchasedGearThisRestock(gearName)
+        local stock = GetGearStock(gearName)
+        local attempts = math.min(math.max(0, target - bought), stock or 0)
+        if tick() >= (GearNextAttempt[gearName] or 0) then
+            for _ = 1, attempts do
+                local success, reason = TryPurchaseOneGear(gearName)
+                if not success then
+                    -- Có stock nhưng chưa đủ tiền: thử lại có nhịp, không khóa đến tận restock sau.
+                    if reason == "purchase_failed" then
+                        GearGlobalBackoffUntil = tick() + 8
+                        GearNextAttempt[gearName] = tick() + 8
+                        return
+                    end
+                    break
+                end
+            end
+        end
+    end
+end
+
+local function StartGearShopBuyer()
+    task.spawn(function()
+        while task.wait(0.85) do pcall(RunGearBuyerPass) end
+    end)
+end
+
+local function ExpandPlotToMax5()
+    if not AUTO_EXPAND or tick() < NextExpandAttemptAt then return end
+    NextExpandAttemptAt = tick() + 15
+
+    local before = #GetPlantAreas()
+    pcall(function() Net.Actions.ExpandGarden:Fire() end)
+    task.wait(0.55 + EXPAND_REPLICATION_WAIT)
+    CachedPlantAreas = nil
+    PlantAreasCacheUntil = 0
+    NextSprinklerCheck = 0
+
+    local after = #GetPlantAreas()
+    -- Có đất mới thì thử level kế sau sớm; không đổi nghĩa là thiếu tiền/max, nghỉ 15 giây.
+    NextExpandAttemptAt = tick() + (after > before and 0.8 or 15)
+end
+
+-- ===================== DENSE CHEAP SPRINKLER GRID =====================
+local SPRINKLER_METADATA_KEYS = {
+    "ItemName", "DisplayName", "SprinklerType", "Type",
+    "Variant", "ItemId", "ItemID", "Identifier"
+}
+
+local function HasSuperSprinklerMetadata(obj)
+    if not obj then return false end
+
+    local texts = {tostring(obj.Name):lower()}
+    for _, key in ipairs(SPRINKLER_METADATA_KEYS) do
+        local value = obj:GetAttribute(key)
+        if value ~= nil then
+            table.insert(texts, tostring(value):lower())
+        end
+    end
+
+    for _, text in ipairs(texts) do
+        if text:find("super", 1, true) and text:find("sprinkler", 1, true) then
+            return true
+        end
+    end
+    return false
+end
+
+local function IsSuperSprinklerObject(root)
+    if HasSuperSprinklerMetadata(root) then return true end
+    for _, obj in ipairs(root:GetDescendants()) do
+        if HasSuperSprinklerMetadata(obj) then
+            return true
+        end
+    end
+    return false
+end
+
+local function CountSuperSprinklers()
+    local plot = GetPlot()
+    local sprinklers = plot:WaitForChild("Sprinklers")
+    local count = 0
+    for _, sprinkler in ipairs(sprinklers:GetChildren()) do
+        if IsSuperSprinklerObject(sprinkler) then
+            count += 1
+        end
+    end
+    return count
+end
+
+local function CountAllPlacedSprinklers()
+    local plot = GetPlot()
+    local sprinklers = plot:WaitForChild("Sprinklers")
+    return #sprinklers:GetChildren()
+end
+
+local function SnapSprinklerTarget(pos)
+    local params = nil
+    pcall(function()
+        local created = PlantController:CreatePlantAreaParams()
+        if typeof(created) == "RaycastParams" then
+            params = created
+        end
+    end)
+
+    local result = workspace:Raycast(
+        pos + Vector3.new(0, 100, 0),
+        Vector3.new(0, -250, 0),
+        params
+    )
+    if result then
+        return result.Position + Vector3.new(0, 0.15, 0)
+    end
+    return pos
+end
+
+local function GetSprinklerTargetPositions()
+    local areas = GetPlantAreas()
+    local targets = {}
+    if #areas <= 0 then return targets end
+
+    -- Dựng danh sách điểm phủ từ chính grid có thể plant, không trung bình
+    -- Position của các visual part vì visual/hitbox có thể lệch giữa account.
+    local params = nil
+    pcall(function()
+        local created = PlantController:CreatePlantAreaParams()
+        if typeof(created) == "RaycastParams" then
+            params = created
+        end
+    end)
+
+    local points = {}
+    local used = {}
+    for _, area in ipairs(areas) do
+        local c, s = area.Position, area.Size
+        for x = c.X - s.X/2 + PLANT_SPACING, c.X + s.X/2 - PLANT_SPACING, PLANT_SPACING do
+            for z = c.Z - s.Z/2 + PLANT_SPACING, c.Z + s.Z/2 - PLANT_SPACING, PLANT_SPACING do
+                local result = workspace:Raycast(
+                    Vector3.new(x, c.Y + 100, z),
+                    Vector3.new(0, -250, 0),
+                    params
+                )
+                if result then
+                    local key = tostring(math.floor(x + 0.5)) .. ":" .. tostring(math.floor(z + 0.5))
+                    if not used[key] then
+                        used[key] = true
+                        table.insert(points, Vector3.new(x, result.Position.Y, z))
                     end
                 end
             end
         end
     end
-end)
 
--- Task 3: Spam lệnh mỗi 60s (giữ lại print + chuẩn args)
+    if #points < 2 then return targets end
+
+    local function getObjectPosition(obj)
+        if not obj then return nil end
+        if obj:IsA("BasePart") then return obj.Position end
+        if obj:IsA("Model") then return obj:GetPivot().Position end
+
+        local sum = Vector3.new(0, 0, 0)
+        local count = 0
+        for _, part in ipairs(obj:GetDescendants()) do
+            if part:IsA("BasePart") then
+                sum += part.Position
+                count += 1
+            end
+        end
+        return count > 0 and sum / count or nil
+    end
+
+    -- PlantAreaColumn1/2 cho biết hướng "hai bên" ngay cả khi plot quay 90 độ.
+    local plot = GetPlot()
+    local visual = plot:FindFirstChild("Visual")
+    local column1 = visual and visual:FindFirstChild("PlantAreaColumn1", true)
+    local column2 = visual and visual:FindFirstChild("PlantAreaColumn2", true)
+    local p1, p2 = getObjectPosition(column1), getObjectPosition(column2)
+    local splitX
+
+    if p1 and p2 then
+        splitX = math.abs(p2.X - p1.X) >= math.abs(p2.Z - p1.Z)
+    else
+        -- Fallback: trục có khoảng hở lớn nhất giữa các điểm grid.
+        local function largestGap(axis)
+            local values = {}
+            for _, point in ipairs(points) do
+                table.insert(values, axis == "X" and point.X or point.Z)
+            end
+            table.sort(values)
+            local best = 0
+            for i = 2, #values do
+                best = math.max(best, values[i] - values[i - 1])
+            end
+            return best
+        end
+        splitX = largestGap("X") >= largestGap("Z")
+    end
+
+    local minValue, maxValue = math.huge, -math.huge
+    for _, point in ipairs(points) do
+        local value = splitX and point.X or point.Z
+        minValue = math.min(minValue, value)
+        maxValue = math.max(maxValue, value)
+    end
+    local splitValue = (minValue + maxValue) / 2
+
+    local sums = {Vector3.new(0, 0, 0), Vector3.new(0, 0, 0)}
+    local counts = {0, 0}
+    local groups = {{}, {}}
+    for _, point in ipairs(points) do
+        local value = splitX and point.X or point.Z
+        local side = value < splitValue and 1 or 2
+        sums[side] += point
+        counts[side] += 1
+        table.insert(groups[side], point)
+    end
+
+    for side = 1, 2 do
+        if counts[side] > 0 then
+            local centroid = sums[side] / counts[side]
+            local closest = nil
+            local closestDistance = math.huge
+            for _, point in ipairs(groups[side]) do
+                local distance = (Vector3.new(point.X, 0, point.Z)
+                    - Vector3.new(centroid.X, 0, centroid.Z)).Magnitude
+                if distance < closestDistance then
+                    closest = point
+                    closestDistance = distance
+                end
+            end
+            -- Dùng grid point thật gần tâm nhất, không đặt vào khe giữa hai soil panel.
+            table.insert(targets, SnapSprinklerTarget(closest or centroid))
+        end
+    end
+
+    if DEBUG_SPRINKLER then
+        print("[SPRINKLER TARGETS]", #targets, "POINTS", #points, "SPLIT", splitX and "X" or "Z")
+        for index, target in ipairs(targets) do
+            print("[SPRINKLER TARGET]", index, target)
+        end
+    end
+
+    return targets
+end
+
+-- Sprinkler thường có vùng phủ nhỏ: chia từng soil panel thành các ô phủ đều.
+-- Target được lấy theo CFrame thật của panel nên vẫn đúng khi plot/account bị xoay.
+local function GetCheapSprinklerTargetPositions()
+    local areas = GetPlantAreas()
+    local targets = {}
+    if #areas <= 0 then return targets end
+
+    local params = nil
+    pcall(function()
+        local created = PlantController:CreatePlantAreaParams()
+        if typeof(created) == "RaycastParams" then params = created end
+    end)
+
+    local candidates = {}
+    for _, area in ipairs(areas) do
+        local size = area.Size
+        local usableX = math.max(1, size.X - 5)
+        local usableZ = math.max(1, size.Z - 5)
+        local countX = math.max(1, math.ceil(usableX / CHEAP_SPRINKLER_TARGET_SPACING))
+        local countZ = math.max(1, math.ceil(usableZ / CHEAP_SPRINKLER_TARGET_SPACING))
+
+        for ix = 1, countX do
+            for iz = 1, countZ do
+                local localX = -usableX / 2 + usableX * (ix - 0.5) / countX
+                local localZ = -usableZ / 2 + usableZ * (iz - 0.5) / countZ
+                local worldPoint = area.CFrame:PointToWorldSpace(Vector3.new(localX, 0, localZ))
+                local result = workspace:Raycast(
+                    worldPoint + Vector3.new(0, 100, 0),
+                    Vector3.new(0, -250, 0),
+                    params
+                )
+                if result then
+                    table.insert(candidates, result.Position + Vector3.new(0, 0.15, 0))
+                end
+            end
+        end
+    end
+
+    -- PlantArea có thể chồng hitbox ở mép. Gộp target gần nhau để không phí gear.
+    table.sort(candidates, function(a, b)
+        if math.abs(a.X - b.X) > 0.1 then return a.X < b.X end
+        return a.Z < b.Z
+    end)
+    for _, candidate in ipairs(candidates) do
+        local duplicate = false
+        local flatCandidate = Vector3.new(candidate.X, 0, candidate.Z)
+        for _, target in ipairs(targets) do
+            if (flatCandidate - Vector3.new(target.X, 0, target.Z)).Magnitude < 6 then
+                duplicate = true
+                break
+            end
+        end
+        if not duplicate then
+            table.insert(targets, candidate)
+            if #targets >= MAX_CHEAP_SPRINKLER_TARGETS then break end
+        end
+    end
+
+    if #targets == 0 then
+        targets = GetSprinklerTargetPositions()
+    end
+    if DEBUG_SPRINKLER then
+        print("[CHEAP SPRINKLER TARGETS]", #targets)
+    end
+    return targets
+end
+
+local function IsSuperSprinklerNear(pos)
+    local plot = GetPlot()
+    local sprinklers = plot:WaitForChild("Sprinklers")
+
+    for _, sprinkler in ipairs(sprinklers:GetChildren()) do
+        -- Lỗi cũ: sprinkler thường cũng làm hàm trả true, khiến account bị skip Super Sprinkler.
+        if IsSuperSprinklerObject(sprinkler) then
+            local part = sprinkler.PrimaryPart or sprinkler:FindFirstChildWhichIsA("BasePart", true)
+            if not part then continue end
+            local a = Vector3.new(pos.X, 0, pos.Z)
+            local b = Vector3.new(part.Position.X, 0, part.Position.Z)
+            if (a - b).Magnitude <= SPRINKLER_RADIUS then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function IsAnyPlacedSprinklerNear(pos)
+    local plot = GetPlot()
+    local sprinklers = plot:WaitForChild("Sprinklers")
+    local target = Vector3.new(pos.X, 0, pos.Z)
+
+    for _, sprinkler in ipairs(sprinklers:GetChildren()) do
+        -- Không phụ thuộc tên/attribute. Folder Sprinklers là trạng thái thật của plot.
+        if sprinkler:IsA("BasePart") then
+            local at = Vector3.new(sprinkler.Position.X, 0, sprinkler.Position.Z)
+            if (target - at).Magnitude <= SPRINKLER_RADIUS then
+                return true
+            end
+        end
+
+        for _, part in ipairs(sprinkler:GetDescendants()) do
+            if part:IsA("BasePart") then
+                local at = Vector3.new(part.Position.X, 0, part.Position.Z)
+                if (target - at).Magnitude <= SPRINKLER_RADIUS then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+local function IsSprinklerTargetOccupied(pos)
+    -- Nhận diện Super nếu metadata có sẵn; fallback về bất kỳ object thật nào
+    -- trong Plot.Sprinklers gần target để tuyệt đối không đặt chồng.
+    return IsSuperSprinklerNear(pos) or IsAnyPlacedSprinklerNear(pos)
+end
+
+local function FindSuperSprinklerTool(root)
+    if not root then return nil end
+
+    if root:IsA("Tool") and IsSuperSprinklerObject(root) then
+        return root
+    end
+    for _, obj in ipairs(root:GetDescendants()) do
+        if obj:IsA("Tool") and IsSuperSprinklerObject(obj) then
+            return obj
+        end
+    end
+    return nil
+end
+
+local function FindSuperSprinklerModel(root)
+    if not root then return nil end
+
+    if (root:IsA("Model") or root:IsA("Tool")) and HasSuperSprinklerMetadata(root) then
+        return root
+    end
+    for _, obj in ipairs(root:GetDescendants()) do
+        if HasSuperSprinklerMetadata(obj) then
+            local candidate = obj
+            while candidate and candidate ~= root do
+                if candidate:IsA("Model") or candidate:IsA("Tool") then
+                    return candidate
+                end
+                candidate = candidate.Parent
+            end
+        end
+    end
+    return nil
+end
+
+local function DumpSprinklerCandidates()
+    if not DEBUG_SPRINKLER then return end
+    print("[SPRINKLER DEBUG] No usable Super Sprinkler instance. Tool candidates:")
+    local roots = {Character, Player:FindFirstChild("Backpack"), workspace:FindFirstChild(Player.Name)}
+    for _, root in ipairs(roots) do
+        if root then
+            for _, obj in ipairs(root:GetDescendants()) do
+                if obj:IsA("Tool") or obj:IsA("Model") then
+                    local attrs = obj:GetAttributes()
+                    print("[SPRINKLER CANDIDATE]", obj:GetFullName(), obj.ClassName, attrs)
+                end
+            end
+        end
+    end
+end
+
+local function WaitForSuperSprinklerModel(timeout)
+    timeout = timeout or 1.6
+    local started = tick()
+
+    while tick() - started < timeout do
+        RefreshCharacter()
+
+        -- Ưu tiên Tool đang equip.
+        local equipped = FindSuperSprinklerTool(Character)
+        if equipped then
+            return equipped
+        end
+
+        local backpack = Player:FindFirstChild("Backpack")
+        local storedTool = FindSuperSprinklerTool(backpack)
+        if storedTool then
+            pcall(function()
+                Humanoid:EquipTool(storedTool)
+            end)
+            task.wait(0.12)
+            return FindSuperSprinklerTool(Character) or storedTool
+        end
+
+        -- Một số account/build tạo placement model lồng sâu trong workspace.<PlayerName>.
+        local playerFolder = workspace:FindFirstChild(Player.Name)
+        local placementModel = FindSuperSprinklerModel(playerFolder)
+        if placementModel then
+            return placementModel
+        end
+
+        task.wait(0.08)
+    end
+
+    DumpSprinklerCandidates()
+    return nil
+end
+
+local function ObjectMatchesGearName(object, gearName)
+    if not object then return false end
+    local wanted = NormalizeItemName(gearName)
+    if NormalizeItemName(object.Name):find(wanted, 1, true) then return true end
+    for _, key in ipairs(SPRINKLER_METADATA_KEYS) do
+        local value = object:GetAttribute(key)
+        if value and NormalizeItemName(value):find(wanted, 1, true) then return true end
+    end
+    return false
+end
+
+local function FindGearObject(root, gearName, toolsOnly)
+    if not root then return nil end
+    if (not toolsOnly or root:IsA("Tool")) and ObjectMatchesGearName(root, gearName) then
+        return root
+    end
+    for _, object in ipairs(root:GetDescendants()) do
+        if (not toolsOnly or object:IsA("Tool")) and ObjectMatchesGearName(object, gearName) then
+            return object
+        end
+    end
+    return nil
+end
+
+local function WaitForPreferredSprinklerModel(timeout)
+    local started = tick()
+    while tick() - started < timeout do
+        RefreshCharacter()
+        local backpack = Player:FindFirstChild("Backpack")
+
+        for _, gearName in ipairs(GEARS_TO_USE) do
+            if string.lower(gearName) == "super sprinkler" then continue end
+            local equipped = FindGearObject(Character, gearName, true)
+            if equipped then return equipped, gearName end
+
+            local stored = FindGearObject(backpack, gearName, true)
+            if stored then
+                -- Direct parent giống Plant/Watering: không chạy animation EquipTool.
+                for _, equippedTool in ipairs(Character:GetChildren()) do
+                    if equippedTool:IsA("Tool") and equippedTool ~= stored then
+                        equippedTool.Parent = backpack
+                    end
+                end
+                stored.Parent = Character
+                RunService.Heartbeat:Wait()
+                return FindGearObject(Character, gearName, true) or stored, gearName
+            end
+        end
+
+        local playerFolder = workspace:FindFirstChild(Player.Name)
+        for _, gearName in ipairs(GEARS_TO_USE) do
+            if string.lower(gearName) == "super sprinkler" then continue end
+            local placementModel = FindGearObject(playerFolder, gearName, false)
+            if placementModel then return placementModel, gearName end
+        end
+        task.wait(0.08)
+    end
+
+    -- Không fallback sang Super Sprinkler: đây là khóa an toàn theo config V20.
+    return nil, nil
+end
+
+local function PlaceOneSprinkler(pos)
+    -- Chờ plant nhả Carrot tool; đồng thời chặn hai sprinkler worker chạy trùng nhau.
+    SprinklerRequested = true
+    while PlantingActive or SprinklerPlacing or WateringActive do
+        task.wait(0.03)
+    end
+    SprinklerPlacing = true
+    SprinklerRequested = false
+
+    local success = false
+    local ok, placeError = pcall(function()
+        for _ = 1, 3 do
+            -- Kiểm tra lại ngay trước mỗi attempt; worker khác hoặc sprinkler cũ có thể đã chiếm target.
+            if IsSprinklerTargetOccupied(pos) then
+                success = true
+                return
+            end
+
+            local beforeAll = CountAllPlacedSprinklers()
+            local toolModel, gearName = WaitForPreferredSprinklerModel(0.55)
+            if not toolModel then return end
+
+            local fired, fireError = pcall(function()
+                Net.Place.PlaceSprinkler:Fire(pos, gearName, toolModel, 1)
+            end)
+            if DEBUG_SPRINKLER and not fired then
+                warn("[SPRINKLER FIRE ERROR]", fireError, toolModel:GetFullName(), pos)
+            end
+
+            -- Chờ replication xác nhận. Không retry chỉ vì model không mang metadata "Super".
+            local confirmStarted = tick()
+            while tick() - confirmStarted < 1.25 do
+                if IsSprinklerTargetOccupied(pos) or CountAllPlacedSprinklers() > beforeAll then
+                    success = true
+                    return
+                end
+                task.wait(0.05)
+            end
+        end
+    end)
+
+    SprinklerPlacing = false
+    SprinklerRequested = false
+    if DEBUG_SPRINKLER and not ok then
+        warn("[SPRINKLER PLACE ERROR]", placeError)
+    end
+    return success
+end
+
+local function GetPlacedSprinklerPosition(sprinkler)
+    if sprinkler:IsA("BasePart") then
+        return sprinkler.Position
+    end
+
+    if sprinkler:IsA("Model") then
+        if sprinkler.PrimaryPart then
+            return sprinkler.PrimaryPart.Position
+        end
+        local ok, pivot = pcall(function()
+            return sprinkler:GetPivot().Position
+        end)
+        if ok then return pivot end
+    end
+
+    local part = sprinkler:FindFirstChildWhichIsA("BasePart", true)
+    return part and part.Position or nil
+end
+
+local function PlaceCheapSprinklers()
+    if tick() < NextSprinklerCheck then return end
+
+    local targets = GetCheapSprinklerTargetPositions()
+    if #targets <= 0 then
+        NextSprinklerCheck = tick() + 1
+        return
+    end
+
+    local attempted = false
+    for _, target in ipairs(targets) do
+        -- Mỗi điểm lưới chỉ có một vòi. Khi vòi hết hạn object biến mất và slot được bù ngay.
+        if not IsSprinklerTargetOccupied(target) then
+            attempted = true
+            local placed = PlaceOneSprinkler(target)
+            if not placed then
+                -- Hết gear hoặc server từ chối: dừng pass để không chờ 0.55s ở mọi target trống.
+                break
+            end
+            task.wait(0.06)
+        end
+    end
+
+    NextSprinklerCheck = tick() + (attempted and 0.55 or 0.9)
+end
+
+-- ===================== COMMON WATERING CAN =====================
+local WATER_SEED_VALUE = {
+    ["Dragon's Breath"] = 120, ["Briar Rose"] = 118, ["Romanesco"] = 116,
+    ["Moon Bloom"] = 112, ["Hypno Bloom"] = 110, ["Fire Fern"] = 108,
+    ["Venom Spitter"] = 104, ["Venus Fly Trap"] = 102, ["Poison Apple"] = 100,
+    ["Pomegranate"] = 98, ["Dragon Fruit"] = 92, ["Mango"] = 90,
+    ["Coconut"] = 88, ["Apple"] = 82, ["Banana"] = 78,
+    ["Pineapple"] = 74, ["Cactus"] = 70, ["Grape"] = 68,
+}
+local CachedWaterTarget = nil
+local NextWaterTargetScanAt = 0
+local NextWaterUseAt = 0
+
+local function GetPlantBasePosition(plant)
+    local position = nil
+    if plant:IsA("Model") then
+        local okPivot, pivot = pcall(function() return plant:GetPivot().Position end)
+        if okPivot then position = pivot end
+    elseif plant:IsA("BasePart") then
+        position = plant.Position
+    end
+    if not position then
+        local part = plant:FindFirstChildWhichIsA("BasePart", true)
+        position = part and part.Position or nil
+    end
+    if not position then return nil end
+
+    local params = nil
+    pcall(function()
+        local created = PlantController:CreatePlantAreaParams()
+        if typeof(created) == "RaycastParams" then params = created end
+    end)
+    local hit = workspace:Raycast(
+        Vector3.new(position.X, position.Y + 100, position.Z),
+        Vector3.new(0, -250, 0),
+        params
+    )
+    return hit and (hit.Position + Vector3.new(0, 0.1, 0)) or position
+end
+
+local function GetBestWaterTarget()
+    if CachedWaterTarget and tick() < NextWaterTargetScanAt then return CachedWaterTarget end
+    local plot = GetPlot()
+    local plants = plot:FindFirstChild("Plants")
+    if not plants then return nil end
+
+    local bestPosition, bestScore = nil, -math.huge
+    for _, plant in ipairs(plants:GetChildren()) do
+        local position = GetPlantBasePosition(plant)
+        if position then
+            local seedName = tostring(plant:GetAttribute("SeedName") or "")
+            local rarityScore = WATER_SEED_VALUE[seedName] or 10
+            local kg = GetPlantKg(plant)
+            local sizeScore = 0
+            if plant:IsA("Model") then
+                local okSize, size = pcall(function() return plant:GetExtentsSize() end)
+                if okSize then sizeScore = size.Magnitude end
+            end
+            local score = rarityScore * 100000 + (ValidKg(kg) and kg or 0) * 1000 + sizeScore
+            if score > bestScore then
+                bestScore = score
+                bestPosition = position
+            end
+        end
+    end
+    CachedWaterTarget = bestPosition
+    NextWaterTargetScanAt = tick() + 0.8
+    return bestPosition
+end
+
+local function UseOneCommonWateringCan()
+    if not AUTO_USE_COMMON_WATERING then return false end
+    if tick() < NextWaterUseAt then return false end
+    if PlantingActive or SprinklerPlacing or SprinklerRequested or WateringActive then return false end
+
+    WateringRequested = true
+    while PlantingActive or SprinklerPlacing or SprinklerRequested do task.wait(0.02) end
+    WateringActive = true
+    WateringRequested = false
+
+    local success = false
+    local ok, err = pcall(function()
+        RefreshCharacter()
+        local backpack = Player:WaitForChild("Backpack")
+        local target = GetBestWaterTarget()
+        if not target then return end
+
+        local tool = FindGearObject(Character, "Common Watering Can", true)
+            or FindGearObject(backpack, "Common Watering Can", true)
+        if not tool then return end
+        local ownedBefore = CountOwnedGearTools("Common Watering Can")
+
+        for _, equipped in ipairs(Character:GetChildren()) do
+            if equipped:IsA("Tool") and equipped ~= tool then equipped.Parent = backpack end
+        end
+        if not tool:IsDescendantOf(Character) then
+            tool.Parent = Character
+            RunService.Heartbeat:Wait()
+        end
+
+        local fired = pcall(function()
+            EnsureNearActionPosition(target, WATER_SERVER_RANGE)
+            Net.WateringCan.UseWateringCan:Fire(target, "Common Watering Can", tool)
+        end)
+        task.wait(0.12)
+        success = fired and CountOwnedGearTools("Common Watering Can") < ownedBefore
+        NextWaterUseAt = tick() + (success and 0.08 or 0.8)
+    end)
+
+    WateringActive = false
+    WateringRequested = false
+    if not ok and DEBUG then warn("WATERING ERROR:", err) end
+    return success
+end
+
+-- sprinkler chạy nền, không chờ plant/harvest xong mới đặt.
 task.spawn(function()
-    while task.wait(60) do
-        -- Nộp tất cả fairy jar
-        game:GetService('ReplicatedStorage').GameEvents.FairyService.FairySubmitAllJar
-            :FireServer()
-        print('📦 FairySubmitAllJar đã gửi!')
-
-        -- Mua Enchanted Chest x2
-        local args = {
-            [1] = 'Enchanted Chest',
-            [2] = 2,
-        }
-        game:GetService('ReplicatedStorage').GameEvents.BuyEventShopStock
-            :FireServer(unpack(args))
-        print('💎 Đã mua Enchanted Chest x2!')
+    while task.wait(SPRINKLER_BACKGROUND_WAIT) do
+        pcall(PlaceCheapSprinklers)
     end
 end)
+
+-- Watering nhường Plant và sprinkler; mỗi lần chỉ dùng một charge để không giữ Tool lock lâu.
+task.spawn(function()
+    while task.wait(0.20) do
+        pcall(UseOneCommonWateringCan)
+    end
+end)
+
+-- ===================== TELEPORT / MAIN =====================
+local function IsNearGarden()
+    RefreshCharacter()
+    local hrp = Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+
+    local areas = GetPlantAreas()
+    if #areas <= 0 then return false end
+
+    local center = Vector3.new(0, 0, 0)
+    for _, area in ipairs(areas) do
+        center += area.Position
+    end
+    center /= #areas
+
+    return (hrp.Position - center).Magnitude < 180
+end
+
+local function TeleportGardenIfNeeded()
+    if IsNearGarden() then return end
+    pcall(function()
+        Net.TeleportButton.Request:Fire("Garden")
+    end)
+    task.wait(0.9)
+end
+
+local function StartPlantWorker()
+    task.spawn(function()
+        while task.wait(PLANT_WORKER_DELAY) do
+            if not PlantingActive and tick() >= NextPlantWorkerAttemptAt then
+                NextPlantWorkerAttemptAt = tick() + 0.12
+                if HasConfiguredSeedToPlant() then
+                    local ok, err = pcall(function()
+                        TeleportGardenIfNeeded()
+                        local planted = PlantConfiguredSeeds(true)
+                        if not planted and CountCarrotSeeds() > 0
+                            and tick() >= (PlantSeedNextAttempt.Carrot or 0) then
+                            PlantSeedNextAttempt.Carrot = tick() + 0.75
+                            PlantCarrotLegacyFallback()
+                        end
+                        NextPlantWorkerAttemptAt = tick() + (planted and 0.015 or 0.14)
+                    end)
+                    if not ok then
+                        NextPlantWorkerAttemptAt = tick() + 0.20
+                        warn("PLANT WORKER ERROR:", err)
+                    end
+                end
+            end
+        end
+    end)
+end
+
+local function FarmCycle()
+    cycle += 1
+
+    -- Harvest và sell đã có worker nền riêng, không chặn plant/FarmCycle.
+
+    if AUTO_EXPAND and cycle % EXPAND_EVERY_CYCLES == 0 then
+        ExpandPlotToMax5()
+    end
+
+    TeleportGardenIfNeeded()
+end
+
+StartMailClaimLoader()
+StartSeedShopBuyer()
+StartGearShopBuyer()
+StartPlantWorker()
+print("TRUNGPHANHUB RANGE BATCH V22 STARTED")
+
+while true do
+    local ok, err = pcall(FarmCycle)
+    if not ok then
+        warn("FARM ERROR:", err)
+    end
+    task.wait(LOOP_DELAY)
+end
