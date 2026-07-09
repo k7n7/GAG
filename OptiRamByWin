@@ -1,25 +1,27 @@
 -- ============================================================================
---  TRUNGPHANHUB GAG2 OPTI STANDALONE V3 - EVENT DRIVEN
+--  TRUNGPHANHUB GAG2 OPTI STANDALONE V5 - GUI + NO RENDER SAFE TEST
 --
---  Script OPTI riêng biệt, KHÔNG gộp farm script.
+--  Dùng riêng, không gộp farm script.
+--  Mục tiêu: dùng chung với DuckHub/farm script khác mà ít ảnh hưởng nhất.
 --
---  Mục tiêu V3:
---  - Bỏ SoftLimit / HardLimit / AutoRejoin.
---  - Không "lock RAM" giả.
---  - Tối ưu dạng detect/event-driven:
---      + Plot người khác xuất hiện -> xóa ngay.
---      + Player/character người khác xuất hiện -> ẩn ngay.
---      + Effect mới xuất hiện -> disable ngay.
---  - Giảm scan toàn workspace lặp lại để ít ảnh hưởng farm.
+--  V5 thêm:
+--  - Console log rõ ràng: [OK] [WARN] [SKIP] [ACTION] [STATS]
+--  - GUI Optimizer: chỉ disable GUI không cần thiết, KHÔNG destroy.
+--  - Viewport Optimizer: dọn preview 3D trong GUI không cần thiết.
+--  - Optional NoRenderMode: tắt render 3D mạnh tay.
 --
---  Giữ an toàn:
---  - Không xóa plot của bạn.
---  - Không xóa ReplicatedStorage.Assets.Plants.
---  - Không disable GUI hàng loạt.
---  - Không destroy character người khác.
---  - Không đụng NPCS, shop, pet, weather/event seed, dropped item, remote.
+--  Mặc định:
+--  - NoRenderMode = false để test an toàn.
+--  - Muốn mạnh nhất thì đổi NoRenderMode = true.
 --
---  Nếu lỗi: rejoin server là khôi phục.
+--  Rule an toàn:
+--  - My Plot = không đụng
+--  - Pets = không đụng
+--  - Shop/NPCS = không đụng trong Workspace
+--  - Weather = chỉ tắt hiệu ứng
+--  - Other Plot = xóa
+--  - Other Character = ẩn
+--  - GUI = disable, không destroy
 -- ============================================================================
 
 task.wait(2)
@@ -27,28 +29,46 @@ task.wait(2)
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local Stats = game:GetService("Stats")
+local RunService = game:GetService("RunService")
 
 local Player = Players.LocalPlayer
 
 local CONFIG = {
     FPSCap = 8,
 
+    -- Mạnh nhất nhưng cần test với DuckHub.
+    NoRenderMode = false,
+
     DestroyOtherPlots = true,
     HideOtherCharacters = true,
 
     DisablePostFX = true,
     DisableWeatherEffects = true,
-    DisableParticlesGlobal = true,
-    DisableSounds = true,
-    DisableShadows = true,
 
-    -- Scan đầu tiên để dọn object đã tồn tại.
-    InitialClean = true,
+    -- GUI optimizer
+    OptimizeGUI = true,
+    DisableUnusedGUI = true,
+    DisableViewportFrames = true,
 
-    -- Sau initial clean, chủ yếu dùng event detect.
-    -- Reclean chỉ để chống miss khi game load chậm.
+    -- Giữ lại các GUI có thể script farm/mail/weather cần.
+    KeepGUI = {
+        ["BackpackGui"] = true,
+        ["SeedShop"] = true,
+        ["GearShop"] = true,
+        ["MailboxUI"] = true,
+        ["WeatherUI"] = true,
+        ["HUD"] = true,
+        ["TopbarStandard"] = true,
+        ["TopbarStandardClipped"] = true,
+        ["TopbarCentered"] = true,
+        ["TopbarCenteredClipped"] = true,
+        ["Tooltip"] = true,
+        ["PlantHoverTooltip"] = true,
+        ["PetHoverTooltip"] = true,
+        ["Cmdr"] = true,
+    },
+
     LightRecleanEverySeconds = 20,
-
     GCEverySeconds = 30,
     PrintStatsEverySeconds = 60,
 
@@ -57,18 +77,41 @@ local CONFIG = {
 
 local processed = setmetatable({}, {__mode = "k"})
 
-local function log(...)
-    if CONFIG.Debug then
-        print("[GAG2 OPTI V3]", ...)
-    end
+local function log(level, ...)
+    print("[GAG2 OPTI V5][" .. level .. "]", ...)
+end
+
+local function safe(fn)
+    local ok, result = pcall(fn)
+    return ok, result
 end
 
 local function setFPS()
     pcall(function()
         if type(setfpscap) == "function" and CONFIG.FPSCap and CONFIG.FPSCap > 0 then
             setfpscap(CONFIG.FPSCap)
+            log("OK", "FPS cap set", CONFIG.FPSCap)
+        else
+            log("SKIP", "setfpscap not available")
         end
     end)
+end
+
+local function setNoRender()
+    if not CONFIG.NoRenderMode then
+        log("SKIP", "NoRenderMode=false")
+        return
+    end
+
+    local ok, err = pcall(function()
+        RunService:Set3dRenderingEnabled(false)
+    end)
+
+    if ok then
+        log("OK", "3D rendering disabled")
+    else
+        log("WARN", "failed to disable 3D rendering", err)
+    end
 end
 
 local function totalMemMb()
@@ -93,21 +136,23 @@ local function countClass(root, className)
         return root:GetDescendants()
     end)
     if not ok then return 0 end
-
     for _, obj in ipairs(desc) do
-        if obj:IsA(className) then
-            n += 1
-        end
+        if obj:IsA(className) then n += 1 end
     end
     return n
 end
 
 local function printStats(label)
     local gardens = workspace:FindFirstChild("Gardens")
-    print("[GAG2 OPTI V3 STATS]", label,
+    local pg = Player:FindFirstChild("PlayerGui")
+
+    log("STATS", label,
         "memMB", string.format("%.1f", totalMemMb()),
         "workspaceDesc", countDesc(workspace),
         "gardenDesc", countDesc(gardens),
+        "playerGuiDesc", countDesc(pg),
+        "guiCount", pg and #pg:GetChildren() or 0,
+        "viewportFrames", countClass(pg, "ViewportFrame"),
         "parts", countClass(workspace, "BasePart"),
         "particles", countClass(workspace, "ParticleEmitter"),
         "prompts", countClass(workspace, "ProximityPrompt")
@@ -123,6 +168,7 @@ local function getMyPlot()
         local plantController = require(controllers:WaitForChild("PlantController"))
         return plantController:GetPlayerPlot()
     end)
+
     if ok and plot and plot.Parent == gardens then
         return plot
     end
@@ -136,157 +182,93 @@ local function getMyPlot()
         end
     end
 
-    for _, plotCandidate in ipairs(gardens:GetChildren()) do
-        local sign = plotCandidate:FindFirstChild("Sign", true)
-        if sign then
-            for _, obj in ipairs(sign:GetDescendants()) do
-                if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
-                    if tostring(obj.Text or ""):find(Player.Name, 1, true) then
-                        return plotCandidate
-                    end
-                end
-            end
-        end
-    end
-
     return nil
 end
 
-local function destroySafe(obj, reason)
-    if not obj or not obj.Parent then return false end
+local function destroyOtherPlot(plot)
+    if not plot or not plot.Parent then return false end
+    local path = plot:GetFullName()
 
-    local path = obj:GetFullName()
     local ok, err = pcall(function()
-        obj:Destroy()
+        plot:Destroy()
     end)
 
     if ok then
-        log("DESTROY", reason, path)
+        log("ACTION", "Destroy other plot", path)
         return true
     else
-        warn("[GAG2 OPTI V3 DESTROY FAIL]", reason, path, err)
+        log("WARN", "Destroy other plot failed", path, err)
         return false
     end
 end
 
-local function optimizeInstance(obj, hide)
-    if not obj or processed[obj] then return end
-    processed[obj] = true
-
-    pcall(function()
-        if obj:IsA("BasePart") then
-            if CONFIG.DisableShadows then
-                obj.CastShadow = false
-            end
-
-            obj.CanTouch = false
-            obj.CanQuery = false
-
-            if hide then
-                obj.CanCollide = false
-                obj.LocalTransparencyModifier = 1
-            end
-        elseif obj:IsA("Decal") or obj:IsA("Texture") then
-            if hide then
-                obj.Transparency = 1
-            end
-        elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
-            or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
-            obj.Enabled = false
-        elseif obj:IsA("BillboardGui") or obj:IsA("SurfaceGui") then
-            if hide then
-                obj.Enabled = false
-            end
-        elseif obj:IsA("Sound") and CONFIG.DisableSounds then
-            obj.Volume = 0
-            obj:Stop()
-        end
-    end)
-end
-
-local function optimizeTree(root, hide, slice)
-    if not root then return 0 end
-
-    local count = 0
-    local ok, desc = pcall(function()
-        return root:GetDescendants()
-    end)
-    if not ok then return 0 end
-
-    for i, obj in ipairs(desc) do
-        optimizeInstance(obj, hide)
-        count += 1
-
-        if slice and i % 500 == 0 then
-            task.wait()
-        end
-    end
-
-    return count
-end
-
-local function applyPostFX()
-    setFPS()
-
-    if not CONFIG.DisablePostFX then return end
-
-    pcall(function()
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-    end)
-
-    for _, obj in ipairs(Lighting:GetDescendants()) do
-        pcall(function()
-            if obj:IsA("BloomEffect") or obj:IsA("BlurEffect") or obj:IsA("DepthOfFieldEffect")
-                or obj:IsA("SunRaysEffect") or obj:IsA("ColorCorrectionEffect") then
-                obj.Enabled = false
-            elseif obj:IsA("Atmosphere") then
-                obj.Density = 0
-                obj.Haze = 0
-                obj.Glare = 0
-            end
-        end)
-    end
-
-    pcall(function()
-        Lighting.GlobalShadows = false
-        Lighting.FogEnd = 100000
-        Lighting.Brightness = 1
-    end)
-end
-
 local function cleanOtherPlotsOnce()
-    if not CONFIG.DestroyOtherPlots then return 0 end
+    if not CONFIG.DestroyOtherPlots then
+        log("SKIP", "DestroyOtherPlots=false")
+        return 0
+    end
 
     local gardens = workspace:FindFirstChild("Gardens")
-    if not gardens then return 0 end
+    if not gardens then
+        log("WARN", "Gardens not found")
+        return 0
+    end
 
     local myPlot = getMyPlot()
     if not myPlot then
-        warn("[GAG2 OPTI V3] My plot not found; skip plot clean")
+        log("WARN", "My plot not found, skip other plot clean")
         return 0
     end
 
     local removed = 0
-
     for _, plot in ipairs(gardens:GetChildren()) do
         if plot ~= myPlot then
-            if destroySafe(plot, "OTHER_PLOT") then
+            if destroyOtherPlot(plot) then
                 removed += 1
             end
         end
     end
 
-    if removed > 0 then
-        print("[GAG2 OPTI V3 MY PLOT]", myPlot:GetFullName())
-        print("[GAG2 OPTI V3 PLOTS REMOVED]", removed)
-    end
+    log("OK", "My plot kept", myPlot:GetFullName())
+    log("OK", "Other plots removed", removed)
 
     return removed
 end
 
 local function hideCharacter(char)
-    if not char then return end
-    optimizeTree(char, true, false)
+    if not char or processed[char] then return end
+    processed[char] = true
+
+    local touched = 0
+
+    for _, obj in ipairs(char:GetDescendants()) do
+        pcall(function()
+            if obj:IsA("BasePart") then
+                obj.CastShadow = false
+                obj.CanCollide = false
+                obj.CanTouch = false
+                obj.CanQuery = false
+                obj.LocalTransparencyModifier = 1
+                touched += 1
+            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                obj.Transparency = 1
+                touched += 1
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
+                or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                obj.Enabled = false
+                touched += 1
+            elseif obj:IsA("BillboardGui") or obj:IsA("SurfaceGui") then
+                obj.Enabled = false
+                touched += 1
+            elseif obj:IsA("Sound") then
+                obj.Volume = 0
+                obj:Stop()
+                touched += 1
+            end
+        end)
+    end
+
+    log("ACTION", "Hide character", char.Name, "objects", touched)
 end
 
 local function hideOtherCharactersOnce()
@@ -300,10 +282,46 @@ local function hideOtherCharactersOnce()
         end
     end
 
+    log("OK", "Other characters checked", hidden)
     return hidden
 end
 
-local function isEffectRoot(obj)
+local function applyPostFX()
+    if not CONFIG.DisablePostFX then
+        log("SKIP", "DisablePostFX=false")
+        return
+    end
+
+    pcall(function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    end)
+
+    local changed = 0
+    for _, obj in ipairs(Lighting:GetDescendants()) do
+        pcall(function()
+            if obj:IsA("BloomEffect") or obj:IsA("BlurEffect") or obj:IsA("DepthOfFieldEffect")
+                or obj:IsA("SunRaysEffect") or obj:IsA("ColorCorrectionEffect") then
+                obj.Enabled = false
+                changed += 1
+            elseif obj:IsA("Atmosphere") then
+                obj.Density = 0
+                obj.Haze = 0
+                obj.Glare = 0
+                changed += 1
+            end
+        end)
+    end
+
+    pcall(function()
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 100000
+        Lighting.Brightness = 1
+    end)
+
+    log("OK", "PostFX optimized", changed)
+end
+
+local function isWeatherOrEffectRoot(obj)
     if not obj then return false end
     local n = obj.Name:lower()
     return n == "weather"
@@ -312,134 +330,128 @@ local function isEffectRoot(obj)
         or n == "_vfx"
         or n == "visuals"
         or n == "particles"
+        or n == "weatherfx"
+        or n == "weather_effects"
 end
 
-local function disableExistingEffects()
-    local disabled = 0
+local function disableEffectTree(root)
+    if not root then return 0 end
 
-    for _, root in ipairs(workspace:GetChildren()) do
-        if isEffectRoot(root) then
-            disabled += optimizeTree(root, false, true)
+    local n = 0
+    for _, obj in ipairs(root:GetDescendants()) do
+        pcall(function()
+            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
+                or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                obj.Enabled = false
+                n += 1
+            elseif obj:IsA("Sound") then
+                obj.Volume = 0
+                obj:Stop()
+                n += 1
+            elseif obj:IsA("BasePart") then
+                obj.CastShadow = false
+                n += 1
+            end
+        end)
+
+        if n % 500 == 0 then task.wait() end
+    end
+
+    return n
+end
+
+local function disableExistingWeatherEffects()
+    if not CONFIG.DisableWeatherEffects then return 0 end
+
+    local n = 0
+    for _, child in ipairs(workspace:GetChildren()) do
+        if isWeatherOrEffectRoot(child) then
+            n += disableEffectTree(child)
         end
     end
 
-    -- Initial pass: chỉ disable particle/sound/shadow, không hide map.
-    if CONFIG.DisableParticlesGlobal or CONFIG.DisableShadows or CONFIG.DisableSounds then
-        local ok, desc = pcall(function()
-            return workspace:GetDescendants()
-        end)
+    log("OK", "Weather/effect optimized", n)
+    return n
+end
 
-        if ok then
-            for i, obj in ipairs(desc) do
+local function optimizeGUI()
+    if not CONFIG.OptimizeGUI then
+        log("SKIP", "OptimizeGUI=false")
+        return 0, 0
+    end
+
+    local pg = Player:FindFirstChild("PlayerGui")
+    if not pg then
+        log("WARN", "PlayerGui not found")
+        return 0, 0
+    end
+
+    local disabledGui = 0
+    local cleanedViewport = 0
+
+    if CONFIG.DisableUnusedGUI then
+        for _, gui in ipairs(pg:GetChildren()) do
+            if gui:IsA("ScreenGui") and not CONFIG.KeepGUI[gui.Name] then
                 pcall(function()
-                    if obj:IsA("BasePart") and CONFIG.DisableShadows then
-                        obj.CastShadow = false
-                    elseif CONFIG.DisableParticlesGlobal and (
-                        obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
-                        or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles")
-                    ) then
-                        obj.Enabled = false
-                    elseif CONFIG.DisableSounds and obj:IsA("Sound") then
-                        obj.Volume = 0
-                        obj:Stop()
+                    if gui.Enabled then
+                        gui.Enabled = false
+                        disabledGui += 1
+                        log("ACTION", "GUI disabled", gui.Name)
                     end
                 end)
+            end
+        end
+    end
 
-                if i % 1000 == 0 then
-                    task.wait()
+    if CONFIG.DisableViewportFrames then
+        for _, vp in ipairs(pg:GetDescendants()) do
+            if vp:IsA("ViewportFrame") then
+                -- Không destroy ViewportFrame, chỉ xóa preview model bên trong.
+                for _, child in ipairs(vp:GetChildren()) do
+                    if child:IsA("Model") or child:IsA("BasePart") or child:IsA("Camera") or child:IsA("WorldModel") then
+                        pcall(function()
+                            child:Destroy()
+                            cleanedViewport += 1
+                        end)
+                    end
                 end
             end
         end
+
+        if cleanedViewport > 0 then
+            log("ACTION", "Viewport preview objects removed", cleanedViewport)
+        else
+            log("OK", "Viewport preview clean, none removed")
+        end
     end
 
-    return disabled
+    log("OK", "GUI optimized", "disabledGui", disabledGui, "viewportObjects", cleanedViewport)
+    return disabledGui, cleanedViewport
 end
 
-local function handleWorkspaceAdded(obj)
-    task.defer(function()
-        if not obj or not obj.Parent then return end
-
-        local gardens = workspace:FindFirstChild("Gardens")
-        local myPlot = getMyPlot()
-
-        -- Plot mới replicate: nếu không phải mình thì xóa ngay.
-        if gardens and obj.Parent == gardens and obj ~= myPlot and CONFIG.DestroyOtherPlots then
-            task.wait(0.5)
-            myPlot = getMyPlot()
-            if myPlot and obj ~= myPlot and obj.Parent == gardens then
-                destroySafe(obj, "OTHER_PLOT_ADDED")
-            end
-            return
-        end
-
-        -- Character người khác spawn: chỉ ẩn.
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= Player and obj == plr.Character then
-                task.wait(0.5)
-                hideCharacter(obj)
-                print("[GAG2 OPTI V3 CHAR DETECT HIDDEN]", plr.Name)
-                return
-            end
-        end
-
-        -- Effect mới xuất hiện: disable.
-        if isEffectRoot(obj) then
-            task.wait(0.2)
-            optimizeTree(obj, false, true)
-            print("[GAG2 OPTI V3 EFFECT ROOT CLEANED]", obj:GetFullName())
-            return
-        end
-
-        -- Particle/sound/basepart mới: xử lý đúng object đó, không scan cả workspace.
-        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
-            or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles")
-            or obj:IsA("Sound") or obj:IsA("BasePart") then
-            optimizeInstance(obj, false)
-        end
-    end)
-end
-
-local function initialClean()
+local function applyOnce()
+    setFPS()
+    setNoRender()
     applyPostFX()
 
-    local removedPlots = cleanOtherPlotsOnce()
-    local hiddenChars = hideOtherCharactersOnce()
-    local effects = disableExistingEffects()
+    local p = cleanOtherPlotsOnce()
+    local c = hideOtherCharactersOnce()
+    local w = disableExistingWeatherEffects()
+    local g, v = optimizeGUI()
 
     pcall(function()
         collectgarbage("collect")
     end)
 
-    print("[GAG2 OPTI V3 INITIAL RESULT]",
-        "removedPlots", removedPlots,
-        "hiddenChars", hiddenChars,
-        "effectPass", effects
+    log("OK", "Cycle complete",
+        "plots", p,
+        "chars", c,
+        "weather", w,
+        "disabledGui", g,
+        "viewportClean", v
     )
 end
 
-print("===== TRUNGPHANHUB GAG2 OPTI STANDALONE V3 EVENT DRIVEN START =====")
-printStats("BEFORE")
-
-if CONFIG.InitialClean then
-    initialClean()
-end
-
-task.wait(3)
-printStats("AFTER_FIRST")
-print("===== TRUNGPHANHUB GAG2 OPTI STANDALONE V3 APPLIED =====")
-
--- Event-driven: object mới xuất hiện thì xử lý ngay.
-workspace.ChildAdded:Connect(handleWorkspaceAdded)
-workspace.DescendantAdded:Connect(function(obj)
-    -- Chỉ xử lý class nhẹ; không gọi getMyPlot ở đây để tránh nặng.
-    if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
-        or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles")
-        or obj:IsA("Sound") or obj:IsA("BasePart") then
-        optimizeInstance(obj, false)
-    end
-end)
-
--- Hook player mới.
 local function hookPlayer(plr)
     if plr == Player then return end
 
@@ -453,20 +465,29 @@ local function hookPlayer(plr)
     plr.CharacterAdded:Connect(function(char)
         task.wait(0.5)
         hideCharacter(char)
-        print("[GAG2 OPTI V3 CHAR ADDED HIDDEN]", plr.Name)
+        log("ACTION", "CharacterAdded hidden", plr.Name)
     end)
 end
+
+print("===== TRUNGPHANHUB GAG2 OPTI STANDALONE V5 START =====")
+log("OK", "DuckHub compatibility mode: no remotes touched, my plot kept")
+printStats("BEFORE")
+
+applyOnce()
+
+task.wait(3)
+printStats("AFTER_FIRST")
+print("===== TRUNGPHANHUB GAG2 OPTI STANDALONE V5 APPLIED =====")
 
 for _, plr in ipairs(Players:GetPlayers()) do
     hookPlayer(plr)
 end
 
 Players.PlayerAdded:Connect(function(plr)
-    print("[GAG2 OPTI V3 PLAYER ADDED]", plr.Name)
+    log("ACTION", "PlayerAdded detected", plr.Name)
     hookPlayer(plr)
 end)
 
--- Garden ChildAdded riêng: chính xác hơn workspace.ChildAdded.
 task.spawn(function()
     local gardens = workspace:WaitForChild("Gardens", 60)
     if gardens then
@@ -474,19 +495,28 @@ task.spawn(function()
             task.wait(0.5)
             local myPlot = getMyPlot()
             if myPlot and plot ~= myPlot and CONFIG.DestroyOtherPlots then
-                destroySafe(plot, "OTHER_PLOT_DETECT")
-                print("[GAG2 OPTI V3 PLOT DETECT CLEANED]", plot.Name)
+                destroyOtherPlot(plot)
+                log("ACTION", "PlotAdded cleaned", plot.Name)
+            else
+                log("SKIP", "PlotAdded kept", plot.Name)
             end
         end)
     end
 end)
 
--- Reclean nhẹ, không còn watchdog RAM.
+workspace.ChildAdded:Connect(function(obj)
+    task.defer(function()
+        task.wait(0.2)
+        if isWeatherOrEffectRoot(obj) then
+            local n = disableEffectTree(obj)
+            log("ACTION", "Effect root cleaned", obj:GetFullName(), n)
+        end
+    end)
+end)
+
 task.spawn(function()
     while task.wait(CONFIG.LightRecleanEverySeconds) do
-        applyPostFX()
-        cleanOtherPlotsOnce()
-        hideOtherCharactersOnce()
+        applyOnce()
     end
 end)
 
@@ -495,6 +525,7 @@ task.spawn(function()
         pcall(function()
             collectgarbage("collect")
         end)
+        log("OK", "Lua GC collect")
     end
 end)
 
